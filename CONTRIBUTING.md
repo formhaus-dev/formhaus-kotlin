@@ -8,7 +8,7 @@ cd formhaus-kotlin
 ./gradlew build
 ```
 
-Requires JDK 17 and the Android SDK with platform 37 and build-tools 36. Set `sdk.dir` in `local.properties` or `ANDROID_HOME`. The duplicate check and the scripts that record data need Node 24.
+Requires JDK 17 and the Android SDK with platform 37 and build-tools 36. Set `sdk.dir` in `local.properties` or `ANDROID_HOME`. The duplicate check and the scripts that record data need Node 22.
 
 ## Modules
 
@@ -27,7 +27,7 @@ Requires JDK 17 and the Android SDK with platform 37 and build-tools 36. Set `sd
 ./scripts/lint.sh
 ```
 
-`./gradlew check` compiles with warnings as errors, runs the tests, ktlint, detekt, Android lint, the screenshot comparison the Android API 26 signature check of the JVM modules and the public API check of the three libraries. `./gradlew :demo:assembleDebug` builds the demo app, and `./gradlew publishToMavenLocal` installs the three libraries in `~/.m2`. `./gradlew coverage` runs the tests with Kover, writes the merged HTML report of the three libraries to `build/reports/kover/htmlCoverage` and prints the line coverage. `./scripts/lint.sh` runs ktlint, detekt, the comment check and jscpd at the versions CI uses. `./scripts/lint.sh ktlint`, `detekt`, `comments`, `duplicates` or `tokens` runs one check.
+`./gradlew check` compiles with warnings as errors, runs the tests, ktlint, detekt, Android lint, the screenshot comparison, the Android API 26 signature check of the JVM modules and the public API check of the three libraries. `./gradlew :demo:assembleDebug` builds the demo app, and `./gradlew publishToMavenLocal` installs the three libraries in `~/.m2`. `./gradlew coverage` runs the tests with Kover, writes the merged HTML report of the three libraries to `build/reports/kover/htmlCoverage` and prints the line coverage. `./scripts/lint.sh` runs ktlint, detekt, the comment check and jscpd at the versions CI uses. `./scripts/lint.sh ktlint`, `detekt`, `comments`, `duplicates` or `tokens` runs one check.
 
 ## Screenshots
 
