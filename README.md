@@ -39,25 +39,26 @@ The library is built with Kotlin 2.4. It calls only APIs that exist on Android A
 
 ## Install
 
-The artifact is `dev.formhaus:formhaus-core`. It is not published to a Maven repository yet, so build it from source. Clone the repository next to your project and include it in `settings.gradle.kts`:
+Releases are served from JitPack. Add the repository in `settings.gradle.kts`:
 
 ```kotlin
-includeBuild("../formhaus-kotlin")
-```
-
-Then depend on it with the artifact coordinates:
-
-```kotlin
-dependencies {
-    implementation("dev.formhaus:formhaus-core")
+dependencyResolutionManagement {
+    repositories {
+        mavenCentral()
+        maven("https://jitpack.io")
+    }
 }
 ```
 
-To build the module on its own:
+Then add the dependency:
 
-```sh
-./gradlew :formhaus-core:build
+```kotlin
+dependencies {
+    implementation("com.github.formhaus-dev:formhaus-kotlin:v0.1.0")
+}
 ```
+
+To work from a local clone instead, include it with `includeBuild("../formhaus-kotlin")` and depend on `dev.formhaus:formhaus-core`.
 
 ## Quick start
 
