@@ -171,6 +171,7 @@ const tables = {
   LETTER_MARK_NUMBER_RANGES: encodeRanges(rangesOf((point) => /^[\p{L}\p{M}\p{N}]$/u.test(char(point)))),
   WHITE_SPACE_RANGES: encodeRanges(rangesOf((point) => /^\s$/.test(String.fromCharCode(point)), maxUnit)),
   CLOSING_PUNCTUATION_RANGES: encodeRanges(closingRanges),
+  HEBREW_SCRIPT_RANGES: encodeRanges(property('Script=Hebrew')),
 }
 
 function constant(name, value) {

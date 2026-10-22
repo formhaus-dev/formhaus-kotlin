@@ -113,3 +113,6 @@ internal const val WHITE_SPACE_RANGES: String =
 
 internal const val CLOSING_PUNCTUATION_RANGES: String =
     "X10C0B040a_72L0A2-X1Jcx20_T040G0vno111120M0X1022f50C0B040X20-iy10"
+
+internal const val HEBREW_SCRIPT_RANGES: String =
+    "ni1s18Q45efz1P1410111119"

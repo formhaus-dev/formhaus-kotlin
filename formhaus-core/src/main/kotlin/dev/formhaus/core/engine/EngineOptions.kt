@@ -126,8 +126,11 @@ public class FormEngineOptions(
     public val messages: MessageSource? = null,
     public val lang: String? = null,
     public val formatRecall: RecallFormatFn? = null,
+    public val recallFormatter: RecallFormatter? = null,
     public val seed: String? = null,
     public val research: FormResearch? = null,
     public val hiddenValues: HiddenValues = HiddenValues.CLEAR,
     public val debugChecks: Boolean = false,
-)
+) {
+    internal val recallFormat: RecallFormatFn? by lazy { formatRecall ?: recallFormatter?.let(::recallFormat) }
+}

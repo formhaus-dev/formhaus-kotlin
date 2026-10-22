@@ -15,6 +15,9 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import java.time.LocalDateTime
+import java.time.format.FormatStyle
+import java.util.Locale
 
 @OptIn(RendererApi::class)
 class RecallTest {
@@ -23,6 +26,8 @@ class RecallTest {
         type: String,
         locale: String = "en",
     ): String = defaultRecallFormat(answer, field("""{"key":"a","type":"$type","label":"A"}"""), locale)
+
+    private val storedFormat: RecallFormatFn = { answer, _, _ -> answer.stored }
 
     @Test
     fun `the default formatter uses the platform styles in UTC`() {
@@ -39,6 +44,60 @@ class RecallTest {
         )
         assertEquals("1.234,5", formatted(RecallAnswer.Number(1234.5), "number", "de"))
         assertTrue("2027" in formatted(RecallAnswer.Text("2027-06-14"), "date", "de"))
+    }
+
+    @Test
+    fun `the default formatter follows CLDR lists, groupings, digits and calendars`() {
+        val items = RecallAnswer.Items(listOf("a", "b", "c"))
+        assertEquals("a, b и c", formatted(items, "multiselect", "ru"))
+        assertEquals("agua e isla", formatted(RecallAnswer.Items(listOf("agua", "isla")), "multiselect", "es"))
+        assertEquals("a, b ו-c", formatted(items, "multiselect", "he"))
+        assertEquals("a", formatted(RecallAnswer.Items(listOf("a")), "multiselect", "ru"))
+        assertEquals("12,34,567.5", formatted(RecallAnswer.Number(1234567.5), "number", "hi-IN"))
+        assertEquals("1234", formatted(RecallAnswer.Number(1234.0), "number", "es"))
+        assertEquals("12.345", formatted(RecallAnswer.Number(12345.0), "number", "es"))
+        assertEquals("1,234", formatted(RecallAnswer.Number(1234.0), "number", "ar"))
+        assertEquals("١٬٢٣٤", formatted(RecallAnswer.Number(1234.0), "number", "ar-SA"))
+        assertEquals("١٬٢٣٤", formatted(RecallAnswer.Number(1234.0), "number", "ar-u-nu-arab"))
+        assertTrue("2567" in formatted(RecallAnswer.Text("2024-06-14"), "date", "th-TH"))
+        assertTrue("2024" in formatted(RecallAnswer.Text("2024-06-14"), "date", "th-TH-u-ca-gregory"))
+    }
+
+    @Test
+    fun `a recall formatter in the options formats engine recall`() {
+        val formatter =
+            object : RecallFormatter {
+                override fun conjunction(
+                    items: List<String>,
+                    locale: Locale,
+                ) = "list $items $locale"
+
+                override fun number(
+                    value: Double,
+                    maximumSignificantDigits: Int,
+                    locale: Locale,
+                ) = "number $value $maximumSignificantDigits"
+
+                override fun dateTime(
+                    utc: LocalDateTime,
+                    dateStyle: FormatStyle?,
+                    timeStyle: FormatStyle?,
+                    locale: Locale,
+                ) = "date $utc $dateStyle $timeStyle"
+            }
+        val definition =
+            """{"formatVersion":"1.5","id":"f","lang":"de","submit":{"label":"S"},"fields":[
+            {"key":"n","type":"number","label":"N"},{"key":"d","type":"datetime","label":"D"},
+            {"key":"t","type":"time","label":"T"},{"key":"m","type":"multiselect","label":"M",
+             "options":[{"value":"a","label":"A"},{"value":"b","label":"B"}]}]}"""
+        val values = """{"n":1.5,"d":"2024-06-14T13:05","t":"13:05","m":["a","b"]}"""
+        val engine = engine(definition, values, FormEngineOptions(recallFormatter = formatter))
+        assertEquals(
+            "number 1.5 21 | date 2024-06-14T13:05 MEDIUM SHORT | date 1970-01-01T13:05 null SHORT | list [A, B] de",
+            engine.recallText("{{n}} | {{d}} | {{t}} | {{m}}"),
+        )
+        val stored = engine(definition, values, FormEngineOptions(formatRecall = storedFormat, recallFormatter = formatter))
+        assertEquals("1.5 | A, B", stored.recallText("{{n}} | {{m}}"))
     }
 
     @Test
@@ -103,13 +162,7 @@ class RecallTest {
                 form,
                 "{{a}}",
                 stringMapOf("a" to text(value)),
-                RecallOptions(format = {
-                    answer,
-                    _,
-                    _,
-                    ->
-                    answer.stored
-                }),
+                RecallOptions(format = storedFormat),
             )
         assertEquals(9999, recalled.length)
     }
