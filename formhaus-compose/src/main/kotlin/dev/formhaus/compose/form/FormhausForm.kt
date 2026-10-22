@@ -61,8 +61,9 @@ public fun FormhausForm(
     modifier: Modifier = Modifier,
 ) {
     key(model) {
-        val system = LocalFormComponents.current.system
-        ResolveFormhausTokens(system) { if (system) ColumnScroller(model, modifier) else LazyFormScroller(model, modifier) }
+        val components = LocalFormComponents.current
+        val lazy = remember(model.definition, components) { !components.system && model.definition.rendersLazily(components) }
+        ResolveFormhausTokens(components.system) { if (lazy) LazyFormScroller(model, modifier) else ColumnScroller(model, modifier) }
     }
 }
 
@@ -125,7 +126,7 @@ internal fun FormFrame(
     val components = LocalFormComponents.current
     val anchors = remember(model) { ScrollAnchors() }
     val cache = LocalContext.current.cacheDir
-    remember(model) { model.attachUploads(cache) }
+    remember(model) { model.also { it.attachUploads(cache) } }
     LaunchedEffect(model) { model.start() }
     ResolveFormhausTokens(components.system) {
         FormLocale(model.definition.lang) {

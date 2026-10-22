@@ -1,6 +1,5 @@
 package dev.formhaus.compose.components
 
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
@@ -8,10 +7,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.dp
 import dev.formhaus.compose.theme.LocalFormhausTokens
@@ -32,15 +29,14 @@ public fun ChoiceIndicator(
             invalid -> colors.error
             else -> colors.control
         }
-    val mark by animateFloatAsState(if (selected) 1f else 0f, tokens.quick(), label = "mark")
     Box(modifier.size(size).clearAndSetSemantics {}, contentAlignment = Alignment.Center) {
         if (shape == IndicatorShape.RADIO) {
             Box(Modifier.size(size).surface(CircleShape, colors.background, stroke, 2.dp))
-            Box(Modifier.size(size * 4 / 9).alpha(mark).background(colors.primary, CircleShape))
+            Box(Modifier.size(size * 4 / 9).fade(selected, tokens.quickMotion).background(colors.primary, CircleShape))
         } else {
             val fill = if (selected) colors.primary else colors.background
             Box(Modifier.size(size).surface(RoundedCornerShape(tokens.radii.indicator), fill, stroke, 1.5.dp))
-            Icon(FormhausIcons.check, null, Modifier.size(size * 0.72f).alpha(mark), tint = colors.onPrimary)
+            Icon(FormhausIcons.check, null, Modifier.size(size * 0.72f).fade(selected, tokens.quickMotion), tint = colors.onPrimary)
         }
     }
 }

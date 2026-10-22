@@ -15,16 +15,22 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
+import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.paneTitle
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import dev.formhaus.compose.theme.LocalFormhausTokens
 import dev.formhaus.compose.theme.TextRole
 import dev.formhaus.compose.theme.textStyle
+import android.graphics.Paint as FrameworkPaint
 
 @Composable
 internal fun ZoomButton(
@@ -44,7 +50,7 @@ internal fun ZoomButton(
         Box(
             Modifier
                 .size(side)
-                .shadow(4.dp, tokens.innerShape, ambientColor = tokens.colors.shadow, spotColor = tokens.colors.shadow)
+                .softShadow(SHADOW, tokens.radii.control - tokens.spacing.s1, tokens.colors.shadow, tokens.colors.background)
                 .background(tokens.colors.background, tokens.innerShape)
                 .border(1.dp, tokens.colors.border, tokens.innerShape),
             contentAlignment = Alignment.Center,
@@ -85,3 +91,22 @@ internal fun ImageViewer(
         }
     }
 }
+
+private val SHADOW = 4.dp
+
+private fun Modifier.softShadow(
+    blur: Dp,
+    radius: Dp,
+    color: Color,
+    fill: Color,
+): Modifier =
+    drawWithCache {
+        val corner = maxOf(0f, radius.toPx())
+        val paint =
+            FrameworkPaint().apply {
+                isAntiAlias = true
+                this.color = fill.toArgb()
+                setShadowLayer(blur.toPx(), 0f, blur.toPx() / 2, color.toArgb())
+            }
+        onDrawBehind { drawIntoCanvas { it.nativeCanvas.drawRoundRect(0f, 0f, size.width, size.height, corner, corner, paint) } }
+    }

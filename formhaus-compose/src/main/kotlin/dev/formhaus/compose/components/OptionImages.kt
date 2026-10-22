@@ -85,7 +85,7 @@ internal object OptionImages : ImageCache(256, 48 * 1024 * 1024, ::loadImage)
 @Composable
 internal fun ImageCache.shown(source: String): ImageBitmap? {
     var held by remember(source) { mutableStateOf(cached(source)) }
-    LaunchedEffect(source) { if (held == null) held = request(source).await() }
+    if (held == null) LaunchedEffect(source) { held = request(source).await() }
     return held
 }
 

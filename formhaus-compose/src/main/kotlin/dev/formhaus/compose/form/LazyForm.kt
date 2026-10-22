@@ -30,16 +30,25 @@ import dev.formhaus.compose.fields.ChoicePlan
 import dev.formhaus.compose.fields.ChoiceRow
 import dev.formhaus.compose.fields.choicePlan
 import dev.formhaus.compose.fields.choiceRowGap
+import dev.formhaus.compose.fields.mayNeedRows
 import dev.formhaus.compose.model.FormModel
 import dev.formhaus.compose.model.formhausTestId
 import dev.formhaus.compose.model.testId
 import dev.formhaus.compose.theme.FormhausTokens
 import dev.formhaus.compose.theme.LocalFormhausTokens
+import dev.formhaus.core.model.FormDefinition
 import dev.formhaus.core.model.FormField
 import dev.formhaus.core.model.FormNode
 import dev.formhaus.core.model.FormSection
 import dev.formhaus.core.renderer.TestIdTarget
 import dev.formhaus.core.renderer.nodeId
+
+private const val LAZY_NODES = 24
+
+internal fun FormDefinition.rendersLazily(components: FormComponents): Boolean {
+    val pages = steps?.map { it.fields } ?: listOf(fields.orEmpty())
+    return pages.any { nodes -> nodes.size > LAZY_NODES || nodes.any { (it as? FormField)?.mayNeedRows(components) == true } }
+}
 
 private class ItemIndex {
     private val keys = HashMap<String, Int>()

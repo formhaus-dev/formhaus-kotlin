@@ -2,9 +2,6 @@ package dev.formhaus.compose.components
 
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsFocusedAsState
-import androidx.compose.foundation.interaction.collectIsHoveredAsState
-import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -16,11 +13,10 @@ import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.FirstBaseline
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
@@ -29,6 +25,9 @@ import dev.formhaus.compose.theme.LocalFormhausTokens
 import dev.formhaus.compose.theme.TextRole
 import dev.formhaus.compose.theme.textStyle
 import kotlin.math.roundToInt
+
+private const val PRESSED_SCALE = 0.99f
+private const val DISABLED_ALPHA = 0.6f
 
 @Composable
 public fun OptionCard(
@@ -56,15 +55,11 @@ internal fun OptionCardBox(
 ) {
     val tokens = LocalFormhausTokens.current
     val source = remember { MutableInteractionSource() }
-    val pressed by source.collectIsPressedAsState()
-    val focused by source.collectIsFocusedAsState()
     Box(
         modifier
-            .scale(if (pressed && !tokens.reduceMotion) 0.99f else 1f)
             .fillMaxWidth()
             .heightIn(min = tokens.controls.hitTarget)
-            .focusRing(focused, tokens.radii.control)
-            .selectableSurface(selected, invalid, solid = false, enabled = enabled, source = source)
+            .selectableSurface(selected, invalid, solid = false, enabled = enabled, source = source, card = true)
             .focusable(enabled, source)
             .choice(selected, shape, enabled, source, onClick)
             .padding(start = tokens.spacing.s6, end = tokens.spacing.s6, top = top, bottom = tokens.spacing.s5),
@@ -93,25 +88,30 @@ internal fun Modifier.selectableSurface(
     solid: Boolean,
     enabled: Boolean,
     source: MutableInteractionSource,
+    card: Boolean = false,
 ): Modifier {
     val tokens = LocalFormhausTokens.current
     val colors = tokens.colors
-    val hovered by source.collectIsHoveredAsState()
-    val active = hovered && enabled
-    val fill =
-        when {
-            selected -> if (solid) colors.primary else colors.primarySoft
-            active -> colors.backgroundHover
-            else -> colors.background
-        }
+    val fill = if (selected) (if (solid) colors.primary else colors.primarySoft) else colors.background
     val border =
         when {
             selected -> colors.primary
             invalid -> colors.error
-            active -> colors.inputBorderHover
             else -> colors.inputBorder
         }
-    return alpha(if (enabled) 1f else 0.6f).surface(tokens.controlShape, fill, border)
+    val quiet = selected || !enabled
+    val style =
+        SurfaceStyle(
+            tokens.controlShape,
+            fill,
+            border,
+            hoverFill = if (quiet) fill else colors.backgroundHover,
+            hoverBorder = if (quiet || invalid) border else colors.inputBorderHover,
+            ring = if (card) colors.focus else Color.Unspecified,
+            ringRadius = tokens.radii.control,
+            pressScale = if (card) PRESSED_SCALE else 1f,
+        )
+    return (if (enabled) this else alpha(DISABLED_ALPHA)).animatedSurface(style, tokens.quickMotion, source)
 }
 
 @Composable

@@ -44,8 +44,7 @@ internal fun choicePlan(
     tokens: FormhausTokens,
     width: Dp,
 ): ChoicePlan? {
-    if (field.type != "radio" && field.type != "multiselect") return null
-    if (!components.builtIns || components.system || components.fields.containsKey(field.type)) return null
+    if (!field.isBuiltInChoice(components)) return null
     val options = model.options(field.key) ?: field.options.orEmpty()
     if (options.size <= SPLIT_OPTIONS) return null
     return when (val arrangement = choiceArrangement(field, options)) {
@@ -62,6 +61,12 @@ internal fun choicePlan(
         }
     }
 }
+
+internal fun FormField.isBuiltInChoice(components: FormComponents): Boolean =
+    (type == "radio" || type == "multiselect") && components.builtIns && !components.system && !components.fields.containsKey(type)
+
+internal fun FormField.mayNeedRows(components: FormComponents): Boolean =
+    isBuiltInChoice(components) && (hasOptionsFrom || options.orEmpty().size > SPLIT_OPTIONS)
 
 internal fun FormhausTokens.choiceRowGap(plan: ChoicePlan): Dp =
     if (plan.arrangement ==

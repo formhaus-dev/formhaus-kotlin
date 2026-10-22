@@ -1,11 +1,7 @@
 package dev.formhaus.compose.components
 
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
@@ -22,9 +18,7 @@ internal fun Modifier.surface(
     lineWidth: Dp = 1.dp,
 ): Modifier {
     val tokens = LocalFormhausTokens.current
-    val fillColor by animateColorAsState(fill, tokens.quick(), label = "fill")
-    val borderColor by animateColorAsState(border, tokens.quick(), label = "border")
-    return background(fillColor, shape).border(lineWidth, borderColor, shape)
+    return animatedSurface(SurfaceStyle(shape, fill, border, lineWidth), tokens.quickMotion)
 }
 
 internal val FormhausTokens.controlShape: Shape get() = RoundedCornerShape(radii.control)
