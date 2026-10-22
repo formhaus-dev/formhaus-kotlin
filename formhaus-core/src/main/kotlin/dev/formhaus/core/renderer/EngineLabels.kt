@@ -2,7 +2,6 @@ package dev.formhaus.core.renderer
 
 import dev.formhaus.core.engine.FormEngine
 import dev.formhaus.core.engine.RecallItem
-import dev.formhaus.core.engine.debugChecks
 import dev.formhaus.core.engine.errorKeys
 import dev.formhaus.core.engine.itemTemplate
 import dev.formhaus.core.engine.recalled
@@ -25,7 +24,7 @@ public fun FormEngine.label(
     source: LabelSource?,
     params: JsonObject = noParams,
 ): String {
-    if (debugChecks) reportMissingLabel(key, source, definition, options)
+    if (options.debugChecks) reportMissingLabel(key, source, definition, options)
     return labelFor(key, params, source, definitionLabels)
 }
 

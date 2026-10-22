@@ -36,7 +36,7 @@ public val FormEngine.definitionRevision: Int get() = core.definitionGeneration
 public fun FormEngine.visibleNodes(step: FormStep): List<FormNode> = core.visibility.shownNodes(step.fields, core.values.json)
 
 @RendererApi
-public suspend fun FormEngine.autoAdvance(): Boolean = advance(StepChangeReason.AUTO_ADVANCE)
+public suspend fun FormEngine.autoAdvance(): Boolean = mutating("autoAdvance") { advance(StepChangeReason.AUTO_ADVANCE) }
 
 @RendererApi
 public fun FormEngine.optionKey(key: String): String = optionName(key)

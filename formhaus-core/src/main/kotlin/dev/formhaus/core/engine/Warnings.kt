@@ -14,12 +14,11 @@ import dev.formhaus.core.validation.MessageSource
 import dev.formhaus.core.validation.ResolveMessage
 import dev.formhaus.core.validation.messageResolver
 import java.util.concurrent.ConcurrentHashMap
+import java.util.logging.Logger
 
 internal typealias MissingMessageFn = (MessageKey) -> Unit
 
-internal val debugChecks: Boolean = FormEngine::class.java.desiredAssertionStatus()
-
-private val warningLog = System.getLogger("dev.formhaus.definition")
+private val warningLog = Logger.getLogger("dev.formhaus.definition")
 private val reportedTexts = ConcurrentHashMap.newKeySet<String>()
 
 internal fun deliver(
@@ -32,7 +31,7 @@ internal fun deliver(
     ) {
         onWarning(issue)
     } else {
-        warningLog.log(System.Logger.Level.WARNING, "[formhaus] ${issue.message}")
+        warningLog.warning("[formhaus] ${issue.message}")
     }
 }
 
@@ -43,7 +42,7 @@ internal fun reportWarnings(
     val issues = checkDefinition(JsonValue.Object(definition.json), CheckDefinitionOptions(options.validators.keys))
     for (
     issue in issues +
-        if (debugChecks) {
+        if (options.debugChecks) {
             unorderedWarning(
                 definition,
                 options,
@@ -85,7 +84,7 @@ internal fun reportMissingLabel(
 }
 
 internal fun missingMessageReporter(options: FormEngineOptions): MissingMessageFn? {
-    if (!debugChecks || options.messages.catalog == null) return null
+    if (!options.debugChecks || options.messages.catalog == null) return null
     return { key -> reportMissing(IssueCode.MISSING_MESSAGE_KEY, key.rawValue, "messages", options) }
 }
 

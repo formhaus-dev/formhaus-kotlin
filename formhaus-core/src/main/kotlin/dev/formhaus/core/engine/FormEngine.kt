@@ -46,6 +46,7 @@ public class FormEngine(
 ) {
     public val seed: String = options.seed?.takeIf { it.isNotEmpty() } ?: options.research?.seed() ?: ""
     private val listeners = Listeners()
+    private val ownerThread = OwnerThread(options.debugChecks)
     internal val core: EngineCore
 
     public constructor(definition: JsonValue, values: JsonObject = MutableJsonObject(), options: FormEngineOptions = FormEngineOptions()) :
@@ -115,6 +116,7 @@ public class FormEngine(
         }
 
     public fun subscribe(listener: () -> Unit): () -> Unit {
+        ownerThread.check("subscribe")
         val id = listeners.add(listener)
         return { listeners.remove(id) }
     }
@@ -122,35 +124,40 @@ public class FormEngine(
     public fun setValue(
         key: String,
         value: JsonValue?,
-    ): Unit = core.setValue(key, value)
+    ) {
+        ownerThread.check("setValue")
+        core.setValue(key, value)
+    }
 
     public fun items(key: String): List<GroupItem> = core.items(key)
 
-    public fun addItem(key: String): Boolean = core.addItem(key)
+    public fun addItem(key: String): Boolean = mutating("addItem") { core.addItem(key) }
 
     public fun removeItem(
         key: String,
         index: Int,
-    ): Boolean = core.removeItem(key, index)
+    ): Boolean = mutating("removeItem") { core.removeItem(key, index) }
 
     public fun setItemValue(
         key: String,
         index: Int,
         field: String,
         value: JsonValue?,
-    ): Unit = core.setItemValue(key, index, field, value)
+    ): Unit = mutating("setItemValue") { core.setItemValue(key, index, field, value) }
 
-    public fun setErrors(errors: FieldErrors): Unit = core.applyValidationErrors(errors, server = true)
+    public fun setErrors(errors: FieldErrors): Unit = mutating("setErrors") { core.applyValidationErrors(errors, server = true) }
 
     public fun setFieldLoading(
         key: String,
         loading: Boolean,
     ) {
+        ownerThread.check("setFieldLoading")
         core.fieldLoading.assign(key, if (loading) true else null)
         core.notify()
     }
 
     public fun cancelPendingActions() {
+        ownerThread.check("cancelPendingActions")
         core.validationEpoch += 1
         core.operationEpoch += 1
         core.stepValidating = false
@@ -158,13 +165,13 @@ public class FormEngine(
         core.notify()
     }
 
-    public fun start(): Unit = core.startEvents()
+    public fun start(): Unit = mutating("start") { core.startEvents() }
 
     public fun isStepSkipped(stepId: String): Boolean = core.isStepSkipped(stepId)
 
-    public fun validate(): FieldErrors = core.validate()
+    public fun validate(): FieldErrors = mutating("validate") { core.validate() }
 
-    public fun validateField(key: String): String? = core.validateOne(key)
+    public fun validateField(key: String): String? = mutating("validateField") { core.validateOne(key) }
 
     public fun getSubmitValues(): JsonObject = core.getSubmitValues(payload = true)
 
@@ -172,6 +179,7 @@ public class FormEngine(
         isActionDisabled(action, core.getSubmitValues(), core.visibility.limits(core.values.json))
 
     public fun goToStepWithField(key: String) {
+        ownerThread.check("goToStepWithField")
         if (!core.isMultiStep) return
         val target = core.visibility.findStepIndex(key, core.values.json, core.currentStepIndex)
         if (target == core.currentStepIndex) {
@@ -181,21 +189,22 @@ public class FormEngine(
         }
     }
 
-    public fun goToStep(stepId: String): GoToStepResult = redirectTo(stepId)
+    public fun goToStep(stepId: String): GoToStepResult = mutating("goToStep") { redirectTo(stepId) }
 
-    public suspend fun next(): Boolean = advance(StepChangeReason.NEXT)
+    public suspend fun next(): Boolean = mutating("next") { advance(StepChangeReason.NEXT) }
 
-    public suspend fun back(): Boolean = changeStep(false, StepChangeReason.BACK)
+    public suspend fun back(): Boolean = mutating("back") { changeStep(false, StepChangeReason.BACK) }
 
-    public suspend fun skip(handler: SubmitHandler? = null): Boolean = reportErrors { skipStep(handler) }
+    public suspend fun skip(handler: SubmitHandler? = null): Boolean = mutating("skip") { reportErrors { skipStep(handler) } }
 
-    public suspend fun submit(handler: SubmitHandler): Boolean = reportErrors { submitForm(handler) }
+    public suspend fun submit(handler: SubmitHandler): Boolean = mutating("submit") { reportErrors { submitForm(handler) } }
 
-    public fun reset(values: JsonObject? = null): Unit = core.reset(values)
+    public fun reset(values: JsonObject? = null): Unit = mutating("reset") { core.reset(values) }
 
     public fun replaceDefinition(definition: JsonValue): Unit = replaceDefinition(FormDefinition(definition))
 
     public fun replaceDefinition(definition: FormDefinition) {
+        ownerThread.check("replaceDefinition")
         reportWarnings(definition, options)
         core.replaceDefinition(definition)
     }
@@ -209,6 +218,14 @@ public class FormEngine(
         text: String,
         options: RecallOptions = RecallOptions(),
     ): String = substitute(definition, text) { recallScope().resolver(options) }
+
+    internal inline fun <Result> mutating(
+        action: String,
+        body: () -> Result,
+    ): Result {
+        ownerThread.check(action)
+        return body()
+    }
 
     internal fun moveTo(index: Int) {
         core.validationEpoch += 1

@@ -129,4 +129,5 @@ public class FormEngineOptions(
     public val seed: String? = null,
     public val research: FormResearch? = null,
     public val hiddenValues: HiddenValues = HiddenValues.CLEAR,
+    public val debugChecks: Boolean = false,
 )

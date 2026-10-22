@@ -25,7 +25,7 @@ class MissingTextTest {
                 """{"id":"w","title":"W","submit":{"label":"Send"},"fields":[
                 {"key":"at","type":"time","label":"At"},{"key":"name","type":"text","label":"Name"}]}""",
                 """{"at":"late"}""",
-                FormEngineOptions(onWarning = { issues.add(it) }, messages = messages),
+                FormEngineOptions(onWarning = { issues.add(it) }, messages = messages, debugChecks = true),
             )
         engine.validate()
         engine.validate()
@@ -50,7 +50,7 @@ class MissingTextTest {
                 """{"id":"d","title":"D","submit":{"label":"Send"},"messages":{"date":"Datum ungültig"},"labels":{"missingTextDefined":"Definiert"},
                "fields":[{"key":"on","type":"date","label":"On"}]}""",
                 """{"on":"soon"}""",
-                FormEngineOptions(onWarning = { issues.add(it) }, messages = messages),
+                FormEngineOptions(onWarning = { issues.add(it) }, messages = messages, debugChecks = true),
             )
         assertEquals("Datum ungültig", engine.validate()["on"])
         assertEquals("Definiert", engine.label("missingTextDefined", labels))
