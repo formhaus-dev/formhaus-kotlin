@@ -1,6 +1,8 @@
 package dev.formhaus.core.regex
 
 import dev.formhaus.core.support.Load
+import dev.formhaus.core.validation.MAX_STRING_LENGTH
+import dev.formhaus.core.validation.rejects
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
@@ -77,6 +79,9 @@ class RegexTest {
     @Test
     fun `a pattern that cannot run rejects the value`() {
         assertNull(JsRegex.unchecked("(").test("a"))
+        assertTrue(rejects(JsRegex.unchecked("("), "a"))
+        assertTrue(rejects(requireNotNull(JsRegex.compile("^a$")), "a".repeat(MAX_STRING_LENGTH + 1)))
+        assertFalse(rejects(requireNotNull(JsRegex.compile("^a+$")), "a".repeat(MAX_STRING_LENGTH)))
     }
 
     @Test

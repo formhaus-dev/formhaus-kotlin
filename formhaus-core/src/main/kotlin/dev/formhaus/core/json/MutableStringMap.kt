@@ -11,6 +11,10 @@ public class MutableStringMap<V : Any> internal constructor(insertionOrder: Bool
 
     internal fun getOrPut(key: String, fallback: () -> V): V = get(key) ?: fallback().also { write(key, it) }
 
+    internal fun assign(key: String, value: V?) {
+        if (value == null) delete(key) else write(key, value)
+    }
+
     internal fun merge(other: StringMap<V>) {
         for ((key, value) in other) write(key, value)
     }

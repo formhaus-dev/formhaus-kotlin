@@ -1,8 +1,17 @@
 package dev.formhaus.core.regex
 
+import dev.formhaus.core.json.JsonValue
+import dev.formhaus.core.json.MutableJsonObject
+import dev.formhaus.core.json.stringMapOf
 import dev.formhaus.core.support.Load
+import dev.formhaus.core.support.definition
+import dev.formhaus.core.validation.ValidateOptions
+import dev.formhaus.core.validation.ValidatorFn
+import dev.formhaus.core.validation.validateFieldValue
+import dev.formhaus.core.validation.validateFields
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 class RegexBudgetTest {
@@ -38,5 +47,27 @@ class RegexBudgetTest {
             assertNull(simple.test("aaa"))
         }
         assertEquals(true, simple.test("aaa"))
+    }
+
+    @Test
+    fun `public validators run in their own budget`() {
+        val probe = stringMapOf<ValidatorFn>("probe" to { _, _ -> if (CallBudget.current.value == null) "outside" else null })
+        val form = definition("""{"id":"p","submit":{"label":"S"},"fields":[{"key":"a","type":"text","label":"A","validation":{"validator":"probe"}}]}""")
+        val nodes = requireNotNull(form.fields)
+        assertNull(validateFieldValue(form.allFields.first(), JsonValue.String("x"), stringMapOf(), ValidateOptions(probe)))
+        assertTrue(validateFields(nodes, stringMapOf("a" to JsonValue.String("x")), ValidateOptions(probe)).isEmpty())
+    }
+
+    @Test
+    fun `one validation tests at most 10,000 values against patterns`() {
+        val limit = CallBudget.patternTestLimit.value
+        val fields = (0..limit).joinToString(",") { """{"key":"f$it","type":"text","label":"F","validation":{"pattern":"^a$"}}""" }
+        val form = definition("""{"id":"p","submit":{"label":"S"},"fields":[$fields]}""")
+        val nodes = requireNotNull(form.fields)
+        val values = MutableJsonObject()
+        for (index in 0..limit) values["f$index"] = JsonValue.String("a")
+        repeat(2) { assertEquals(stringMapOf("f$limit" to "Invalid format"), validateFields(nodes, values)) }
+        val field = form.allFields.first()
+        assertTrue((0..limit).all { validateFieldValue(field, JsonValue.String("a"), values) == null })
     }
 }
