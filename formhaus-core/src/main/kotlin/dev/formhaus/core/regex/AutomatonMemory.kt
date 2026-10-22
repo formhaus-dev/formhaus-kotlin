@@ -1,40 +1,57 @@
 package dev.formhaus.core.regex
 
-import java.lang.ref.Cleaner
+import java.lang.ref.ReferenceQueue
 import java.lang.ref.WeakReference
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicBoolean
+
+private class ShardReference(
+    shard: AutomatonShard,
+    queue: ReferenceQueue<AutomatonShard>,
+    val memory: AutomatonMemory,
+) : WeakReference<AutomatonShard>(shard, queue)
 
 internal class MemoryPool(
     val limit: Int = AutomatonMemory.GLOBAL_LIMIT,
 ) {
     private var total = 0
-    private val registry: MutableSet<WeakReference<AutomatonShard>> = ConcurrentHashMap.newKeySet()
+    private val queue = ReferenceQueue<AutomatonShard>()
+    private val registry: MutableSet<ShardReference> = ConcurrentHashMap.newKeySet()
 
     val reserved: Int get() = synchronized(this) { total }
 
-    fun take(bytes: Int): Boolean =
+    fun take(bytes: Int): Boolean {
+        drain()
         synchronized(this) {
             if (total + bytes > limit) return false
             total += bytes
-            true
+            return true
         }
+    }
 
     fun give(bytes: Int) {
         synchronized(this) { total -= bytes }
     }
 
-    fun register(shard: WeakReference<AutomatonShard>) {
-        registry.add(shard)
-    }
-
-    fun unregister(shard: WeakReference<AutomatonShard>) {
-        registry.remove(shard)
+    fun register(
+        shard: AutomatonShard,
+        memory: AutomatonMemory,
+    ) {
+        registry.add(ShardReference(shard, queue, memory))
     }
 
     fun reclaim(): Boolean {
+        drain()
         val shards = registry.mapNotNull { it.get() }
         return shards.any { it.evict(sparingRecent = true) } || shards.any { it.evict(sparingRecent = false) }
+    }
+
+    private fun drain() {
+        while (true) {
+            val dead = queue.poll() as? ShardReference ?: return
+            registry.remove(dead)
+            dead.memory.release()
+        }
     }
 
     companion object {
@@ -90,9 +107,7 @@ internal class AutomatonShard(
     private var recent = false
 
     init {
-        val reference = WeakReference(this)
-        plan.pool.register(reference)
-        cleaner.register(this, release(plan.pool, reference, memory))
+        plan.pool.register(this, memory)
     }
 
     val bytes: Int get() = memory.used
@@ -121,19 +136,5 @@ internal class AutomatonShard(
         } finally {
             lock.set(false)
         }
-    }
-
-    private companion object {
-        val cleaner: Cleaner = Cleaner.create()
-
-        fun release(
-            pool: MemoryPool,
-            reference: WeakReference<AutomatonShard>,
-            memory: AutomatonMemory,
-        ): Runnable =
-            Runnable {
-                pool.unregister(reference)
-                memory.release()
-            }
     }
 }
