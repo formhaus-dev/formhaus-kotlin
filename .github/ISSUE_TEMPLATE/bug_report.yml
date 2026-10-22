@@ -1,0 +1,48 @@
+name: Bug report
+description: Something in formhaus-core does not work as expected
+labels: [bug]
+body:
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: The formhaus-kotlin version or commit
+      placeholder: 0.1.0
+    validations:
+      required: true
+  - type: input
+    id: platform
+    attributes:
+      label: Platform
+      description: JDK or Android version, Kotlin version and OS
+      placeholder: Temurin 17, Kotlin 2.4, Android 14
+    validations:
+      required: true
+  - type: textarea
+    id: definition
+    attributes:
+      label: Minimal definition
+      description: The smallest form definition that shows the problem
+      render: json
+    validations:
+      required: true
+  - type: textarea
+    id: code
+    attributes:
+      label: Code
+      description: The Kotlin code that uses the definition, if it matters
+      render: kotlin
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected
+      description: What should happen. If `@formhaus/core` or the playground behaves differently, say so.
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual
+      description: What happens instead, with errors or stack traces
+    validations:
+      required: true

@@ -45,4 +45,3 @@ sync_dir() {
 }
 
 sync_dir packages/core/fixtures/conformance "$root/formhaus-core/src/test/resources/fixtures" conformance
-sync_dir packages/core/tokens "$root/formhaus-compose/src/test/resources/fixtures" tokens

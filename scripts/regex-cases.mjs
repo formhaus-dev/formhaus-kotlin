@@ -5,7 +5,7 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
-const output = join(root, 'Tests/FormhausCoreTests/Fixtures/regex/cases.json')
+const output = join(root, 'formhaus-core/src/test/resources/fixtures/regex/cases.json')
 const seed = Number(process.env.REGEX_SEED ?? 20261019)
 const fuzzPatterns = Number(process.env.REGEX_FUZZ ?? 1500)
 const inputsPerPattern = 4
