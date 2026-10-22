@@ -44,5 +44,6 @@ ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint-plugin" }
 detekt = { id = "dev.detekt", version.ref = "detekt" }
 animalsniffer = { id = "ru.vyarus.animalsniffer", version.ref = "animalsniffer" }
 android-library = { id = "com.android.library", version.ref = "agp" }
+android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 roborazzi = { id = "io.github.takahirom.roborazzi", version.ref = "roborazzi" }
