@@ -45,6 +45,7 @@ internal fun EngineCore.skipStep(index: Int) {
 
 internal fun EngineCore.reset(initialValues: JsonObject?) {
     val previousValues = values
+    restarts += 1
     baselineFields()
     validationEpoch += 1
     operationEpoch += 1
