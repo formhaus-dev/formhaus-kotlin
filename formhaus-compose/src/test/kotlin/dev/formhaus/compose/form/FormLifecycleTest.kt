@@ -137,7 +137,7 @@ class FormLifecycleTest {
     }
 
     @Test
-    fun anOwnedModelClosesWhenTheFormLeavesComposition() {
+    fun anOwnedModelKeepsRunningWhenTheFormLeavesCompositionWithinItsOwner() {
         var shown by mutableStateOf(true)
         val values = mutableListOf<String>()
         val renderer =
@@ -151,7 +151,10 @@ class FormLifecycleTest {
         compose.waitForIdle()
         val before = values.size
         compose.runOnIdle { owned.engine.setValue("x", JsonValue.String("late")) }
-        assertEquals(before, values.size)
+        assertEquals(before + 1, values.size)
+        compose.runOnIdle { shown = true }
+        compose.waitForIdle()
         assertSame(owned, seen.single())
+        assertEquals("late", owned.engine.values["x"]?.stringValue)
     }
 }

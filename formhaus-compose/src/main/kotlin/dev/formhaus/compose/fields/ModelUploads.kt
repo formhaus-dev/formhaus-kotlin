@@ -7,7 +7,6 @@ import dev.formhaus.core.json.JsonValue
 import dev.formhaus.core.json.MutableJsonObject
 import dev.formhaus.core.renderer.value
 import java.io.File
-import java.net.URI
 
 public fun FormModel.pickedFile(key: String): File? = engine.value(key)?.stringValue?.let { UploadStore.owned(it, uploadOwner) }
 
@@ -21,26 +20,29 @@ internal fun FormModel.releaseUploads() {
     UploadStore.release(uploadOwner)
 }
 
+internal fun FormModel.attachUploads(cache: File) {
+    UploadStore.attach(cache)
+    if (restored) adoptUploads()
+}
+
 internal fun FormModel.adoptUploads() {
     val files = HashSet<String>()
     for (value in engine.values.values) value.collectFiles(files)
     for (file in files) UploadStore.adopt(file, uploadOwner)
 }
 
-internal fun FormSnapshot.withoutDeadUploads(): FormSnapshot = copy(values = values.withoutDeadUploads())
+internal fun FormSnapshot.withoutDeadUploads(): FormSnapshot = withValues(values.withoutDeadUploads())
 
 private fun JsonObject.withoutDeadUploads(): JsonObject =
     MutableJsonObject().also { copy -> for ((key, value) in this) copy[key] = value.withoutDeadUploads() }
 
 private fun JsonValue.withoutDeadUploads(): JsonValue =
     when (this) {
-        is JsonValue.String -> if (UploadStore.isUpload(value) && !uploadExists(value)) JsonValue.Null else this
+        is JsonValue.String -> if (UploadStore.isUpload(value) && !UploadStore.exists(value)) JsonValue.Null else this
         is JsonValue.Array -> JsonValue.Array(items.map { it.withoutDeadUploads() })
         is JsonValue.Object -> JsonValue.Object(members.withoutDeadUploads())
         else -> this
     }
-
-private fun uploadExists(value: String): Boolean = runCatching { File(URI(value.trim())).isFile }.getOrDefault(false)
 
 private fun JsonValue.collectFiles(files: MutableSet<String>) {
     when (this) {

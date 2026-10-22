@@ -11,7 +11,8 @@ import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
 import java.net.URI
-import java.nio.file.Path
+import java.nio.file.Files
+import java.nio.file.LinkOption
 import java.nio.file.Paths
 import java.util.UUID
 import kotlin.coroutines.cancellation.CancellationException
@@ -29,9 +30,18 @@ internal object UploadStore {
 
     private val uploads = HashMap<String, Upload>()
     private val lock = Mutex()
-    private var swept = false
+
+    @Volatile
+    private var root: File? = null
+    private var attached: File? = null
 
     fun directory(cache: File): File = File(cache, FOLDER)
+
+    fun attach(cache: File) {
+        if (attached == cache) return
+        attached = cache
+        root = runCatching { directory(cache).canonicalFile }.getOrNull()
+    }
 
     suspend fun copy(
         cache: File,
@@ -40,57 +50,47 @@ internal object UploadStore {
         open: () -> InputStream?,
     ): File? =
         lock.withLock {
-            val root = directory(cache)
-            val folder = UUID.randomUUID().toString()
-            val sweep = !swept
-            swept = true
-            val keep = uploads.keys.toSet()
+            attach(cache)
+            val folder = File(root ?: return@withLock null, UUID.randomUUID().toString())
             val target =
                 try {
-                    withContext(Dispatchers.IO) {
-                        if (sweep) sweepStale(root, keep)
-                        copyFile(File(root, folder), name, open)
-                    }
+                    withContext(Dispatchers.IO) { copyFile(folder, name, open) }
                 } catch (error: CancellationException) {
-                    File(root, folder).deleteRecursively()
+                    deleteFolder(folder)
                     throw error
                 }
-            target?.also { uploads[folder] = Upload(owner, it) }
+            target?.also { uploads[folder.name] = Upload(owner, it) }
         }
 
     fun owned(
         value: String,
         owner: Long,
     ): File? {
-        val (folder, path) = location(value) ?: return null
-        val upload = uploads[folder] ?: return null
-        if (upload.owner != owner || upload.file.toPath().normalize() != path) return null
-        return upload.file
+        val file = location(value) ?: return null
+        return registered(file)?.takeIf { it.owner == owner }?.file
     }
 
-    fun isUpload(value: String): Boolean = location(value)?.second?.inUploads == true
+    fun isUpload(value: String): Boolean = location(value) != null
+
+    fun exists(value: String): Boolean = location(value)?.let(::isPlainFile) == true
 
     fun adopt(
         value: String,
         owner: Long,
     ): Boolean {
-        val (folder, path) = location(value)?.takeIf { it.second.inUploads } ?: return false
-        val upload = uploads[folder]
-        if (upload != null) return upload.owner == owner && upload.file.toPath().normalize() == path
-        val file = path.toFile()
-        if (!file.isFile) return false
-        uploads[folder] = Upload(owner, file)
+        val file = location(value)?.takeIf(::isPlainFile) ?: return false
+        val upload = uploads[file.parentFile?.name]
+        if (upload != null) return upload.owner == owner && upload.file == file
+        uploads[file.parentFile?.name ?: return false] = Upload(owner, file)
         return true
     }
-
-    private val Path.inUploads: Boolean get() = parent?.parent?.fileName?.toString() == FOLDER
 
     fun discard(
         value: String,
         owner: Long,
     ) {
-        val folder = location(value)?.first ?: return
-        if (uploads[folder]?.owner == owner) remove(folder)
+        val file = location(value) ?: return
+        if (registered(file)?.owner == owner) remove(file.parentFile?.name ?: return)
     }
 
     fun prune(
@@ -104,29 +104,43 @@ internal object UploadStore {
         uploads.filterValues { it.owner == owner }.keys.forEach(::remove)
     }
 
+    private fun registered(file: File): Upload? = uploads[file.parentFile?.name]?.takeIf { it.file == file }
+
     private fun remove(folder: String) {
         val upload = uploads.remove(folder) ?: return
-        upload.file.parentFile?.deleteRecursively()
+        val directory = upload.file.parentFile ?: return
+        if (location(fileValue(upload.file)) == upload.file && directory.name == folder) deleteFolder(directory)
     }
 
-    private fun location(value: String): Pair<String, Path>? {
+    private fun location(value: String): File? {
+        val base = root ?: return null
         val text = value.trim { it.isWhitespace() || it.isISOControl() }
         if (!text.lowercase().startsWith("file:")) return null
         val path = runCatching { URI(text).path }.getOrNull() ?: return null
-        val normalized = runCatching { Paths.get(path).normalize() }.getOrNull() ?: return null
-        val folder = normalized.parent?.fileName?.toString() ?: return null
-        return folder to normalized
+        val file = runCatching { Paths.get(path).normalize().toFile() }.getOrNull() ?: return null
+        val folder = file.parentFile ?: return null
+        return file.takeIf { folder.parentFile == base && isUuid(folder.name) && file.name.isNotEmpty() }
+    }
+}
+
+private fun isUuid(name: String): Boolean = runCatching { UUID.fromString(name).toString() == name.lowercase() }.getOrDefault(false)
+
+private fun isPlainFile(file: File): Boolean {
+    val path = file.toPath()
+    if (!Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS)) return false
+    return runCatching { file.canonicalFile == file }.getOrDefault(false)
+}
+
+private fun deleteFolder(folder: File) {
+    val path = folder.toPath()
+    if (Files.isSymbolicLink(path) || !Files.isDirectory(path, LinkOption.NOFOLLOW_LINKS)) return
+    runCatching {
+        Files.newDirectoryStream(path).use { entries -> entries.forEach { Files.deleteIfExists(it) } }
+        Files.deleteIfExists(path)
     }
 }
 
 internal fun fileValue(file: File): String = "file://${file.toURI().rawPath}"
-
-private fun sweepStale(
-    root: File,
-    keep: Set<String>,
-) {
-    root.listFiles()?.filter { it.name !in keep }?.forEach { it.deleteRecursively() }
-}
 
 private suspend fun copyFile(
     folder: File,
@@ -144,7 +158,7 @@ private suspend fun copyFile(
     } catch (_: SecurityException) {
         return null
     } finally {
-        if (!copied) folder.deleteRecursively()
+        if (!copied) deleteFolder(folder)
     }
 }
 

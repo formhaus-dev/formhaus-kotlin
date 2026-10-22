@@ -1,6 +1,7 @@
 package dev.formhaus.compose.model
 
 import android.content.Context
+import dev.formhaus.compose.fields.UploadStore
 import dev.formhaus.compose.fields.withoutDeadUploads
 import dev.formhaus.compose.platform.isDebuggable
 import dev.formhaus.core.engine.FormEngine
@@ -35,9 +36,11 @@ internal fun ownedFormModel(
     restoring: FormSnapshot?,
     onSnapshotChange: SnapshotChangeFn?,
     onSubmit: SubmitHandler,
-): FormModel =
-    FormModel(
+): FormModel {
+    UploadStore.attach(context.cacheDir)
+    return FormModel(
         EngineSetup(definition, values, engineOptions, renderer, debuggable = context.isDebuggable, restoring = restoring),
         onSnapshotChange,
         onSubmit,
     )
+}

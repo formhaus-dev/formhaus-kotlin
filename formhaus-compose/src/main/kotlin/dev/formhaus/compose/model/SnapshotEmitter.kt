@@ -14,9 +14,12 @@ internal class SnapshotEmitter(
     private var last: FormSnapshot? = engine.snapshot()
     private var pending = false
     private var closed = false
+    var cleared: Boolean = false
+        private set
     private val frame = Choreographer.FrameCallback { emit() }
 
     fun changed() {
+        cleared = false
         if (closed || pending || handler == null) return
         pending = true
         Choreographer.getInstance().postFrameCallback(frame)
@@ -24,6 +27,7 @@ internal class SnapshotEmitter(
 
     fun submitted() {
         cancel()
+        cleared = true
         if (closed) return
         last = null
         handler?.invoke(null)

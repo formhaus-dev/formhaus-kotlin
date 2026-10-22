@@ -1,17 +1,22 @@
 package dev.formhaus.compose.form
 
-import androidx.activity.compose.LocalActivity
+import android.os.Bundle
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.currentCompositeKeyHashCode
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.HasDefaultViewModelProviderFactory
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.createSavedStateHandle
+import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import dev.formhaus.compose.model.FormModel
 import dev.formhaus.compose.model.FormRendererOptions
 import dev.formhaus.compose.model.SnapshotChangeFn
@@ -19,52 +24,98 @@ import dev.formhaus.compose.model.ownedFormModel
 import dev.formhaus.core.engine.FormEngineOptions
 import dev.formhaus.core.engine.FormSnapshot
 import dev.formhaus.core.engine.SubmitHandler
+import dev.formhaus.core.engine.snapshotJson
 import dev.formhaus.core.json.JsonObject
 import dev.formhaus.core.model.FormDefinition
 import dev.formhaus.core.renderer.source
 
 private const val SNAPSHOT_KEY = "dev.formhaus.snapshot"
+private const val SNAPSHOT_JSON = "json"
 private const val HOLDER_KEY = "dev.formhaus.form:"
 private const val KEY_RADIX = 36
+internal const val MAX_SAVED_SNAPSHOT_BYTES = 256 * 1024
 
 internal class FormHolder(
     private val handle: SavedStateHandle,
 ) : ViewModel() {
     private var model: FormModel? = null
     private var source: JsonObject? = null
-    var appHandler: SnapshotChangeFn? = null
+    private var retired: FormModel? = null
+    private var claimant: Any? = null
+
+    init {
+        handle.setSavedStateProvider(SNAPSHOT_KEY) { Bundle().apply { putString(SNAPSHOT_JSON, savedJson()) } }
+    }
+
+    fun claim(binding: Any): Boolean {
+        if (claimant != null && claimant !== binding) return false
+        claimant = binding
+        return true
+    }
+
+    fun unclaim(binding: Any) {
+        if (claimant === binding) claimant = null
+    }
 
     fun model(
         source: JsonObject,
         restoring: FormSnapshot?,
-        create: (FormSnapshot?, SnapshotChangeFn) -> FormModel,
+        create: (FormSnapshot?) -> FormModel,
     ): FormModel {
         val current = model
         if (current != null && this.source == source) return current
-        val saved = if (current == null) handle.get<String>(SNAPSHOT_KEY)?.let(FormSnapshot::fromJson) else null
-        current?.close()
-        val created = create(restoring ?: saved, ::save)
+        val saved = if (current == null) savedSnapshot() else null
+        if (current != null) retired = current
+        val created = create(restoring ?: saved)
         model = created
         this.source = source
         return created
     }
 
-    fun release(model: FormModel) {
-        if (this.model !== model) return
-        model.close()
-        this.model = null
+    fun closeRetired() {
+        retired?.close()
+        retired = null
+    }
+
+    fun release() {
+        closeRetired()
+        model?.close()
+        model = null
         source = null
-        handle.remove<String>(SNAPSHOT_KEY)
+        handle.remove<Bundle>(SNAPSHOT_KEY)
     }
 
     override fun onCleared() {
+        closeRetired()
         model?.close()
         model = null
     }
 
-    private fun save(snapshot: FormSnapshot?) {
-        handle[SNAPSHOT_KEY] = snapshot?.toJson()
-        appHandler?.invoke(snapshot)
+    private fun savedSnapshot(): FormSnapshot? = handle.get<Bundle>(SNAPSHOT_KEY)?.getString(SNAPSHOT_JSON)?.let(FormSnapshot::fromJson)
+
+    private fun savedJson(): String? {
+        val current = model ?: return null
+        if (current.snapshots.cleared) return null
+        return current.engine.snapshotJson(MAX_SAVED_SNAPSHOT_BYTES)
+    }
+}
+
+private class Binding {
+    var holder: FormHolder? = null
+}
+
+private fun claimedHolder(
+    owner: ViewModelStoreOwner,
+    base: String,
+    binding: Binding,
+): FormHolder {
+    val extras = (owner as? HasDefaultViewModelProviderFactory)?.defaultViewModelCreationExtras ?: CreationExtras.Empty
+    val provider = ViewModelProvider.create(owner, viewModelFactory { initializer { FormHolder(createSavedStateHandle()) } }, extras)
+    var index = 0
+    while (true) {
+        val holder = provider["$base#$index", FormHolder::class]
+        if (holder.claim(binding)) return holder
+        index += 1
     }
 }
 
@@ -79,25 +130,30 @@ internal fun rememberOwnedModel(
     onSubmit: SubmitHandler,
 ): FormModel {
     val context = LocalContext.current
-    val activity = LocalActivity.current
     val owner = LocalViewModelStoreOwner.current
-    val key = HOLDER_KEY + currentCompositeKeyHashCode.toString(KEY_RADIX)
+    val binding = remember { Binding() }
+    val base = HOLDER_KEY + definition.source["id"]?.stringValue.orEmpty() + ":" + currentCompositeKeyHashCode.toString(KEY_RADIX)
     val holder =
-        if (owner != null) {
-            viewModel(owner, key) { FormHolder(createSavedStateHandle()) }
-        } else {
-            remember { FormHolder(SavedStateHandle()) }
+        remember(owner, base) {
+            if (owner != null) claimedHolder(owner, base, binding) else FormHolder(SavedStateHandle()).also { it.claim(binding) }
         }
     val model =
-        holder.model(definition.source, restoring) { start, save ->
-            ownedFormModel(context, definition, initialValues, engineOptions, renderer, start, save, onSubmit)
+        holder.model(definition.source, restoring) { start ->
+            ownedFormModel(context, definition, initialValues, engineOptions, renderer, start, onSnapshotChange, onSubmit)
         }
     SideEffect {
-        holder.appHandler = onSnapshotChange
+        val previous = binding.holder
+        if (previous != null && previous !== holder) previous.release()
+        binding.holder = holder
+        holder.closeRetired()
+        model.snapshots.handler = onSnapshotChange
         model.updateHandlers(engineOptions, renderer, onSubmit)
     }
-    DisposableEffect(holder, model) {
-        onDispose { if (owner == null || activity?.isChangingConfigurations != true) holder.release(model) }
+    DisposableEffect(holder) {
+        onDispose {
+            holder.unclaim(binding)
+            if (owner == null) holder.release()
+        }
     }
     return model
 }

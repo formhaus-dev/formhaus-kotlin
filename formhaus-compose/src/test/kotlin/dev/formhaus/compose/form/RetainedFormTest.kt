@@ -1,11 +1,14 @@
 package dev.formhaus.compose.form
 
+import android.content.Context
 import android.os.Bundle
 import android.os.Looper
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.Composable
+import androidx.test.core.app.ApplicationProvider
 import dev.formhaus.compose.fields.TextInputField
+import dev.formhaus.compose.fields.UploadStore
 import dev.formhaus.compose.fields.fileValue
 import dev.formhaus.compose.fields.pickedFile
 import dev.formhaus.compose.model.FormModel
@@ -46,23 +49,31 @@ class HostActivity : ComponentActivity() {
     }
 }
 
-private val trip =
-    FormDefinition(
-        json(
-            """
-            {"id": "trip", "title": "Trip", "submit": {"label": "Book"}, "steps": [
-              {"id": "who", "title": "Who", "fields": [{"key": "name", "type": "text", "label": "Name", "validation": {"required": true}}]},
-              {"id": "extras", "title": "Extras", "skip": {"label": "Skip"}, "fields": [{"key": "meal", "type": "text", "label": "Meal"}]},
-              {"id": "seat", "title": "Seat", "fields": [
-                {"key": "note", "type": "text", "label": "Note"},
-                {"key": "doc", "type": "file", "label": "Ticket"},
-                {"key": "photo", "type": "file", "label": "Photo"},
-                {"key": "pick", "type": "radio", "label": "Pick", "randomize": true,
-                 "options": [{"value": "a", "label": "A"}, {"value": "b", "label": "B"}, {"value": "c", "label": "C"}]}]}
-            ]}
-            """.trimIndent(),
-        ),
-    )
+internal val tripJson =
+    """
+    {"id": "trip", "title": "Trip", "submit": {"label": "Book"}, "steps": [
+      {"id": "who", "title": "Who", "fields": [{"key": "name", "type": "text", "label": "Name", "validation": {"required": true}}]},
+      {"id": "extras", "title": "Extras", "skip": {"label": "Skip"}, "fields": [{"key": "meal", "type": "text", "label": "Meal"}]},
+      {"id": "seat", "title": "Seat", "fields": [
+        {"key": "note", "type": "text", "label": "Note"},
+        {"key": "doc", "type": "file", "label": "Ticket"},
+        {"key": "photo", "type": "file", "label": "Photo"},
+        {"key": "pick", "type": "radio", "label": "Pick", "randomize": true,
+         "options": [{"value": "a", "label": "A"}, {"value": "b", "label": "B"}, {"value": "c", "label": "C"}]}]}
+    ]}
+    """.trimIndent()
+
+internal val trip = FormDefinition(json(tripJson))
+
+internal fun upload(name: String): File {
+    val cache = ApplicationProvider.getApplicationContext<Context>().cacheDir
+    val folder = File(UploadStore.directory(cache).canonicalFile, UUID.randomUUID().toString()).apply { mkdirs() }
+    return File(folder, name).apply { writeText("ticket") }
+}
+
+internal fun settle() {
+    shadowOf(Looper.getMainLooper()).idleFor(Duration.ofMillis(50))
+}
 
 @RunWith(RobolectricTestRunner::class)
 class RetainedFormTest {
@@ -86,15 +97,6 @@ class RetainedFormTest {
         if (saved == null) controller.setup() else controller.setup(saved)
         settle()
         return controller
-    }
-
-    private fun settle() {
-        shadowOf(Looper.getMainLooper()).idleFor(Duration.ofMillis(50))
-    }
-
-    private fun upload(name: String): File {
-        val cache = Robolectric.buildActivity(HostActivity::class.java).get().cacheDir
-        return File(File(cache, "formhaus-uploads/${UUID.randomUUID()}").apply { mkdirs() }, name).apply { writeText("ticket") }
     }
 
     private fun FormModel.reachSeat() {

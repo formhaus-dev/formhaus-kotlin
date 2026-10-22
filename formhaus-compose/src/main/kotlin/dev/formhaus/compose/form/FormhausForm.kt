@@ -18,10 +18,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import dev.formhaus.compose.containers.FormActionsSlot
 import dev.formhaus.compose.containers.FormErrorSummary
 import dev.formhaus.compose.containers.FormProgress
 import dev.formhaus.compose.containers.FormTopLevelErrors
+import dev.formhaus.compose.fields.attachUploads
 import dev.formhaus.compose.model.FormModel
 import dev.formhaus.compose.model.FormRendererOptions
 import dev.formhaus.compose.model.SnapshotChangeFn
@@ -102,6 +104,8 @@ public fun FormhausFormContent(
 ) {
     val components = LocalFormComponents.current
     val anchors = remember(model) { ScrollAnchors() }
+    val cache = LocalContext.current.cacheDir
+    remember(model) { model.attachUploads(cache) }
     LaunchedEffect(model) { model.start() }
     ResolveFormhausTokens(components.system) {
         FormLocale(model.definition.lang) {

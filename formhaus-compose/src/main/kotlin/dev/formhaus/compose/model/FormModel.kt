@@ -49,7 +49,7 @@ public class FormModel private constructor(
     onSubmit: SubmitHandler,
     private val hooks: HookBox?,
     onSnapshotChange: SnapshotChangeFn?,
-    restored: Boolean,
+    internal val restored: Boolean,
 ) {
     public constructor(
         engine: FormEngine,
@@ -210,9 +210,7 @@ public class FormModel private constructor(
         engineOptions: FormEngineOptions? = null,
         options: FormRendererOptions? = null,
         onSubmit: SubmitHandler? = null,
-        onSnapshotChange: SnapshotChangeFn? = null,
     ) {
-        if (onSnapshotChange != null) snapshots.handler = onSnapshotChange
         if (engineOptions != null) hooks?.current = engineOptions
         if (options != null) this.options = options
         if (onSubmit != null) submitHandler = onSubmit
