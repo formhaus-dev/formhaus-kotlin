@@ -123,7 +123,7 @@ internal object UploadStore {
     }
 }
 
-private fun isUuid(name: String): Boolean = runCatching { UUID.fromString(name).toString() == name.lowercase() }.getOrDefault(false)
+private fun isUuid(name: String): Boolean = runCatching { UUID.fromString(name).toString() == name }.getOrDefault(false)
 
 private fun isPlainFile(file: File): Boolean {
     val path = file.toPath()

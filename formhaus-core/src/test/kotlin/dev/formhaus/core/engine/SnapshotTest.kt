@@ -33,7 +33,7 @@ class SnapshotTest {
         val engine = restored(example)
         assertEquals("seat", engine.currentStep?.id)
         assertEquals("abc", engine.seed)
-        assertEquals(jsonObject("""{"name":"Ada"}"""), engine.values)
+        assertEquals(jsonObject("""{"name":"Ada","meal":"veg"}"""), engine.values)
         assertTrue(engine.errors.isEmpty())
         assertEquals(listOf("extras"), engine.snapshot().skipped)
         assertTrue(issues.none { it.code == IssueCode.SNAPSHOT_MISMATCH })
@@ -46,11 +46,25 @@ class SnapshotTest {
     }
 
     @Test
+    fun `a restored skipped step holds the same values as a live skip`() {
+        val live = FormEngine(JsonValue.parse(trip), options = options)
+        runBlocking {
+            live.setValue("name", JsonValue.String("Ada"))
+            live.next()
+            live.setValue("meal", JsonValue.String("fish"))
+            live.skip()
+        }
+        val engine = restored(example)
+        assertEquals(live.values, engine.values)
+        assertEquals(live.snapshot().skipped, engine.snapshot().skipped)
+    }
+
+    @Test
     fun `a snapshot round-trips through json`() {
         val engine = restored(example)
         val snapshot = engine.snapshot()
         assertEquals(snapshot, FormSnapshot.fromJson(snapshot.toJson()))
-        assertEquals(FormSnapshot.fromJson(example), snapshot)
+        assertEquals(FormSnapshot.fromJson(example.replace(""""Ada"}""", """"Ada","meal":"veg"}""")), snapshot)
     }
 
     @Test

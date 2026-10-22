@@ -5,9 +5,12 @@ import dev.formhaus.core.json.MutableStringMap
 import dev.formhaus.core.model.FormStep
 import dev.formhaus.core.model.valueFields
 
-private fun EngineCore.resetStepValues(): Values {
-    val fields = valueFields(currentStep?.fields.orEmpty())
-    val next = values.copy()
+internal fun EngineCore.resetStepValues(
+    step: FormStep? = currentStep,
+    from: Values = values,
+): Values {
+    val fields = valueFields(step?.fields.orEmpty())
+    val next = from.copy()
     for (field in fields) next.remove(field.key)
     next.merge(createValues(fields))
     return next
