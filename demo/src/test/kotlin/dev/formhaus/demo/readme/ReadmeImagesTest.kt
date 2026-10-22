@@ -28,8 +28,8 @@ import java.io.File
 import javax.imageio.ImageIO
 
 private const val FRAME = "device-frame"
-private const val IMAGE_WIDTH = 366
-private const val IMAGE_HEIGHT = 754
+private const val IMAGE_WIDTH = 1098
+private const val IMAGE_HEIGHT = 2262
 private const val VALUES =
     """{"projectType": "new-site", "budget": "medium", "services": ["design", "development"], "urgency": 4}"""
 
