@@ -24,7 +24,7 @@ public fun FormModel.addItem(group: String): Boolean {
         ?.fields
         ?.firstOrNull { it.type != "hidden" }
         ?.let { requestFocus("$group.$count.${it.key}") }
-    announce(label("itemAdded", stringMapOf("item" to JsonValue.String(itemTitle(count, group)))))
+    alerts.announce(label("itemAdded", stringMapOf("item" to JsonValue.String(itemTitle(count, group)))))
     return true
 }
 
@@ -35,7 +35,7 @@ public fun FormModel.removeItem(
     val name = itemTitle(index, group)
     if (!changeItems(group) { engine.removeItem(group, index) }) return false
     requestFocus(group)
-    announce(label("itemRemoved", stringMapOf("item" to JsonValue.String(name))))
+    alerts.announce(label("itemRemoved", stringMapOf("item" to JsonValue.String(name))))
     return true
 }
 

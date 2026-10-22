@@ -120,8 +120,8 @@ private fun SystemTitle(
 private fun SystemErrorAlert(model: FormModel) {
     var dismissed by remember { mutableIntStateOf(-1) }
     val errors = model.topLevelErrors + listOfNotNull(model.actionError)
-    if (errors.isEmpty() || model.alertVersion == dismissed) return
-    val close = { dismissed = model.alertVersion }
+    if (errors.isEmpty() || model.alerts.alertVersion == dismissed) return
+    val close = { dismissed = model.alerts.alertVersion }
     AlertDialog(
         onDismissRequest = close,
         confirmButton = { TextButton(close) { Text(model.label("close")) } },

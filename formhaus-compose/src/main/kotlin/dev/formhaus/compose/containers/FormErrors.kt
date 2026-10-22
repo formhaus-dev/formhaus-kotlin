@@ -51,7 +51,7 @@ public fun FormErrorSummary(
     if (groups.isEmpty()) return
     val tokens = LocalFormhausTokens.current
     val title = model.label("errorSummary")
-    LaunchedEffect(Unit) { model.announce(title) }
+    LaunchedEffect(Unit) { model.alerts.announce(title) }
     Column(
         modifier
             .fillMaxWidth()

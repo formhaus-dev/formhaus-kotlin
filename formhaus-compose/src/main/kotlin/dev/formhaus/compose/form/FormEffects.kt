@@ -39,7 +39,7 @@ internal fun InvalidFeedback(model: FormModel) {
 
 @Composable
 internal fun Announcer(model: FormModel) {
-    val announcement = model.announcement ?: return
+    val announcement = model.alerts.announcement ?: return
     Box(
         Modifier.size(1.dp).semantics {
             liveRegion = LiveRegionMode.Polite

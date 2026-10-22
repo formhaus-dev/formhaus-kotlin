@@ -137,7 +137,7 @@ internal fun SystemErrorSummary(model: FormModel) {
     if (groups.isEmpty()) return
     val error = LocalFormhausTokens.current.colors.error
     val title = model.label("errorSummary")
-    LaunchedEffect(Unit) { model.announce(title) }
+    LaunchedEffect(Unit) { model.alerts.announce(title) }
     OutlinedCard(
         Modifier
             .fillMaxWidth()

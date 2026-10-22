@@ -91,7 +91,7 @@ public fun FormModel.focus(field: String) {
 internal suspend fun FormModel.run(action: suspend () -> Boolean) {
     withContext(Dispatchers.Main.immediate) {
         if (loading) return@withContext
-        setActionError(null)
+        alerts.reportActionError(null)
         val errors = engine.errorsVersion
         try {
             val done = action()
@@ -99,7 +99,7 @@ internal suspend fun FormModel.run(action: suspend () -> Boolean) {
         } catch (error: CancellationException) {
             throw error
         } catch (error: Throwable) {
-            options.onError?.invoke(error) ?: setActionError(actionMessage(error))
+            options.onError?.invoke(error) ?: alerts.reportActionError(actionMessage(error))
         }
         applyHeldEdits()
     }

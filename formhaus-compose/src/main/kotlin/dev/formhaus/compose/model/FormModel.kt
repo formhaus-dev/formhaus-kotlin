@@ -13,7 +13,6 @@ import dev.formhaus.core.engine.FormEngineOptions
 import dev.formhaus.core.engine.FormSnapshot
 import dev.formhaus.core.engine.SubmitHandler
 import dev.formhaus.core.i18n.Localized
-import dev.formhaus.core.json.FieldErrors
 import dev.formhaus.core.json.JsonObject
 import dev.formhaus.core.json.JsonValue
 import dev.formhaus.core.json.MutableJsonObject
@@ -22,8 +21,6 @@ import dev.formhaus.core.renderer.ErrorGroup
 import dev.formhaus.core.renderer.FormActionsState
 import dev.formhaus.core.renderer.LabelSource
 import dev.formhaus.core.renderer.actionsState
-import dev.formhaus.core.renderer.errorGroups
-import dev.formhaus.core.renderer.errorsVersion
 import dev.formhaus.core.renderer.firstErrorKey
 import dev.formhaus.core.renderer.formatTemplate
 import dev.formhaus.core.renderer.itemsHaveContent
@@ -105,16 +102,13 @@ public class FormModel private constructor(
         private set
     public var submitting: Boolean by mutableStateOf(false)
         private set
-    public var topLevelErrors: List<String> by mutableStateOf(emptyList())
-        private set
-    public var errorGroups: List<ErrorGroup> by mutableStateOf(emptyList())
-        private set
-    public var stepErrorCounts: Map<String, Int> by mutableStateOf(emptyMap())
-        private set
+    internal val alerts: FormAlerts = FormAlerts(engine)
+    public val topLevelErrors: List<String> get() = alerts.topLevelErrors
+    public val errorGroups: List<ErrorGroup> get() = alerts.errorGroups
+    public val stepErrorCounts: Map<String, Int> get() = alerts.stepErrorCounts
     public var actions: FormActionsState by mutableStateOf(engine.actionsState(options.labels))
         private set
-    public var actionError: String? by mutableStateOf(null)
-        private set
+    public val actionError: String? get() = alerts.actionError
     public var invalidAttempts: Int by mutableIntStateOf(0)
         internal set
     public var focusRequest: FocusRequest? by mutableStateOf(null)
@@ -135,10 +129,6 @@ public class FormModel private constructor(
         }
     public var disabled: Boolean by mutableStateOf(false)
         private set
-    internal var alertVersion: Int by mutableIntStateOf(0)
-        private set
-    internal var announcement: Announcement? by mutableStateOf(null)
-        private set
 
     internal val fieldStates = mutableMapOf<String, FieldState>()
     private val groupStates = mutableMapOf<String, GroupState>()
@@ -146,10 +136,6 @@ public class FormModel private constructor(
     internal var optionsRevision = -1
     internal val heldEdits = mutableMapOf<String, JsonValue?>()
     private var lastValues: JsonObject = engine.values
-    private var lastErrors: FieldErrors = engine.errors
-    private var seenErrors = -1
-    private var lastStructureVersion = -1
-    private var lastValuesVersion = -1
     internal val focusRequests = FocusRequests()
     private var emittedValues: JsonObject? = null
     private var restarts = engine.restarts
@@ -216,15 +202,6 @@ public class FormModel private constructor(
         if (onSubmit != null) submitHandler = onSubmit
     }
 
-    internal fun setActionError(message: String?) {
-        actionError = message
-        if (message != null) alertVersion += 1
-    }
-
-    internal fun announce(text: String) {
-        announcement = Announcement(text, (announcement?.id ?: 0) + 1)
-    }
-
     private fun refresh() {
         version = engine.version
         val previousStep = structure.currentStep?.nodeId
@@ -265,23 +242,8 @@ public class FormModel private constructor(
     private fun refreshStatus() {
         stepValidating = engine.stepValidating
         submitting = engine.submitting
-        topLevelErrors = engine.topLevelErrors
-        if (engine.errorsVersion != seenErrors) {
-            seenErrors = engine.errorsVersion
-            if (topLevelErrors.isNotEmpty()) alertVersion += 1
-        }
+        alerts.refresh(options.labels, structureVersion, valuesVersion)
         actions = engine.actionsState(options.labels)
-        val errors = engine.errors
-        val recallChanged = !errors.isEmpty() && valuesVersion != lastValuesVersion
-        val errorsChanged = errors != lastErrors || errorGroups.isEmpty() != errors.isEmpty()
-        if (errorsChanged || structureVersion != lastStructureVersion || recallChanged) {
-            lastErrors = errors
-            lastStructureVersion = structureVersion
-            lastValuesVersion = valuesVersion
-            errorGroups = engine.errorGroups(options.labels)
-            val stepErrors = engine.stepErrors
-            stepErrorCounts = stepErrors.keys.associateWith { stepErrors[it].orEmpty().size }
-        }
         refreshDisabled()
     }
 
@@ -297,8 +259,3 @@ public class FormModel private constructor(
         onValuesChange(values)
     }
 }
-
-internal data class Announcement(
-    val text: String,
-    val id: Int,
-)
