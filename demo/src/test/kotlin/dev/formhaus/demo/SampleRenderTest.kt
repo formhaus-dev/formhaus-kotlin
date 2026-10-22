@@ -23,6 +23,9 @@ class SampleRenderTest {
         listOf(SampleDefinitions.contact, SampleDefinitions.trip).forEach { text ->
             assertTrue(checkDefinition(JsonValue.parse(text)).isEmpty())
         }
+        listOf("/project-inquiry.json", "/readme-project.json").forEach { path ->
+            assertTrue(path, checkDefinition(resourceJson(path)).isEmpty())
+        }
     }
 
     @Test
@@ -39,6 +42,7 @@ class SampleRenderTest {
 
     private val firstLabels =
         mapOf(
+            "project" to "What do you need?",
             "contact" to "Name",
             "trip" to "Destination",
             "translated" to "E-Mail",

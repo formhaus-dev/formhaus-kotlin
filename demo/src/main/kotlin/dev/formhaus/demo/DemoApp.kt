@@ -31,14 +31,12 @@ fun DemoApp() {
         var selected by rememberSaveable { mutableStateOf<String?>(null) }
         val sample = samples.firstOrNull { it.id == selected }
         BackHandler(enabled = sample != null) { selected = null }
-        Scaffold(contentWindowInsets = WindowInsets.safeDrawing) { padding ->
-            Column(Modifier.padding(padding).fillMaxSize()) {
-                if (sample == null) {
-                    SampleList { selected = it.id }
-                } else {
-                    SampleScreen(sample)
-                }
+        if (sample == null) {
+            Scaffold(contentWindowInsets = WindowInsets.safeDrawing) { padding ->
+                Column(Modifier.padding(padding).fillMaxSize()) { SampleList { selected = it.id } }
             }
+        } else {
+            SampleScreen(sample) { selected = null }
         }
     }
 }

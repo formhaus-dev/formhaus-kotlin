@@ -14,15 +14,25 @@ class Sample(
     val title: String,
     val summary: String,
     val definition: FormDefinition,
-    val components: FormComponents = FormComponents.standard,
+    val look: Look = Look.formhaus,
     val engineOptions: FormEngineOptions = FormEngineOptions(),
     val labels: LabelSource? = null,
 )
+
+private val project = FormDefinition(resourceJson("/project-inquiry.json"))
+
+fun resourceJson(path: String): JsonValue =
+    JsonValue.parse(
+        checkNotNull(Sample::class.java.getResourceAsStream(path)).use {
+            it.readBytes()
+        },
+    )
 
 private val translated = localize(JsonValue.parse(SampleDefinitions.contact), JsonValue.parse(SampleDefinitions.german), "de")
 
 val samples: List<Sample> =
     listOf(
+        Sample("project", "Start a project", "Pictures, a matrix and a scale. Switch the look from the menu", project),
         Sample("contact", "Contact", "One step with validation", FormDefinition(JsonValue.parse(SampleDefinitions.contact))),
         Sample(
             "trip",
@@ -44,13 +54,17 @@ val samples: List<Sample> =
             "System set",
             "Material 3 components and colors",
             FormDefinition(JsonValue.parse(SampleDefinitions.trip)),
-            components = FormComponents.system,
+            look = Look.material,
         ),
         Sample(
             "custom",
             "Custom slot",
             "Text fields drawn by the app",
             FormDefinition(JsonValue.parse(SampleDefinitions.contact)),
-            components = FormComponents.standard.field("text") { UnderlineField(it) }.field("email") { UnderlineField(it) },
+            look =
+                Look(
+                    "Custom fields",
+                    FormComponents.standard.field("text") { UnderlineField(it) }.field("email") { UnderlineField(it) },
+                ),
         ),
     )
