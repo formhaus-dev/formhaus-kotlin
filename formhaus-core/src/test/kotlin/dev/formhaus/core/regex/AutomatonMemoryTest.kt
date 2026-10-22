@@ -50,7 +50,8 @@ class AutomatonMemoryTest {
             val pattern = CompiledPattern("[^]*a[^]{40}$(?=)")
             assertEquals(false, pattern.test(RegexRegressionTest.randomText(400, "ab", 7L) + "b".repeat(41)))
             val shard = AutomatonShard(requireNotNull(pattern.automaton).plan)
-            shard.run { automaton ->
+            assertTrue(shard.acquire())
+            shard.holding { automaton ->
                 assertTrue(automaton.memory.reserve(4096))
                 shard.release()
                 assertTrue(shard.bytes > 0)

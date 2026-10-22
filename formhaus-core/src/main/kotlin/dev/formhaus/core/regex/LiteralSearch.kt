@@ -10,31 +10,35 @@ internal class LiteralSearch(
     }
 
     fun index(
-        text: CharArray,
+        text: String,
         origin: Int,
-    ): Int? {
-        if (literal.isEmpty()) return origin.takeIf { it <= text.size }
+    ): Int {
+        if (literal.isEmpty()) return if (origin <= text.length) origin else NONE
         val last = literal.size - 1
         val tail = literal[last]
         if (last == 0) {
-            for (index in origin until text.size) if (text[index] == tail) return index
-            return null
+            for (index in origin until text.length) if (text[index] == tail) return index
+            return NONE
         }
         var start = origin
-        while (start + last < text.size) {
+        while (start + last < text.length) {
             val unit = text[start + last]
             if (unit == tail && matchesAt(text, start, last)) return start
             start += shifts[unit.code and 0xFF]
         }
-        return null
+        return NONE
     }
 
     private fun matchesAt(
-        text: CharArray,
+        text: String,
         start: Int,
         length: Int,
     ): Boolean {
         for (index in 0 until length) if (text[start + index] != literal[index]) return false
         return true
+    }
+
+    companion object {
+        const val NONE: Int = -1
     }
 }

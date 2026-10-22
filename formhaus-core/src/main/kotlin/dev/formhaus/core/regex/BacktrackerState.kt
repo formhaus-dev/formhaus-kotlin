@@ -56,7 +56,9 @@ internal fun Backtracker.matchReference(
 ): Int? {
     var position = offset
     context.spend(reference.groups.size)
-    for (group in if (reference.backward) reference.groups else reference.groups.asReversed()) {
+    val groups = reference.groups
+    for (index in groups.indices) {
+        val group = groups[if (reference.backward) index else groups.size - 1 - index]
         if (slots[2 * group] < 0) continue
         context.spend(slots[2 * group + 1] - slots[2 * group] + 1)
         position = matchCapture(group, reference, position) ?: return null
@@ -72,7 +74,7 @@ private fun Backtracker.matchCapture(
     val start = slots[2 * group]
     val length = slots[2 * group + 1] - start
     val from = if (reference.backward) offset - length else offset
-    if (from < 0 || from + length > text.size) return null
+    if (from < 0 || from + length > text.length) return null
     for (index in 0 until length) {
         val left = text[start + index]
         val right = text[from + index]

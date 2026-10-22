@@ -93,14 +93,11 @@ internal class AutomatonMemory(
 internal class AutomatonShard(
     private val plan: AutomatonPlan,
 ) {
-    class Ran<Value>(
-        val value: Value,
-    )
-
     private val memory = AutomatonMemory(plan.pool)
     private val lock = AtomicBoolean(false)
     private val pendingRelease = AtomicBoolean(false)
-    private var automaton = LazyDFA(plan, memory)
+    var automaton: LazyDFA = LazyDFA(plan, memory)
+        private set
     private var recent = false
 
     init {
@@ -109,15 +106,18 @@ internal class AutomatonShard(
 
     val bytes: Int get() = memory.used
 
-    fun <Value> run(body: (LazyDFA) -> Value): Ran<Value>? {
-        if (!lock.compareAndSet(false, true)) return null
+    fun acquire(): Boolean {
+        if (!lock.compareAndSet(false, true)) return false
+        recent = true
+        return true
+    }
+
+    inline fun <Value> holding(body: (LazyDFA) -> Value): Value =
         try {
-            recent = true
-            return Ran(body(automaton))
+            body(automaton)
         } finally {
             unlock()
         }
-    }
 
     fun release() {
         pendingRelease.set(true)
@@ -144,7 +144,7 @@ internal class AutomatonShard(
         automaton = LazyDFA(plan, memory)
     }
 
-    private fun unlock() {
+    fun unlock() {
         lock.set(false)
         settle()
     }

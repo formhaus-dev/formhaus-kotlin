@@ -4,7 +4,7 @@ internal class AutomatonCache(
     val plan: AutomatonPlan,
 ) {
     @Volatile
-    private var shards: List<AutomatonShard> = emptyList()
+    private var shards: Array<AutomatonShard> = emptyArray()
 
     val bytes: Int get() = shards.sumOf { it.bytes }
 
@@ -13,7 +13,7 @@ internal class AutomatonCache(
     }
 
     fun matches(
-        text: CharArray,
+        text: String,
         context: MatchContext,
     ): Boolean =
         run(
@@ -22,7 +22,7 @@ internal class AutomatonCache(
         )
 
     fun reverse(
-        text: CharArray,
+        text: String,
         end: Int,
         floor: Int,
         context: MatchContext,
@@ -33,26 +33,31 @@ internal class AutomatonCache(
         )
 
     fun acceptance(
-        text: CharArray,
+        text: String,
         context: MatchContext,
     ): BooleanArray =
         run(
             { it.acceptance(text, context) },
             { stepper ->
-                BooleanArray(text.size + 1).also { stepper.acceptance(LazyDFA.start, text, 0, it, context) }
+                BooleanArray(text.length + 1).also { stepper.acceptance(LazyDFA.start, text, 0, it, context) }
             },
         )
 
-    private fun <Value> run(
+    private inline fun <Value> run(
         cached: (LazyDFA) -> Value,
         uncached: (ThreadStep) -> Value,
     ): Value {
         val current = shards
-        val start = ((Thread.currentThread().id * SPREAD) ushr 61).toInt()
-        for (offset in current.indices) {
-            current[(start + offset) % current.size].run(cached)?.let { return it.value }
+        if (current.isNotEmpty()) {
+            var index = ((Thread.currentThread().id * SPREAD) ushr 61).toInt() % current.size
+            repeat(current.size) {
+                val shard = current[index]
+                if (shard.acquire()) return shard.holding(cached)
+                index = if (index + 1 == current.size) 0 else index + 1
+            }
         }
-        addShard()?.run(cached)?.let { return it.value }
+        val added = addShard()
+        if (added != null && added.acquire()) return added.holding(cached)
         return uncached(plan.stepper())
     }
 

@@ -63,23 +63,24 @@ internal class CompiledPattern(
         unanchored?.takeIf { it.isInitialized() }?.value?.release()
     }
 
-    fun test(text: String): Boolean? {
-        val units = text.toCharArray()
-        if (!prefilter.admits(units)) return false
-        if (oversized || (units.size > MAX_STRING_LENGTH && program.clamped)) return null
-        val call = CallBudget.current.value
+    fun test(
+        text: String,
+        call: CallBudget? = CallBudget.current.value,
+    ): Boolean? {
+        if (!prefilter.admits(text)) return false
+        if (oversized || (text.length > MAX_STRING_LENGTH && program.clamped)) return null
         val allowance = call?.remaining ?: Int.MAX_VALUE
         if (allowance <= 0) return null
-        val context = MatchContext(units, scanners, allowance)
+        val context = MatchContext(text, scanners, allowance)
         try {
-            return match(units, context)
+            return match(text, context)
         } finally {
-            call?.charge(context.spent)
+            if (call != null && context.spent != 0) call.charge(context.spent)
         }
     }
 
     private fun match(
-        units: CharArray,
+        text: String,
         context: MatchContext,
     ): Boolean? {
         val automaton =
@@ -87,37 +88,39 @@ internal class CompiledPattern(
                 context.limit(StepBudget.backtrackingLimit.value)
                 return budgeted { Backtracker(program, context).search(prefilter) }
             }
-        context.limit(16 * (units.size + 64))
-        if (program.size >= PROBE_SIZE) probe(units, context)?.let { return it }
-        context.limit(StepBudget.linear(units.size, program.size))
-        if (!plan.backward) return budgeted { automaton.matches(units, context) }
-        return budgeted { reverse(automaton, units, context) }
+        if (program.size >= PROBE_SIZE) {
+            context.limit(16 * (text.length + 64))
+            probe(text, context)?.let { return it }
+        }
+        context.limit(StepBudget.linear(text.length, program.size))
+        if (!plan.backward) return budgeted { automaton.matches(text, context) }
+        return budgeted { reverse(automaton, text, context) }
     }
 
     private fun probe(
-        units: CharArray,
+        text: String,
         context: MatchContext,
     ): Boolean? =
         budgeted {
             val probe = Backtracker(program, context)
             if (!plan.backward) return@budgeted probe.search(prefilter)
-            var end = plan.end(units, null)
+            var end = plan.end(text, null)
             while (end != null) {
                 if (probe.run(0, end)) return@budgeted true
-                end = plan.end(units, end)
+                end = plan.end(text, end)
             }
             false
         }
 
     private fun reverse(
         automaton: AutomatonCache,
-        units: CharArray,
+        text: String,
         context: MatchContext,
     ): Boolean {
         var floor = 0
-        var end = plan.end(units, null)
+        var end = plan.end(text, null)
         while (end != null) {
-            when (automaton.reverse(units, end, floor, context)) {
+            when (automaton.reverse(text, end, floor, context)) {
                 Verdict.MATCH -> {
                     return true
                 }
@@ -128,10 +131,10 @@ internal class CompiledPattern(
 
                 Verdict.UNDECIDED -> {
                     val fallback = unanchored ?: throw BudgetExceeded
-                    return fallback.value.reverse(units, units.size, 0, context) == Verdict.MATCH
+                    return fallback.value.reverse(text, text.length, 0, context) == Verdict.MATCH
                 }
             }
-            end = plan.end(units, end)
+            end = plan.end(text, end)
         }
         return false
     }
