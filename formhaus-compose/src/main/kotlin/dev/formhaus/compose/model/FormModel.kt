@@ -5,8 +5,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import dev.formhaus.compose.fields.adoptUploads
 import dev.formhaus.compose.fields.pruneUploads
+import dev.formhaus.compose.fields.reconcileUploads
 import dev.formhaus.compose.fields.releaseUploads
 import dev.formhaus.core.engine.FormEngine
 import dev.formhaus.core.engine.FormEngineOptions
@@ -46,13 +46,12 @@ public class FormModel private constructor(
     onSubmit: SubmitHandler,
     private val hooks: HookBox?,
     onSnapshotChange: SnapshotChangeFn?,
-    internal val restored: Boolean,
 ) {
     public constructor(
         engine: FormEngine,
         options: FormRendererOptions = FormRendererOptions(),
         onSubmit: SubmitHandler,
-    ) : this(engine, options, onSubmit, null, null, false)
+    ) : this(engine, options, onSubmit, null, null)
 
     public constructor(
         definition: FormDefinition,
@@ -86,7 +85,7 @@ public class FormModel private constructor(
     )
 
     internal constructor(setup: EngineSetup, onSnapshotChange: SnapshotChangeFn?, onSubmit: SubmitHandler) :
-        this(setup.engine(), setup.renderer, onSubmit, setup.hooks, onSnapshotChange, setup.restoring != null)
+        this(setup.engine(), setup.renderer, onSubmit, setup.hooks, onSnapshotChange)
 
     public var options: FormRendererOptions = options
         private set
@@ -145,7 +144,7 @@ public class FormModel private constructor(
     init {
         refreshStatus()
         unsubscribe = engine.subscribe(::refresh)
-        if (restored) adoptUploads()
+        reconcileUploads()
     }
 
     public val definition: FormDefinition get() = engine.definition

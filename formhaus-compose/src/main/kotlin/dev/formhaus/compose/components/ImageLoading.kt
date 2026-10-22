@@ -4,8 +4,6 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Base64
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withTimeoutOrNull
-import java.io.ByteArrayOutputStream
 import java.net.HttpURLConnection
 import java.net.URI
 import java.net.URL
@@ -14,7 +12,6 @@ internal const val MAX_IMAGE_SIDE = 2048
 internal const val MAX_IMAGE_BYTES = 10 * 1024 * 1024
 private const val REQUEST_TIMEOUT = 15_000
 private const val RESOURCE_TIMEOUT = 30_000L
-private const val CHUNK = 64 * 1024
 private val decodes = AsyncGate(2, Dispatchers.Default)
 private val fetches = AsyncGate(4, Dispatchers.IO)
 private val imageTypes = setOf("image/png", "image/jpeg", "image/gif", "image/webp")
@@ -31,7 +28,7 @@ internal fun remoteImageUrl(source: String): URL? {
 internal suspend fun loadImage(source: String): Bitmap? {
     if (isInline(source)) return decodes.run { decodeInline(source) }
     val url = remoteImageUrl(source) ?: return null
-    val data = fetches.run { withTimeoutOrNull(RESOURCE_TIMEOUT) { fetchImage(url) } } ?: return null
+    val data = fetches.run { fetchImage(url) } ?: return null
     return decodes.run { decodeImage(data) }
 }
 
@@ -41,27 +38,18 @@ private fun fetchImage(url: URL): ByteArray? {
     connection.connectTimeout = REQUEST_TIMEOUT
     connection.readTimeout = REQUEST_TIMEOUT
     return try {
-        val status = runCatching { connection.responseCode }.getOrDefault(-1)
-        if (status !in 200..299 || connection.contentLengthLong > MAX_IMAGE_BYTES) null else readCapped(connection)
+        withDeadline(RESOURCE_TIMEOUT, connection::disconnect) { deadline ->
+            val status = runCatching { connection.responseCode }.getOrDefault(-1)
+            if (status !in 200..299 || connection.contentLengthLong > MAX_IMAGE_BYTES) {
+                null
+            } else {
+                runCatching { connection.inputStream.use { readCapped(it, deadline) } }.getOrNull()
+            }
+        }
     } finally {
         connection.disconnect()
     }
 }
-
-private fun readCapped(connection: HttpURLConnection): ByteArray? =
-    runCatching {
-        connection.inputStream.use { input ->
-            val output = ByteArrayOutputStream()
-            val buffer = ByteArray(CHUNK)
-            while (true) {
-                val read = input.read(buffer)
-                if (read < 0) break
-                if (output.size() + read > MAX_IMAGE_BYTES) return@use null
-                output.write(buffer, 0, read)
-            }
-            output.toByteArray()
-        }
-    }.getOrNull()
 
 private fun decodeInline(source: String): Bitmap? {
     val comma = source.indexOf(',')
