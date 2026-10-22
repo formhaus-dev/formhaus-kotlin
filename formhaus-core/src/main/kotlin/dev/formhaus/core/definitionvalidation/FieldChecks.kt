@@ -102,9 +102,7 @@ internal fun itemLimitWarnings(entry: FieldEntry): List<DefinitionIssue> {
     val items = field.defaultItems
     if (items != null && items > field.maxItems && (max == null || items <= max)) {
         val hint =
-            if (max ==
-                null
-            ) {
+            if (max == null) {
                 "Lower defaultItems or set validation.maxLength"
             } else {
                 "Lower defaultItems to $MAX_GROUP_ITEMS"

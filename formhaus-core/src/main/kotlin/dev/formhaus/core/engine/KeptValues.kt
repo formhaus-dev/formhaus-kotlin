@@ -17,9 +17,7 @@ private fun StartValues.keptItems(
         val entry = item.objectValue ?: return@mapIndexed item
         val missing =
             group.items.mapNotNull { field ->
-                if (entry[field.key] !=
-                    null
-                ) {
+                if (entry[field.key] != null) {
                     null
                 } else {
                     itemStartValue(ids.getOrNull(position), field.key)?.let { field.key to it }

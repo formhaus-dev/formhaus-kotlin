@@ -135,9 +135,7 @@ private fun keyIssue(
 ): DefinitionIssue? {
     val key = entry.node.key
     val path = "${entry.path}/key"
-    if (key in
-        reservedKeys
-    ) {
+    if (key in reservedKeys) {
         return error(
             IssueCode.RESERVED_KEY,
             path,
@@ -164,9 +162,7 @@ private fun keyIssues(context: CheckContext): List<DefinitionIssue> {
     val groups = context.nodes.filter { it.group == null && (it.node as? FormField)?.isGroup == true }
     return context.nodes.zip(keyClashes(context)).mapNotNull { (entry, clash) ->
         val prefix =
-            if (entry.group ==
-                null
-            ) {
+            if (entry.group == null) {
                 groups.firstOrNull { entry.node.key.startsWith("${it.node.key}.") }
             } else {
                 null

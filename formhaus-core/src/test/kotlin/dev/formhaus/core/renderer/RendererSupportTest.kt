@@ -3,6 +3,7 @@ package dev.formhaus.core.renderer
 import dev.formhaus.core.support.field
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -95,7 +96,10 @@ class RendererSupportTest {
         val option = FieldOption("a", "A", "data:image/svg+xml,x")
         assertEquals("a", option.value)
         assertNull(option.safeImage)
-        assertEquals("data:image/svg+xml,x".hashCode(), option.imageKey)
+        assertEquals("data:image/svg+xml,x", option.imageKey?.source)
+        assertEquals(option.imageKey, FieldOption("b", "B", "data:image/svg+xml,x").imageKey)
+        assertNotEquals(FieldOption("a", "A", "Aa").imageKey, FieldOption("a", "A", "BB").imageKey)
+        assertNull(FieldOption("a", "A").imageKey)
         assertTrue(field("""{"key":"a","type":"text","validation":{"required":"yes"}}""").isRequired)
     }
 }

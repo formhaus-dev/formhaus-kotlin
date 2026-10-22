@@ -16,9 +16,7 @@ private class Outdated(
 
 private fun latestOutdated(context: CheckContext): Outdated? {
     val recall = recallTexts(context).firstOrNull { it.keys.isNotEmpty() }
-    if (recall !=
-        null
-    ) {
+    if (recall != null) {
         return Outdated(
             "${recall.path} recalls \"{{${recall.keys.first()}}}\"",
             5,

@@ -48,9 +48,7 @@ internal fun recallTexts(context: CheckContext): List<RecallText> {
                 reserved,
                 owner.step,
                 owner.ordinal,
-                if (slot ==
-                    "itemLabel"
-                ) {
+                if (slot == "itemLabel") {
                     owner.key
                 } else {
                     owner.group

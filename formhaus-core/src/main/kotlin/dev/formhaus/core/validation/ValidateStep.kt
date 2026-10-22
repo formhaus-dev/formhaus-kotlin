@@ -53,10 +53,8 @@ private fun validateItems(
         val shown = itemScope(group, item, scope)
         for (field in group.items) {
             if (!isVisible(field, shown, checks.limits)) continue
-            validateFieldValue(field, own[field.key], own, checks.options)?.let {
-                errors[itemPath(group.key, index, field.key)] =
-                    it
-            }
+            val error = validateFieldValue(field, own[field.key], own, checks.options) ?: continue
+            errors[itemPath(group.key, index, field.key)] = error
         }
     }
 }

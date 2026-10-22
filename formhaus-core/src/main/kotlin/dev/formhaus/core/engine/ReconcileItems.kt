@@ -70,9 +70,7 @@ internal fun VisibilityState.reconcileItems(
                 Mapped(result.item, result.stable && result.cleared.isEmpty())
             }
         if (mapped.reused) continue
-        if (mapped.items !=
-            source
-        ) {
+        if (mapped.items != source) {
             values.set(group.key, ValueSlot(JsonValue.Array(mapped.items), Ref(freshToken(), ids)))
         }
         dropHiddenErrors(group, mapped.items, values.json, errors, cleared)

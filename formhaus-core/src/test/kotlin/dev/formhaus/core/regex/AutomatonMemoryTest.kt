@@ -1,6 +1,7 @@
 package dev.formhaus.core.regex
 
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
@@ -18,14 +19,13 @@ class AutomatonMemoryTest {
     fun `memory of collected automatons returns to the pool`() {
         val pool = MemoryPool()
         fill(pool)
-        assertTrue(pool.reserved > 0)
+        assertFalse(pool.take(pool.limit))
         var rounds = 0
-        while (pool.reserved > 0 && rounds < 100) {
+        while (!pool.take(pool.limit) && rounds < 100) {
             System.gc()
             Thread.sleep(10)
-            pool.take(0)
             rounds++
         }
-        assertEquals(0, pool.reserved)
+        assertTrue(rounds < 100)
     }
 }

@@ -62,9 +62,7 @@ internal fun recallAnswer(
 ): RecallAnswer? {
     if (value == null || value.isNull) return null
     if (field.isGroup) return value.arrayValue?.let { RecallAnswer.Number(it.size.toDouble()) }
-    if (field.type in
-        booleanTypes
-    ) {
+    if (field.type in booleanTypes) {
         return if (value == JsonValue.Bool(true)) field.label?.let(RecallAnswer::Text) else null
     }
     val items = value.arrayValue

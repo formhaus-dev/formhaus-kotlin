@@ -89,9 +89,7 @@ private fun text(
     path: String,
 ): List<DefinitionIssue> {
     val item = value[key] ?: return listOf(missing(path, key))
-    return if (item.stringValue !=
-        null
-    ) {
+    return if (item.stringValue != null) {
         emptyList()
     } else {
         listOf(error(IssueCode.INVALID_TYPE, "$path/${pointer(key)}", "\"$key\" must be a string"))

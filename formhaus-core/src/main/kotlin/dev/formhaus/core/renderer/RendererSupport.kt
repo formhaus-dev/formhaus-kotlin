@@ -20,8 +20,13 @@ public fun FieldOption(
     return FieldOption(json)
 }
 
+@JvmInline
+public value class ImageKey internal constructor(
+    public val source: String,
+)
+
 @RendererApi
-public val FieldOption.imageKey: Int? get() = image?.hashCode()
+public val FieldOption.imageKey: ImageKey? get() = image?.let(::ImageKey)
 
 @RendererApi
 public val FieldOption.safeImage: String? get() = imageSource(image)

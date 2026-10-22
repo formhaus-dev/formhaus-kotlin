@@ -71,9 +71,7 @@ class AwaitOrderTest {
                 FormEngineOptions(
                     onAfterSubmit = { _, _ -> calls += 1 },
                     onFormEvent = { event ->
-                        if (event ==
-                            FormEvent.FormSubmitted(1)
-                        ) {
+                        if (event == FormEvent.FormSubmitted(1)) {
                             launch { engine.cancelPendingActions() }
                         }
                     },
@@ -91,9 +89,7 @@ class AwaitOrderTest {
             val options =
                 FormEngineOptions(
                     onFormEvent = { event ->
-                        if (event ==
-                            FormEvent.FormSubmitted(0)
-                        ) {
+                        if (event == FormEvent.FormSubmitted(0)) {
                             launch { engine.setErrors(errorsOf("""{"a":"taken"}""")) }
                         }
                     },

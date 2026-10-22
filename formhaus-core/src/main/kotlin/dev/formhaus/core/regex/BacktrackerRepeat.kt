@@ -89,9 +89,7 @@ private fun Backtracker.gate(entry: Int): Gate {
 
             is Instruction.Set -> return Gate.Members(program.sets[instruction.set], instruction.backward)
 
-            is Instruction.Backreference -> return if (pc ==
-                entry
-            ) {
+            is Instruction.Backreference -> return if (pc == entry) {
                 gate(program.references[instruction.reference])
             } else {
                 Gate.Open

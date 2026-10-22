@@ -42,9 +42,7 @@ private fun tokenAt(
     start: Int,
 ): FoundToken? {
     val next = start + 1
-    if (text[start] ==
-        '\\'
-    ) {
+    if (text[start] == '\\') {
         return if (text.startsWith("{{", next)) FoundToken(next + 2, TemplateToken.Escape) else null
     }
     if (next < text.length && text[next] == '{') {

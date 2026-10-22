@@ -65,9 +65,7 @@ fun canonical(value: JsonValue?): JsonValue =
         is JsonValue.Number -> {
             if (value.value.isFinite()) {
                 JsonValue.Number(
-                    if (value.value ==
-                        0.0
-                    ) {
+                    if (value.value == 0.0) {
                         0.0
                     } else {
                         value.value

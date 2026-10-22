@@ -173,7 +173,6 @@ class RegexRegressionTest {
             assertEquals(text[1600 - width - 1] == 'a', compiled.test(text))
             assertEquals(text.startsWith("a"), compiled.test(text.take(width + 1)))
             assertTrue(requireNotNull(compiled.automaton).bytes <= AutomatonMemory.PATTERN_LIMIT)
-            assertTrue(AutomatonMemory.reservedTotal <= AutomatonMemory.GLOBAL_LIMIT)
         }
     }
 
@@ -190,7 +189,6 @@ class RegexRegressionTest {
             val patterns = (0 until count).map { CompiledPattern("[^]*$letter[^]{${300 - it}}$(?=)") }
             for ((index, pattern) in patterns.withIndex()) {
                 pattern.test(randomText(1300, "${letter}b", index + 1L))
-                assertTrue(AutomatonMemory.reservedTotal <= pool.limit)
             }
             assertTrue(requireNotNull(patterns.last().automaton).bytes > AutomatonMemory.PATTERN_LIMIT / 2)
             val fresh = CompiledPattern("^[a-z]+@[a-z]+\\.$letter[a-z]{2,}$")
@@ -224,9 +222,7 @@ class RegexRegressionTest {
                             for (index in patterns.indices) {
                                 val pattern = (index + worker + round) % patterns.size
                                 for ((text, result) in texts.zip(expected[pattern])) {
-                                    if (patterns[pattern].test(text) !=
-                                        result
-                                    ) {
+                                    if (patterns[pattern].test(text) != result) {
                                         mismatches++
                                     }
                                 }

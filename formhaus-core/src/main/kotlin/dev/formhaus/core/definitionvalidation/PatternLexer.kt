@@ -60,9 +60,7 @@ internal class PatternLexer(
         if (unit(next) == ':') return Token(TokenKind.Open(false), next + 1)
         if (unit(next) == '<') {
             for (close in next + 1 until units.size) {
-                if (units[close] ==
-                    '>'
-                ) {
+                if (units[close] == '>') {
                     return Token(TokenKind.Open(false), close + 1)
                 }
             }

@@ -95,9 +95,7 @@ internal fun VisibilityState.trackShown(
     return TrackedShown(
         state,
         state.flat.mapNotNull { (id, entry) ->
-            if (before[id]?.shown ==
-                !entry.shown
-            ) {
+            if (before[id]?.shown == !entry.shown) {
                 entry
             } else {
                 null
@@ -134,9 +132,7 @@ private fun VisibilityState.shownRows(
             val before = previous?.let { known[itemId(values, key, position, item)] }
             if (previous != null && before != null) {
                 names.forEachIndexed { index, name ->
-                    if (previous.rows[before][index] ==
-                        !row[index]
-                    ) {
+                    if (previous.rows[before][index] == !row[index]) {
                         flips.add(Flip(itemPath(key, position, name), row[index]))
                     }
                 }

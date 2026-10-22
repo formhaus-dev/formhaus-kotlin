@@ -39,9 +39,7 @@ private fun labeled(
     path: String,
     hint: String? = null,
 ): List<DefinitionIssue> =
-    if ("label" in
-        value
-    ) {
+    if ("label" in value) {
         emptyList()
     } else {
         listOf(warning(IssueCode.MISSING_LABEL, "$path/label", "missing required property \"label\"", hint))

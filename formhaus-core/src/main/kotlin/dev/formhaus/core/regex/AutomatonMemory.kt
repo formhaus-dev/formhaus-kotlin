@@ -18,8 +18,6 @@ internal class MemoryPool(
     private val queue = ReferenceQueue<AutomatonShard>()
     private val registry: MutableSet<ShardReference> = ConcurrentHashMap.newKeySet()
 
-    val reserved: Int get() = synchronized(this) { total }
-
     fun take(bytes: Int): Boolean {
         drain()
         synchronized(this) {
@@ -89,8 +87,6 @@ internal class AutomatonMemory(
         const val PATTERN_LIMIT: Int = 1 shl 20
         const val GLOBAL_LIMIT: Int = 32 shl 20
         private const val CHUNK = 4 shl 10
-
-        val reservedTotal: Int get() = MemoryPool.current.value.reserved
     }
 }
 

@@ -72,14 +72,10 @@ internal class CallBudget(
         val patternTestLimit: ScopedLocal<Int> = ScopedLocal(10_000)
         val current: ScopedLocal<CallBudget?> = ScopedLocal(null)
 
-        fun <Value> run(body: () -> Value): Value =
-            if (current.value ==
-                null
-            ) {
-                current.withValue(CallBudget(), body)
-            } else {
-                body()
-            }
+        fun <Value> run(body: () -> Value): Value {
+            if (current.value != null) return body()
+            return current.withValue(CallBudget(), body)
+        }
 
         suspend fun <Value> runSuspending(body: suspend () -> Value): Value {
             if (current.value != null) return body()

@@ -15,9 +15,12 @@ class RecallIntlTest {
         val expected: String,
     )
 
-    private val cases: List<Case> by lazy {
+    private val fixture by lazy {
         val bytes = requireNotNull(javaClass.getResourceAsStream("/cldr/recall-format.json")).use { it.readBytes() }
-        val fixture = requireNotNull(JsonValue.parse(bytes).objectValue)
+        requireNotNull(JsonValue.parse(bytes).objectValue)
+    }
+
+    private val cases: List<Case> by lazy {
         requireNotNull(fixture["cases"]?.arrayValue).map { item ->
             val case = requireNotNull(item.objectValue)
 
@@ -53,6 +56,11 @@ class RecallIntlTest {
         val differing = cases.filter { formatted(it) != it.expected }.mapTo(sortedSetOf()) { "${it.locale} ${it.type}" }
         val known = olderJdkDatePatterns + olderJdkNumberSymbols + missingPersianChronology + julianBeforeGregorianCutover
         assertEquals(known.toSortedSet(), differing)
+    }
+
+    @Test
+    fun `the fixture and the tables come from the same CLDR release`() {
+        assertEquals(CLDR_VERSION, fixture["cldr"]?.stringValue)
     }
 
     @Test

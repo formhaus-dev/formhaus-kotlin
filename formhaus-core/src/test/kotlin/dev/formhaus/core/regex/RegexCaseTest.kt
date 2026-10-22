@@ -14,9 +14,7 @@ class RegexCaseTest {
     private fun describe(text: String): String =
         text
             .map {
-                if (it.code in
-                    0x20..0x7E
-                ) {
+                if (it.code in 0x20..0x7E) {
                     "$it"
                 } else {
                     "\\u%04X".format(it.code)

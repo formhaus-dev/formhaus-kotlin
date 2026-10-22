@@ -13,9 +13,7 @@ public class FormField private constructor(
         this(
             json,
             ordinals.take(),
-            if (json["type"]?.stringValue ==
-                "group"
-            ) {
+            if (json["type"]?.stringValue == "group") {
                 formNodes(json["fields"], ordinals)
             } else {
                 null

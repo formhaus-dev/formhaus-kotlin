@@ -44,9 +44,7 @@ class ApiSurfaceTest {
             SubmissionOptions(
                 messages =
                     MessageSource.Function { key, _, field ->
-                        if (key ==
-                            MessageKey.REQUIRED
-                        ) {
+                        if (key == MessageKey.REQUIRED) {
                             "Need ${field.key}"
                         } else {
                             null

@@ -28,9 +28,7 @@ private fun mismatch(
 ): List<DefinitionIssue> =
     listOf(
         warning(
-            if (name in
-                containsOperators
-            ) {
+            if (name in containsOperators) {
                 IssueCode.CONTAINS_NOT_LIST
             } else {
                 IssueCode.CONDITION_VALUE_MISMATCH
@@ -160,9 +158,7 @@ private fun optionWarnings(entry: FieldEntry): List<DefinitionIssue> {
     val defaultValue = field.defaultValue
     if (defaultValue == null || values.isEmpty() || field.hasOptionsFrom) return emptyList()
     val defaults =
-        if (field.type ==
-            "multiselect"
-        ) {
+        if (field.type == "multiselect") {
             defaultValue.arrayValue ?: listOf(defaultValue)
         } else {
             listOf(defaultValue)

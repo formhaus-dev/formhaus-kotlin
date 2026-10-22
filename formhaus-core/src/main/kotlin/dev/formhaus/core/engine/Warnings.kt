@@ -19,20 +19,20 @@ import java.util.logging.Logger
 internal typealias MissingMessageFn = (MessageKey) -> Unit
 
 private val warningLog = Logger.getLogger("dev.formhaus.definition")
+private const val REPORTED_TEXT_LIMIT = 1024
 private val reportedTexts = ConcurrentHashMap.newKeySet<String>()
+
+private fun reportsFirst(text: String): Boolean {
+    if (reportedTexts.size >= REPORTED_TEXT_LIMIT) reportedTexts.clear()
+    return reportedTexts.add(text)
+}
 
 internal fun deliver(
     issue: DefinitionIssue,
     options: FormEngineOptions,
 ) {
     val onWarning = options.onWarning
-    if (onWarning !=
-        null
-    ) {
-        onWarning(issue)
-    } else {
-        warningLog.warning("[formhaus] ${issue.message}")
-    }
+    if (onWarning != null) onWarning(issue) else warningLog.warning("[formhaus] ${issue.message}")
 }
 
 internal fun reportWarnings(
@@ -40,19 +40,8 @@ internal fun reportWarnings(
     options: FormEngineOptions,
 ) {
     val issues = checkDefinition(JsonValue.Object(definition.json), CheckDefinitionOptions(options.validators.keys))
-    for (
-    issue in issues +
-        if (options.debugChecks) {
-            unorderedWarning(
-                definition,
-                options,
-            )
-        } else {
-            emptyList()
-        }
-    ) {
-        deliver(issue, options)
-    }
+    val debugIssues = if (options.debugChecks) unorderedWarning(definition, options) else emptyList()
+    for (issue in issues + debugIssues) deliver(issue, options)
 }
 
 private fun reportMissing(
@@ -61,7 +50,7 @@ private fun reportMissing(
     catalog: String,
     options: FormEngineOptions,
 ) {
-    if (!reportedTexts.add("${code.rawValue}:$key")) return
+    if (!reportsFirst("${code.rawValue}:$key")) return
     deliver(
         warning(code, "", "The $catalog catalog has no \"$key\" text", "Add \"$key\" to the $catalog catalog"),
         options,

@@ -35,9 +35,7 @@ private fun RegexCompiler.clamp(
 ): Quantifier {
     val length = body.minimumLength
     val usable =
-        if (length ==
-            0
-        ) {
+        if (length == 0) {
             MAX_STRING_LENGTH + 1
         } else {
             ((MAX_STRING_LENGTH.toLong() + length - 1) / length).toInt()
