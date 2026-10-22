@@ -15,7 +15,7 @@ run_detekt() {
 
 run_comments() {
   matches=$(grep -rnE '^\s*(//|/\*|\*)|[;{)]\s*//|\s//\s|/\*' --include='*.kt' --include='*.kts' \
-    "$root/formhaus-core/src" "$root/formhaus-compose/src" "$root"/*.kts "$root"/*/build.gradle.kts || true)
+    "$root"/*/src "$root"/*.kts "$root"/*/build.gradle.kts || true)
   if [ -n "$matches" ]; then
     echo "$matches" >&2
     echo "error: comments are not allowed" >&2
