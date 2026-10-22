@@ -67,3 +67,9 @@ exceptions:
     ignoredExceptionTypes:
       - CancellationException
       - NumberFormatException
+
+naming:
+  FunctionNaming:
+    active: true
+    ignoreAnnotated:
+      - Composable
