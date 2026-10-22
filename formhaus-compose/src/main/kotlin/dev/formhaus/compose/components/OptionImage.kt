@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
@@ -24,8 +23,7 @@ public fun FormhausOptionImage(
     contentScale: ContentScale = ContentScale.Crop,
 ) {
     val source = option.safeImage.orEmpty()
-    LaunchedEffect(source) { OptionImages.load(source) }
-    val image = OptionImages.loaded(source)
+    val image = OptionImages.shown(source)
     Box(modifier.clearAndSetSemantics {}) {
         if (image != null) Image(image, null, Modifier.fillMaxWidth(), contentScale = contentScale)
     }
@@ -38,8 +36,7 @@ internal fun OptionImage(
     fit: Boolean = false,
 ) {
     val tokens = LocalFormhausTokens.current
-    LaunchedEffect(source) { OptionImages.load(source) }
-    val image = OptionImages.loaded(source)
+    val image = OptionImages.shown(source)
     val frame =
         modifier
             .fillMaxWidth()

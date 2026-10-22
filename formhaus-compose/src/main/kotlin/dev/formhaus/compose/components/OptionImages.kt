@@ -1,5 +1,8 @@
 package dev.formhaus.compose.components
 
+import android.graphics.Bitmap
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -16,9 +19,11 @@ internal class ImageEntry {
     var bytes = 0
 }
 
-internal object OptionImages {
-    private const val MAX_BYTES = 48 * 1024 * 1024
-    private const val MAX_COUNT = 256
+internal open class ImageCache(
+    private val maxCount: Int,
+    private val maxBytes: Int,
+    private val loader: suspend (String) -> Bitmap?,
+) {
     private val entries = HashMap<String, ImageEntry>()
     private val order = ArrayDeque<String>()
     private var bytes = 0
@@ -48,7 +53,11 @@ internal object OptionImages {
     suspend fun image(source: String): ImageBitmap? {
         val entry = entry(source)
         entry.image?.let { return it }
-        val bitmap = loadImage(source) ?: return null
+        val bitmap = loader(source)
+        if (bitmap == null) {
+            if (entries[source] === entry && entry.image == null) entries.remove(source)
+            return null
+        }
         if (entry.image == null) store(bitmap.asImageBitmap(), bitmap.allocationByteCount, source, entry)
         return entry.image
     }
@@ -65,8 +74,19 @@ internal object OptionImages {
         entry.bytes = size
         bytes += size
         order.addLast(source)
-        while ((order.size > MAX_COUNT || bytes > MAX_BYTES) && order.size > 1) {
-            entries.remove(order.removeFirst())?.let { bytes -= it.bytes }
+        while ((order.size > maxCount || bytes > maxBytes) && order.size > 1) {
+            val evicted = entries.remove(order.removeFirst()) ?: continue
+            bytes -= evicted.bytes
+            evicted.image = null
         }
     }
+}
+
+internal object OptionImages : ImageCache(256, 48 * 1024 * 1024, ::loadImage)
+
+@Composable
+internal fun ImageCache.shown(source: String): ImageBitmap? {
+    val image = loaded(source)
+    LaunchedEffect(source, image == null) { if (image == null) load(source) }
+    return image
 }
