@@ -6,16 +6,16 @@ jscpd_version=5.4.1
 root=$(cd "$(dirname "$0")/.." && pwd)
 
 run_ktlint() {
-  "$root/gradlew" --no-daemon --quiet ktlintCheck
+  "$root/gradlew" --no-daemon --quiet ktlintCheck :build-logic:ktlintCheck
 }
 
 run_detekt() {
-  "$root/gradlew" --no-daemon --quiet detekt
+  "$root/gradlew" --no-daemon --quiet detekt :build-logic:detekt
 }
 
 run_comments() {
   matches=$(grep -rnE '^\s*(//|/\*|\*)|[;{)]\s*//|\s//\s|/\*' --include='*.kt' --include='*.kts' \
-    "$root"/*/src "$root"/*.kts "$root"/*/build.gradle.kts || true)
+    "$root"/*/src "$root"/*.kts "$root"/*/*.kts || true)
   if [ -n "$matches" ]; then
     echo "$matches" >&2
     echo "error: comments are not allowed" >&2

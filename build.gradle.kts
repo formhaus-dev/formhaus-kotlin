@@ -1,12 +1,9 @@
 plugins {
-    alias(libs.plugins.kotlin.jvm) apply false
-    alias(libs.plugins.ktlint) apply false
-    alias(libs.plugins.detekt) apply false
-    alias(libs.plugins.animalsniffer) apply false
-    alias(libs.plugins.android.library) apply false
-    alias(libs.plugins.android.application) apply false
-    alias(libs.plugins.kotlin.compose) apply false
-    alias(libs.plugins.roborazzi) apply false
-    alias(libs.plugins.kotlin.allopen) apply false
-    alias(libs.plugins.kotlinx.benchmark) apply false
+    id("formhaus.coverage")
+}
+
+dependencies {
+    kover(project(":formhaus-core"))
+    kover(project(":formhaus-research"))
+    kover(project(":formhaus-compose"))
 }

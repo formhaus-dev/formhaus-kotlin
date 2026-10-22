@@ -18,7 +18,7 @@ Requires JDK 17 and the Android SDK with platform 37 and build-tools 36. Set `sd
 - `demo`: the sample app. It is not published.
 - `benchmarks`: JMH benchmarks of the engine on the JVM, with kotlinx-benchmark. It is not published.
 - `benchmarks-compose`: render benchmarks and the recomposition check of the Compose renderer, on Robolectric. It is not published.
-- `buildSrc`: the shared publishing setup.
+- `build-logic`: the convention plugins every module applies: Kotlin, Android, ktlint and detekt, publishing, the public API check and coverage.
 
 ## Build and test
 
@@ -27,7 +27,15 @@ Requires JDK 17 and the Android SDK with platform 37 and build-tools 36. Set `sd
 ./scripts/lint.sh
 ```
 
-`./gradlew check` compiles with warnings as errors, runs the tests, ktlint, detekt, Android lint, the screenshot comparison and the Android API 26 signature check of the JVM modules. `./gradlew :demo:assembleDebug` builds the demo app, and `./gradlew publishToMavenLocal` installs the three libraries in `~/.m2`. `./scripts/lint.sh` runs ktlint, detekt, the comment check and jscpd at the versions CI uses. `./scripts/lint.sh ktlint`, `detekt`, `comments`, `duplicates` or `tokens` runs one check.
+`./gradlew check` compiles with warnings as errors, runs the tests, ktlint, detekt, Android lint, the screenshot comparison the Android API 26 signature check of the JVM modules and the public API check of the three libraries. `./gradlew :demo:assembleDebug` builds the demo app, and `./gradlew publishToMavenLocal` installs the three libraries in `~/.m2`. `./gradlew coverage` runs the tests with Kover, writes the merged HTML report of the three libraries to `build/reports/kover/htmlCoverage` and prints the line coverage. `./scripts/lint.sh` runs ktlint, detekt, the comment check and jscpd at the versions CI uses. `./scripts/lint.sh ktlint`, `detekt`, `comments`, `duplicates` or `tokens` runs one check.
+
+## Public API
+
+The public API of `formhaus-core`, `formhaus-research` and `formhaus-compose` is recorded in each module's `api/` directory. `./gradlew check` fails when the compiled API differs from the dump. After an intended API change, update the dumps and commit them with the change:
+
+```sh
+./gradlew updateKotlinAbi
+```
 
 ## Conformance
 
@@ -97,5 +105,5 @@ Run the heavy tests and the benchmarks before a release and after changes to the
 
 1. Sync the fixtures to a tagged `@formhaus/core` release with `./scripts/sync-fixtures.sh @formhaus/core@X.Y.Z`.
 2. Run the heavy tests.
-3. Set the version in `buildSrc/src/main/kotlin/formhaus.publishing.gradle.kts`, add the release to `CHANGELOG.md` and update the install snippets in `README.md`.
+3. Set the version in `build-logic/src/main/kotlin/formhaus.publishing.gradle.kts`, add the release to `CHANGELOG.md` and update the install snippets in `README.md`.
 4. Tag `main` with `v` and the version, such as `v0.2.0`, and push the tag. JitPack builds the three libraries from `jitpack.yml`.

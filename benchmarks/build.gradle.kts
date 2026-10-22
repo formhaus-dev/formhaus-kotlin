@@ -1,17 +1,13 @@
 plugins {
-    alias(libs.plugins.kotlin.jvm)
-    alias(libs.plugins.kotlin.allopen)
-    alias(libs.plugins.kotlinx.benchmark)
-    alias(libs.plugins.ktlint)
-    alias(libs.plugins.detekt)
+    id("formhaus.kotlin-jvm")
+    id("org.jetbrains.kotlin.plugin.allopen")
+    id("org.jetbrains.kotlinx.benchmark")
 }
 
 description = "Benchmarks for the Formhaus Kotlin engine. Not published."
 
 kotlin {
-    jvmToolchain(17)
     compilerOptions {
-        allWarningsAsErrors.set(true)
         optIn.add("dev.formhaus.core.renderer.RendererApi")
     }
 }
@@ -54,18 +50,4 @@ tasks.register<JavaExec>("benchmarkReport") {
 
 tasks.named("check") {
     dependsOn("mainBenchmarkJar")
-}
-
-ktlint {
-    version.set(
-        libs.versions.ktlint.engine
-            .get(),
-    )
-}
-
-detekt {
-    config.setFrom(rootProject.file("config/detekt.yml"))
-    buildUponDefaultConfig = true
-    allRules = false
-    parallel = false
 }

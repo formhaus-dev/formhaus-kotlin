@@ -1,59 +1,17 @@
 plugins {
-    alias(libs.plugins.android.library)
-    alias(libs.plugins.kotlin.compose)
-    alias(libs.plugins.ktlint)
-    alias(libs.plugins.detekt)
-    alias(libs.plugins.roborazzi)
-    id("formhaus.publishing")
+    id("formhaus.android-library")
+    id("formhaus.public-library")
+    id("formhaus.screenshots")
 }
 
 description = "Jetpack Compose renderer for Formhaus JSON form definitions."
 
 android {
     namespace = "dev.formhaus.compose"
-    compileSdk = 37
-
-    defaultConfig {
-        minSdk = 26
-    }
-
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
-
-    buildFeatures {
-        compose = true
-    }
-
-    publishing {
-        singleVariant("release") {
-            withSourcesJar()
-            withJavadocJar()
-        }
-    }
-
-    testOptions {
-        unitTests {
-            isIncludeAndroidResources = true
-            all {
-                it.maxHeapSize = "1536m"
-            }
-        }
-    }
-}
-
-androidComponents {
-    beforeVariants(selector().withBuildType("release")) { variant ->
-        variant.hostTests[com.android.build.api.variant.HostTestBuilder.UNIT_TEST_TYPE]?.enable = false
-    }
 }
 
 kotlin {
-    jvmToolchain(17)
-    explicitApi()
     compilerOptions {
-        allWarningsAsErrors.set(true)
         optIn.add("dev.formhaus.core.renderer.RendererApi")
     }
 }
@@ -78,35 +36,4 @@ dependencies {
     testImplementation(libs.androidx.test.core)
     testImplementation(libs.compose.ui.test.junit4)
     testImplementation(libs.kotlinx.coroutines.test)
-}
-
-roborazzi {
-    outputDir.set(file("src/test/screenshots"))
-}
-
-tasks.named("check") {
-    dependsOn("verifyRoborazziDebug")
-}
-
-ktlint {
-    version.set(
-        libs.versions.ktlint.engine
-            .get(),
-    )
-    android.set(true)
-}
-
-detekt {
-    config.setFrom(rootProject.file("config/detekt.yml"))
-    buildUponDefaultConfig = true
-    allRules = false
-    parallel = false
-}
-
-publishing {
-    publications {
-        register<MavenPublication>("release") {
-            afterEvaluate { from(components["release"]) }
-        }
-    }
 }
