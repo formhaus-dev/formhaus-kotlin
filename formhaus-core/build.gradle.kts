@@ -43,3 +43,5 @@ detekt {
     allRules = false
     parallel = false
 }
+
+group = "dev.formhaus"
