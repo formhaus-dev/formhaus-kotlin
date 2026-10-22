@@ -188,6 +188,12 @@ Without it, options show in written order and the engine reports `missing-resear
 
 ## Choose a look
 
+The same form in the three sets:
+
+| Formhaus | Material | Your own |
+|:---:|:---:|:---:|
+| <img src=".github/assets/set-formhaus.png" alt="The Formhaus set" width="240"> | <img src=".github/assets/set-material.png" alt="The Material 3 set" width="240"> | <img src=".github/assets/set-kiln.png" alt="A custom brand set" width="240"> |
+
 ### The Formhaus set
 
 The default, `FormComponents.standard`. It matches the web renderers of `@formhaus/react` and `@formhaus/vue`, and uses the Formhaus design tokens.
@@ -232,7 +238,7 @@ fun UnderlineField(context: FieldContext) {
 }
 ```
 
-`FieldShell` draws the label, helper text and error, and lets the form scroll to the field. `formhausFocus` joins focus to the first error. `section`, `group`, `groupItem`, `confirmDialog`, `progress` and `actions` replace the containers. `FormComponents.headless` has no built-in fields, so every type comes from your registrations. The demo app has a complete custom field in [`demo/src/main/kotlin/dev/formhaus/demo/UnderlineField.kt`](demo/src/main/kotlin/dev/formhaus/demo/UnderlineField.kt).
+`FieldShell` draws the label, helper text and error, and lets the form scroll to the field. `formhausFocus` joins focus to the first error. `section`, `group`, `groupItem`, `confirmDialog`, `progress` and `actions` replace the containers. `FormComponents.headless` has no built-in fields, so every type comes from your registrations. The demo app has a complete custom field in [`demo/src/main/kotlin/dev/formhaus/demo/UnderlineField.kt`](demo/src/main/kotlin/dev/formhaus/demo/UnderlineField.kt), and a whole brand set, Kiln, with its own fields, step header, sections and actions in [`demo/src/main/kotlin/dev/formhaus/demo/kiln`](demo/src/main/kotlin/dev/formhaus/demo/kiln).
 
 Switching the components or the theme of a running form keeps its values, step and errors.
 
@@ -382,7 +388,7 @@ Case folding, Unicode properties and the formats for recalled lists, numbers and
 
 ## Demo app
 
-`demo` is an Android app with a list of sample forms: a contact form, a three-step trip form with a group of travellers and randomized options, the contact form in German, the trip form in the Material 3 set, and the contact form with a custom text field. Build it with:
+`demo` is an Android app with a list of sample forms: a three-step "Start a project" form with pictures, a matrix and a scale, a contact form, a three-step trip form with a group of travellers and randomized options, the contact form in German, the trip form in the Material 3 set, and the contact form with a custom text field. The menu in the top bar switches a form between the Formhaus, Material 3 and Kiln looks. Build it with:
 
 ```sh
 ./gradlew :demo:assembleDebug

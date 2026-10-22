@@ -29,6 +29,20 @@ Requires JDK 17 and the Android SDK with platform 37 and build-tools 36. Set `sd
 
 `./gradlew check` compiles with warnings as errors, runs the tests, ktlint, detekt, Android lint, the screenshot comparison the Android API 26 signature check of the JVM modules and the public API check of the three libraries. `./gradlew :demo:assembleDebug` builds the demo app, and `./gradlew publishToMavenLocal` installs the three libraries in `~/.m2`. `./gradlew coverage` runs the tests with Kover, writes the merged HTML report of the three libraries to `build/reports/kover/htmlCoverage` and prints the line coverage. `./scripts/lint.sh` runs ktlint, detekt, the comment check and jscpd at the versions CI uses. `./scripts/lint.sh ktlint`, `detekt`, `comments`, `duplicates` or `tokens` runs one check.
 
+## Screenshots
+
+`./gradlew check` compares the screenshots in `formhaus-compose/src/test/screenshots` with the renderer. After an intended visual change, record them again and look at every changed image before you commit:
+
+```sh
+./gradlew :formhaus-compose:recordRoborazziDebug
+```
+
+The README images in `.github/assets` show the demo app in a device frame. `check` does not compare them, so font changes on a machine do not fail the build. Record them again after a visual change to the demo or the sets:
+
+```sh
+./gradlew :demo:recordReadmeImages
+```
+
 ## Public API
 
 The public API of `formhaus-core`, `formhaus-research` and `formhaus-compose` is recorded in each module's `api/` directory. `./gradlew check` fails when the compiled API differs from the dump. After an intended API change, update the dumps and commit them with the change:
