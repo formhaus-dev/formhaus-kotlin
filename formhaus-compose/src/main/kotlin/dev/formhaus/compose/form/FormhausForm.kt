@@ -61,23 +61,34 @@ public fun FormhausForm(
     modifier: Modifier = Modifier,
 ) {
     key(model) {
-        ResolveFormhausTokens(LocalFormComponents.current.system) { FormScroller(model, modifier) }
+        val system = LocalFormComponents.current.system
+        ResolveFormhausTokens(system) { if (system) ColumnScroller(model, modifier) else LazyFormScroller(model, modifier) }
     }
 }
 
 @Composable
-private fun FormScroller(
+internal fun rememberTopRequests(scrollToTop: suspend (reduceMotion: Boolean) -> Unit): TopRequests {
+    val tokens = LocalFormhausTokens.current
+    val top = remember { TopRequests() }
+    LaunchedEffect(top.issued) {
+        if (top.issued == 0) return@LaunchedEffect
+        withFrameNanos {}
+        scrollToTop(tokens.reduceMotion)
+    }
+    return top
+}
+
+@Composable
+private fun ColumnScroller(
     model: FormModel,
     modifier: Modifier,
 ) {
     val tokens = LocalFormhausTokens.current
     val scroll = rememberScrollState()
-    val top = remember { TopRequests() }
-    LaunchedEffect(top.issued) {
-        if (top.issued == 0) return@LaunchedEffect
-        withFrameNanos {}
-        if (tokens.reduceMotion) scroll.scrollTo(0) else scroll.animateScrollTo(0, tween(tokens.motion.progress))
-    }
+    val top =
+        rememberTopRequests { reduceMotion ->
+            if (reduceMotion) scroll.scrollTo(0) else scroll.animateScrollTo(0, tween(tokens.motion.progress))
+        }
     Column(
         modifier
             .fillMaxSize()
@@ -102,6 +113,15 @@ public fun FormhausFormContent(
     model: FormModel,
     modifier: Modifier = Modifier,
 ) {
+    val system = LocalFormComponents.current.system
+    FormFrame(model) { if (system) SystemForm(model, modifier) else FormStack(model, modifier) }
+}
+
+@Composable
+internal fun FormFrame(
+    model: FormModel,
+    body: @Composable () -> Unit,
+) {
     val components = LocalFormComponents.current
     val anchors = remember(model) { ScrollAnchors() }
     val cache = LocalContext.current.cacheDir
@@ -110,11 +130,7 @@ public fun FormhausFormContent(
     ResolveFormhausTokens(components.system) {
         FormLocale(model.definition.lang) {
             CompositionLocalProvider(LocalScrollAnchors provides anchors) {
-                if (components.system) {
-                    SystemForm(model, modifier)
-                } else {
-                    FormStack(model, modifier)
-                }
+                body()
                 StepScroller(model, anchors)
                 InvalidFeedback(model)
                 Announcer(model)

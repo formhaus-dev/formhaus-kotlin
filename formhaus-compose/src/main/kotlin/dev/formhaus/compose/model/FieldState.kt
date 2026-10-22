@@ -26,6 +26,19 @@ public class FieldState internal constructor(
     internal var hasFocus: Boolean by mutableStateOf(false)
         private set
     private var focusPending: Int? = null
+    private var orderSource: List<FieldOption>? = null
+    private var ordered: List<FieldOption> = emptyList()
+
+    internal fun ordered(
+        source: List<FieldOption>,
+        order: () -> List<FieldOption>,
+    ): List<FieldOption> {
+        if (orderSource !== source) {
+            ordered = order()
+            orderSource = source
+        }
+        return ordered
+    }
 
     internal fun requestFocus(id: Int) {
         focusPending = id

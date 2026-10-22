@@ -54,18 +54,24 @@ internal fun NodeStack(
 ) {
     val tokens = LocalFormhausTokens.current
     Column(modifier, verticalArrangement = Arrangement.spacedBy(tokens.spacing.gap)) {
-        nodes.forEachIndexed { index, node ->
-            key(node.nodeId) {
-                val container = node is FormSection || (node as? FormField)?.isGroup == true
-                Box(
-                    Modifier.padding(
-                        top = if (container && index > 0) tokens.spacing.s5 else 0.dp,
-                        bottom = if (container) tokens.spacing.s5 else 0.dp,
-                    ),
-                ) { FormNodeView(node, model) }
-            }
-        }
+        nodes.forEachIndexed { index, node -> key(node.nodeId) { SpacedNode(node, index, model) } }
     }
+}
+
+@Composable
+internal fun SpacedNode(
+    node: FormNode,
+    index: Int,
+    model: FormModel,
+) {
+    val tokens = LocalFormhausTokens.current
+    val container = node is FormSection || (node as? FormField)?.isGroup == true
+    Box(
+        Modifier.padding(
+            top = if (container && index > 0) tokens.spacing.s5 else 0.dp,
+            bottom = if (container) tokens.spacing.s5 else 0.dp,
+        ),
+    ) { FormNodeView(node, model) }
 }
 
 @Composable

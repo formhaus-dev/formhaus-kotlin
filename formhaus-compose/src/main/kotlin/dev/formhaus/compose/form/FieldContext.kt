@@ -40,7 +40,8 @@ public class FieldContext internal constructor(
     internal val focused: Boolean = state.hasFocus
     public val options: List<FieldOption> =
         model.options(key).let { loaded ->
-            if (field.randomize) model.engine.orderOptions(key, loaded) else loaded ?: field.options.orEmpty()
+            val source = loaded ?: field.options.orEmpty()
+            if (field.randomize) state.ordered(source) { model.engine.orderOptions(key, loaded) } else source
         }
 
     public val isItem: Boolean get() = key != this.field.key

@@ -74,7 +74,7 @@ public fun FieldShell(
 }
 
 @Composable
-private fun FieldHeader(
+internal fun FieldHeader(
     context: FieldContext,
     variant: FieldShellVariant,
     helper: String?,

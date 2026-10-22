@@ -30,8 +30,8 @@ import dev.formhaus.compose.form.numberText
 import dev.formhaus.compose.theme.FormhausTokens
 import dev.formhaus.compose.theme.LocalFormhausTokens
 import dev.formhaus.core.json.JsonValue
-import dev.formhaus.core.json.stringMapOf
 import dev.formhaus.core.model.FieldOption
+import dev.formhaus.core.model.FormField
 import dev.formhaus.core.renderer.safeImage
 
 private const val PREFETCH_LIMIT = 64
@@ -81,71 +81,98 @@ private class Zoomed(
     val source: String,
 )
 
+internal enum class ChoiceArrangement { PICTURES, INLINE, LIST }
+
+internal fun choiceArrangement(
+    field: FormField,
+    options: List<FieldOption>,
+): ChoiceArrangement =
+    when {
+        options.any { !it.image.isNullOrEmpty() } -> ChoiceArrangement.PICTURES
+        field.layout?.stringValue == "inline" -> ChoiceArrangement.INLINE
+        else -> ChoiceArrangement.LIST
+    }
+
+internal val FormField.indicatorShape: IndicatorShape
+    get() = if (type == "multiselect") IndicatorShape.CHECKBOX else IndicatorShape.RADIO
+
 @Composable
 private fun ChoiceList(
     context: FieldContext,
     shape: IndicatorShape,
 ) {
     val requester = remember { FocusRequester() }
-    var zoomed by remember { mutableStateOf<Zoomed?>(null) }
     val options = context.options
-    LaunchedEffect(options) { OptionImages.prefetch(options.take(PREFETCH_LIMIT).mapNotNull { it.safeImage }) }
-    FieldShell(context, variant = FieldShellVariant.GROUP) {
-        ChoiceOptions(context, shape, Modifier.formhausFocus(context, requester).selectableGroup()) { option ->
-            zoomed = Zoomed(option.label ?: option.value.orEmpty(), option.safeImage.orEmpty())
+    val arrangement = remember(options) { choiceArrangement(context.field, options) }
+    val spec = LocalFormhausTokens.current.pictureGrid(context.field.columns)
+    PrefetchImages(options)
+    ChoiceScope(context) { actions ->
+        FieldShell(context, variant = FieldShellVariant.GROUP) {
+            val modifier = Modifier.formhausFocus(context, requester).selectableGroup()
+            ChoiceOptions(context, shape, arrangement, options.indices, spec::columnCount, actions, modifier)
         }
     }
+}
+
+@Composable
+internal fun PrefetchImages(options: List<FieldOption>) {
+    LaunchedEffect(options) { OptionImages.prefetch(options.take(PREFETCH_LIMIT).mapNotNull { it.safeImage }) }
+}
+
+@Composable
+internal fun ChoiceScope(
+    context: FieldContext,
+    content: @Composable (ChoiceActions) -> Unit,
+) {
+    var zoomed by remember { mutableStateOf<Zoomed?>(null) }
+    val actions = remember { ChoiceActions() }
+    actions.context = context
+    actions.zoom = { option, source -> zoomed = Zoomed(option.label ?: option.value.orEmpty(), source) }
+    content(actions)
     zoomed?.let { shown -> ImageViewer(shown.label, shown.source, context.text("close")) { zoomed = null } }
 }
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun ChoiceOptions(
+internal fun ChoiceOptions(
     context: FieldContext,
     shape: IndicatorShape,
+    arrangement: ChoiceArrangement,
+    indices: IntRange,
+    columnCount: (width: Dp, count: Int) -> Int,
+    actions: ChoiceActions,
     modifier: Modifier,
-    zoom: (FieldOption) -> Unit,
 ) {
     val tokens = LocalFormhausTokens.current
     val options = context.options
     val selected = ChoiceSelection.values(context.value, shape == IndicatorShape.CHECKBOX).toSet()
-    val selection = ChoiceSelection(context)
-    val card: @Composable (FieldOption, Boolean) -> Unit = { option, picture ->
-        val value = option.value.orEmpty()
-        ChoiceCard(
-            option,
-            shape,
-            value in selected,
-            picture,
-            !context.isLocked,
-            context.isInvalid,
-            context.text("enlargeImage", stringMapOf("label" to JsonValue.String(option.label.orEmpty()))),
-            context.optionTestId(value),
-            { selection.choose(value) },
-            { zoom(option) },
-        )
+    val enabled = !context.isLocked
+    val invalid = context.isInvalid
+    val picture = arrangement == ChoiceArrangement.PICTURES
+    val card: @Composable (Int) -> Unit = { index ->
+        val option = options[index]
+        ChoiceCard(option, shape, option.value.orEmpty() in selected, picture, enabled, invalid, actions)
     }
-    when {
-        options.any { !it.image.isNullOrEmpty() } -> {
-            val spec = tokens.pictureGrid(context.field.columns)
-            ColumnGrid(tokens.spacing.s5, spec::columnCount, modifier) { options.forEach { card(it, true) } }
+    when (arrangement) {
+        ChoiceArrangement.PICTURES -> {
+            ColumnGrid(tokens.spacing.s5, columnCount, modifier) { indices.forEach { card(it) } }
         }
 
-        context.field.layout?.stringValue == "inline" -> {
+        ChoiceArrangement.INLINE -> {
             FlowRow(
                 modifier,
                 horizontalArrangement = Arrangement.spacedBy(tokens.spacing.s3),
                 verticalArrangement = Arrangement.spacedBy(tokens.spacing.s3),
-            ) { options.forEach { option -> Column(Modifier.width(IntrinsicSize.Max)) { card(option, false) } } }
+            ) { indices.forEach { index -> Column(Modifier.width(IntrinsicSize.Max)) { card(index) } } }
         }
 
-        else -> {
-            Column(modifier, verticalArrangement = Arrangement.spacedBy(tokens.spacing.s3)) { options.forEach { card(it, false) } }
+        ChoiceArrangement.LIST -> {
+            Column(modifier, verticalArrangement = Arrangement.spacedBy(tokens.spacing.s3)) { indices.forEach { card(it) } }
         }
     }
 }
 
-private fun FormhausTokens.pictureGrid(columns: Int?): GridSpec {
+internal fun FormhausTokens.pictureGrid(columns: Int?): GridSpec {
     val fixed =
         when {
             scale >= LARGE_TYPE -> 1
