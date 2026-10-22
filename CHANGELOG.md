@@ -1,11 +1,30 @@
 # Changelog
 
-## Unreleased
+## 0.2.0
 
 ### formhaus-core
 
+- **Breaking:** `dev.formhaus.research.Research` moved to the new `formhaus-research` package. `FormEngineOptions.research` and the `FormResearch` interface stay in core.
 - **Breaking:** `FormEngineOptions.debugChecks` is a `Boolean?`. `null`, the default, keeps the checks off.
 - New renderer API `Locale.withPreferredCalendar()` adds the calendar CLDR prefers for the locale, such as Buddhist for `th-TH` and Persian for `fa-IR`.
+
+### formhaus-compose
+
+- New Jetpack Compose renderer for Android, `minSdk` 26.
+- `FormhausForm` renders a definition or a `FormModel`, with `initialValues`, `engineOptions` and `FormRendererOptions`.
+- `FormComponents.standard` matches the web renderers, `FormComponents.system` uses Material 3 and the colors of `MaterialTheme`, and `FormComponents.headless` has no built-in fields.
+- Custom composables replace any field type, and the section, group, group item, confirm dialog, progress and actions containers.
+- `FormhausTheme` holds the Formhaus design tokens for light, dark and raised contrast.
+- `TestIds.Automatic` and `TestIds.Custom` add test tags with the scheme of the web `testIds`.
+
+### formhaus-research
+
+- New package with `Research`, the option order for `randomize` fields.
+
+### Packaging
+
+- **Breaking:** Each package has its own coordinates: `com.github.formhaus-dev.formhaus-kotlin:formhaus-core`, `formhaus-compose` and `formhaus-research`. `com.github.formhaus-dev:formhaus-kotlin` is no longer published.
+- Local builds publish under the group `dev.formhaus`.
 
 ## 0.1.0
 

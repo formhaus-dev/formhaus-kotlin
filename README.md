@@ -11,31 +11,15 @@
 </p>
 
 <p align="center">
-  Kotlin engine for <a href="https://github.com/formhaus-dev/formhaus">Formhaus</a> JSON form definitions.
+  Kotlin engine and Jetpack Compose renderer for <a href="https://github.com/formhaus-dev/formhaus">Formhaus</a> JSON form definitions.
 </p>
 
 <p align="center">
   <a href="https://formhaus.dev/guide/">Documentation</a> ·
   <a href="https://formhaus.dev/playground">Playground</a> ·
-  <a href="https://github.com/formhaus-dev/formhaus">TypeScript core</a>
+  <a href="https://github.com/formhaus-dev/formhaus">TypeScript core</a> ·
+  <a href="#demo-app">Demo</a>
 </p>
-
-## What it is
-
-`formhaus-core` is a port of `@formhaus/core` to pure Kotlin. It parses a definition, runs the form as a state machine and validates submitted values with the same rules as the TypeScript core. It has no UI, so you can drive any screen from it, or use it on a server.
-
-- `FormEngine` holds values, errors, the current step and the visible fields, and moves between steps.
-- `validateSubmission` checks a submitted body against the definition on a server.
-- `checkDefinition` lists the issues of a definition.
-- `localize` and `missingKeys` support translations.
-
-The only dependency is `kotlinx-coroutines-core`. There is no JavaScript runtime.
-
-## Requirements
-
-- JDK 17 or later, or Android with `minSdk` 26 or later.
-
-The library is built with Kotlin 2.4. It calls only APIs that exist on Android API 26, and `./gradlew check` verifies this.
 
 ## Install
 
@@ -44,25 +28,67 @@ Releases are served from JitPack. Add the repository in `settings.gradle.kts`:
 ```kotlin
 dependencyResolutionManagement {
     repositories {
+        google()
         mavenCentral()
         maven("https://jitpack.io")
     }
 }
 ```
 
-Then add the dependency:
+Then add the packages you need:
 
 ```kotlin
 dependencies {
-    implementation("com.github.formhaus-dev:formhaus-kotlin:v0.1.0")
+    implementation("com.github.formhaus-dev.formhaus-kotlin:formhaus-core:v0.2.0")
+    implementation("com.github.formhaus-dev.formhaus-kotlin:formhaus-compose:v0.2.0")
 }
 ```
 
-To work from a local clone instead, include it with `includeBuild("../formhaus-kotlin")` and depend on `dev.formhaus:formhaus-core`.
+| Package | Contents |
+|---|---|
+| `formhaus-core` | Engine, validation, `validateSubmission`. Pure Kotlin for the JVM and Android. |
+| `formhaus-compose` | Jetpack Compose renderer. Android library, depends on `formhaus-core`. |
+| `formhaus-research` | Option order for `randomize` fields. Pure Kotlin, depends on `formhaus-core`. |
 
-## Quick start
+`formhaus-core` has one dependency, `kotlinx-coroutines-core`, and no Android or Compose artifacts, so it also runs on a server. There is no JavaScript runtime.
 
-Parse a definition, create a `FormEngine` and set values. `next`, `back`, `skip` and `submit` are `suspend` functions, because hooks and the submit handler can wait on the network:
+To work from a local clone, run `./gradlew publishToMavenLocal` and depend on `dev.formhaus:formhaus-core:0.2.0`, `dev.formhaus:formhaus-compose:0.2.0` or `dev.formhaus:formhaus-research:0.2.0` with `mavenLocal()` in your repositories.
+
+## Requirements
+
+- JDK 17 or later.
+- Android: `minSdk` 26 or later. `formhaus-compose` is built with `compileSdk` 37.
+
+The libraries are built with Kotlin 2.4. `formhaus-core` and `formhaus-research` call only APIs that exist on Android API 26, and `./gradlew check` verifies this.
+
+## Quick start with Compose
+
+Parse a definition and render it. The submit handler returns `SubmitResult.Ok`, or `SubmitResult.Rejected` with errors that the form shows on the fields:
+
+```kotlin
+import androidx.compose.runtime.Composable
+import dev.formhaus.compose.form.FormhausForm
+import dev.formhaus.core.engine.SubmitResult
+import dev.formhaus.core.json.JsonValue
+import dev.formhaus.core.json.toJsonString
+import dev.formhaus.core.model.FormDefinition
+
+val definition = FormDefinition(JsonValue.parse(assets.open("signup.json").readBytes()))
+
+@Composable
+fun SignupScreen() {
+    FormhausForm(definition) { values, _ ->
+        val response = api.post("https://example.com/signup", values.toJsonString())
+        SubmitResult.of(JsonValue.parse(response))
+    }
+}
+```
+
+`SubmitResult.of(json)` reads the `{ ok, errors, formErrors }` object that a Formhaus endpoint returns. `FormhausForm` takes `initialValues`, `engineOptions` and `renderer` options. For a form whose state lives outside the composable, create a `FormModel` and pass it to `FormhausForm(model)`. `FormhausFormContent(model)` renders the form without its own scroll container.
+
+## Quick start without a UI
+
+`FormEngine` runs the same form without a UI, for a renderer of your own or a server. `next`, `back`, `skip` and `submit` are `suspend` functions, because hooks and the submit handler can wait on the network:
 
 ```kotlin
 import dev.formhaus.core.engine.FormEngine
@@ -101,9 +127,116 @@ suspend fun fill() {
 }
 ```
 
-`next` returns `false` when validation fails, and the errors are in `engine.errors`. The submit handler receives the values of the active path and the ids of skipped steps. It returns `SubmitResult.Ok`, or `SubmitResult.Rejected(errors, formErrors)` to show server errors on the fields. `SubmitResult.of(json)` reads the `{ ok, errors, formErrors }` object that a Formhaus endpoint returns.
+`next` returns `false` when validation fails, and the errors are in `engine.errors`. The submit handler receives the values of the active path and the ids of skipped steps. Observe the engine with `engine.subscribe { ... }`, which returns a function that removes the listener. Read `engine.currentStep`, `engine.visibleFields`, `engine.errors`, `engine.topLevelErrors`, `engine.progress` and `engine.canGoNext` after each change. The [documentation](https://formhaus.dev/guide/) covers the definition format.
 
-Observe the engine with `engine.subscribe { ... }`, which returns a function that removes the listener. Read `engine.currentStep`, `engine.visibleFields`, `engine.errors`, `engine.topLevelErrors`, `engine.progress` and `engine.canGoNext` after each change. The [documentation](https://formhaus.dev/guide/) covers the definition format.
+## Randomize options
+
+A `radio`, `multiselect` or `select` field with `"randomize": true` shows its options in a random order per respondent. Add `formhaus-research` and pass `Research()`:
+
+```kotlin
+implementation("com.github.formhaus-dev.formhaus-kotlin:formhaus-research:v0.2.0")
+```
+
+```kotlin
+import dev.formhaus.core.engine.FormEngineOptions
+import dev.formhaus.research.Research
+
+FormhausForm(definition, engineOptions = FormEngineOptions(research = Research())) { values, _ ->
+    send(values)
+}
+```
+
+Without it, options show in written order and the engine reports `missing-research` through `onWarning`. The same `seed` in `FormEngineOptions` shows the same order again.
+
+## Choose a look
+
+### The Formhaus set
+
+The default, `FormComponents.standard`. It matches the web renderers of `@formhaus/react` and `@formhaus/vue`, and uses the Formhaus design tokens.
+
+### Material 3
+
+`FormComponents.system` renders the form with Material 3 components and takes its colors from the `MaterialTheme` around it:
+
+```kotlin
+import androidx.compose.runtime.CompositionLocalProvider
+import dev.formhaus.compose.form.FormComponents
+import dev.formhaus.compose.form.LocalFormComponents
+
+MaterialTheme {
+    CompositionLocalProvider(LocalFormComponents provides FormComponents.system) {
+        FormhausForm(definition) { _, _ -> SubmitResult.Ok }
+    }
+}
+```
+
+`LocalFormBehavior` takes a `FormBehavior` for the error summary, the remove confirmation, the Back button placement, step scrolling and the title display mode.
+
+### Your own components
+
+Register a composable per field type on top of a built-in set. Types you leave out keep the built-in views:
+
+```kotlin
+val brand = FormComponents.standard
+    .field("text") { UnderlineField(it) }
+    .field("email") { UnderlineField(it) }
+
+@Composable
+fun UnderlineField(context: FieldContext) {
+    val requester = remember { FocusRequester() }
+    FieldShell(context, Modifier.formhausScrollAnchor(context)) {
+        BasicTextField(
+            value = context.text,
+            onValueChange = { context.setValue(JsonValue.String(it)) },
+            modifier = Modifier.fillMaxWidth().formhausFocus(context, requester),
+        )
+    }
+}
+```
+
+`FieldShell` draws the label, helper text and error. `formhausFocus` joins focus to the first error, and `formhausScrollAnchor` lets the form scroll to the field. `section`, `group`, `groupItem`, `confirmDialog`, `progress` and `actions` replace the containers. `FormComponents.headless` has no built-in fields, so every type comes from your registrations. The demo app has a complete custom field in [`demo/src/main/kotlin/dev/formhaus/demo/UnderlineField.kt`](demo/src/main/kotlin/dev/formhaus/demo/UnderlineField.kt).
+
+Switching the components or the theme of a running form keeps its values, step and errors.
+
+## Theming
+
+`FormhausTheme` holds the [Formhaus design tokens](https://github.com/formhaus-dev/formhaus/tree/main/packages/core/tokens): light and dark palettes, type sizes, spacing, radii, control sizes and motion. `FormhausTheme.standard` is the touch theme.
+
+```kotlin
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+import dev.formhaus.compose.theme.FormhausTheme
+import dev.formhaus.compose.theme.Palette
+
+val brand = FormhausTheme.standard.copy(
+    light = Palette.light.copy(primary = Color(0xFFB84F29)),
+    dark = Palette.dark.copy(primary = Color(0xFFE88259)),
+    radii = FormhausTheme.standard.radii.copy(control = 22.dp),
+)
+
+FormhausTheme(brand) {
+    FormhausForm(definition) { _, _ -> SubmitResult.Ok }
+}
+```
+
+Custom components read the resolved tokens from `LocalFormhausTokens.current` and style text with `tokens.textStyle(TextRole.body)`. When the system contrast setting is raised, on Android 14 and later, the built-in palettes switch to the `contrast: more` values of the tokens. Set `lightIncreased` and `darkIncreased` to choose those colors yourself.
+
+## UI tests
+
+Set `testIds` to tag the form for Compose UI tests. They are off by default:
+
+```kotlin
+FormhausForm(definition, renderer = FormRendererOptions(testIds = TestIds.Automatic)) { _, _ -> SubmitResult.Ok }
+```
+
+`TestIds.Automatic` names each element after the definition `id` with the scheme of the web `testIds`: `<id>.form`, `<id>.<key>`, `<id>.<key>.<value>`, `<id>.<group>.<index>.<key>`, `<id>.submit`, `<id>.next`, `<id>.back` and `<id>.summary`. The tags are `Modifier.testTag` values:
+
+```kotlin
+compose.onNodeWithTag("signup.email").assertExists()
+compose.onNodeWithTag("signup.next").performClick()
+```
+
+A field tag sits on the field row, which holds the label, the control and the error. `TestIds.Custom { target -> ... }` names the tags yourself from a `TestIdTarget`. Custom field composables read `context.testId` and `context.optionTestId(value)`.
 
 ## Validate on the server
 
@@ -163,7 +296,7 @@ println(missing.messages)
 | Option | Effect |
 |---|---|
 | `seed` | Fixes the random option order of `randomize` fields. The same seed gives the same order. |
-| `research` | A `FormResearch` that creates seeds and orders options. `dev.formhaus.research.Research()` is the built-in one. Without it, options show in written order. |
+| `research` | A `FormResearch` that creates seeds and orders options. `Research()` from `formhaus-research` is the built-in one. Without it, options show in written order. |
 | `hiddenValues` | `HiddenValues.CLEAR` (default) drops the value of a field that a condition hides. `HiddenValues.KEEP` keeps it in `engine.values` and in submitted values. |
 | `debugChecks` | Makes calls from a thread other than the creating one throw, and reports missing message keys. |
 | `recallFormatter` | A `RecallFormatter` that formats recalled answers: lists, numbers, dates and times. The default follows CLDR 48. |
@@ -208,6 +341,14 @@ The fixtures are copied, never edited here. See [CONTRIBUTING.md](CONTRIBUTING.m
 ## Unicode and CLDR data
 
 Case folding, Unicode properties and the formats for recalled lists, numbers and dates come from embedded tables of Unicode 17 and CLDR 48, not from the JDK or Android. Results are the same on every JVM, and on every Android version from API 26. The tables are generated by `scripts/unicode-tables.mjs` and `scripts/cldr-tables.mjs`.
+
+## Demo app
+
+`demo` is an Android app with a list of sample forms: a contact form, a three-step trip form with a group of travellers and randomized options, the contact form in German, the trip form in the Material 3 set, and the contact form with a custom text field. Build it with:
+
+```sh
+./gradlew :demo:assembleDebug
+```
 
 ## Contributing
 

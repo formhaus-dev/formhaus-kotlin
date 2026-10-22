@@ -8,7 +8,15 @@ cd formhaus-kotlin
 ./gradlew build
 ```
 
-Requires JDK 17. The duplicate check and the scripts that record data need Node 24.
+Requires JDK 17 and the Android SDK with platform 37 and build-tools 36. Set `sdk.dir` in `local.properties` or `ANDROID_HOME`. The duplicate check and the scripts that record data need Node 24.
+
+## Modules
+
+- `formhaus-core`: the engine, pure Kotlin for the JVM. Shared test helpers live in its `testFixtures` source set.
+- `formhaus-research`: option order for `randomize` fields, pure Kotlin. Its tests read the conformance fixtures of `formhaus-core`.
+- `formhaus-compose`: the Compose renderer, an Android library. UI tests run on the JVM with Robolectric, and screenshots with Roborazzi.
+- `demo`: the sample app. It is not published.
+- `buildSrc`: the shared publishing setup.
 
 ## Build and test
 
@@ -17,7 +25,7 @@ Requires JDK 17. The duplicate check and the scripts that record data need Node 
 ./scripts/lint.sh
 ```
 
-`./gradlew check` compiles with warnings as errors, runs the tests, ktlint, detekt and the Android API 26 signature check. `./scripts/lint.sh` runs ktlint, detekt, the comment check and jscpd at the versions CI uses. `./scripts/lint.sh ktlint`, `detekt`, `comments` or `duplicates` runs one check.
+`./gradlew check` compiles with warnings as errors, runs the tests, ktlint, detekt, Android lint, the screenshot comparison and the Android API 26 signature check of the JVM modules. `./gradlew :demo:assembleDebug` builds the demo app, and `./gradlew publishToMavenLocal` installs the three libraries in `~/.m2`. `./scripts/lint.sh` runs ktlint, detekt, the comment check and jscpd at the versions CI uses. `./scripts/lint.sh ktlint`, `detekt`, `comments`, `duplicates` or `tokens` runs one check.
 
 ## Conformance
 
@@ -72,5 +80,5 @@ Run them before a release and after changes to the regex engine or the engine co
 
 1. Sync the fixtures to a tagged `@formhaus/core` release with `./scripts/sync-fixtures.sh @formhaus/core@X.Y.Z`.
 2. Run the heavy tests.
-3. Add the release to `CHANGELOG.md` and update the compatibility table in `README.md`.
-4. Tag `main` with the plain version, such as `0.1.0`, and push the tag.
+3. Set the version in `buildSrc/src/main/kotlin/formhaus.publishing.gradle.kts`, add the release to `CHANGELOG.md` and update the install snippets in `README.md`.
+4. Tag `main` with `v` and the version, such as `v0.2.0`, and push the tag. JitPack builds the three libraries from `jitpack.yml`.
