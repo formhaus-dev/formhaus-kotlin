@@ -3,16 +3,16 @@ package dev.formhaus.compose.containers
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.focusable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -20,6 +20,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.withFrameNanos
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
@@ -90,7 +91,6 @@ private fun FormModel.stepMarks(structure: FormStructure): List<StepStatus> =
 private fun FormModel.errorLabel(count: Int): String? =
     if (count > 0) label("stepErrors", stringMapOf("count" to JsonValue.Number(count.toDouble()))) else null
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 public fun StepProgressView(
     context: ProgressContext,
@@ -114,9 +114,10 @@ public fun StepProgressView(
             if (tokens.scale > LARGE_TYPE && current != null) {
                 StepMark(current, true)
             } else {
-                FlowRow(
+                Row(
+                    Modifier.horizontalScroll(rememberScrollState()),
                     horizontalArrangement = Arrangement.spacedBy(tokens.spacing.s7),
-                    verticalArrangement = Arrangement.spacedBy(tokens.spacing.s1),
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     steps.forEachIndexed { index, step -> StepMark(step, index + 1 == context.current) }
                 }
@@ -133,7 +134,7 @@ public fun StepProgressView(
                         heading()
                         context.errorLabel?.let { stateDescription = it }
                     },
-                color = if (context.errorCount > 0) colors.error else colors.text,
+                color = colors.text,
                 style = tokens.textStyle(TextRole.title, colored = false),
             )
         }
@@ -174,13 +175,24 @@ private fun StepMark(
         }
     val style = tokens.textStyle(TextRole.counter, colored = false).copy(color = color)
     Row(
-        Modifier.semantics(mergeDescendants = true) { selected = current },
-        horizontalArrangement = Arrangement.spacedBy(tokens.spacing.s1),
+        Modifier.semantics(mergeDescendants = true) {
+            selected = current
+            step.errorLabel?.let { stateDescription = it }
+        },
+        horizontalArrangement = Arrangement.spacedBy(tokens.spacing.s2),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(step.title, style = style.copy(fontWeight = if (current) FontWeight.SemiBold else FontWeight.Normal))
-        step.errorLabel?.let { errors ->
-            Text("·", Modifier.clearAndSetSemantics {}, style = style)
-            Text(errors, style = style)
+        Text(step.title, style = style.copy(fontWeight = if (current) FontWeight.SemiBold else FontWeight.Normal), maxLines = 1)
+        if (step.errorCount > 0) {
+            Text(
+                "${step.errorCount}",
+                Modifier
+                    .clearAndSetSemantics {}
+                    .background(colors.error, CircleShape)
+                    .padding(horizontal = tokens.spacing.s2),
+                color = colors.background,
+                style = style.copy(fontWeight = FontWeight.SemiBold),
+            )
         }
     }
 }

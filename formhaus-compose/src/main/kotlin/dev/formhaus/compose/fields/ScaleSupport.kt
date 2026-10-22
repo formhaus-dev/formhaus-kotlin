@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -119,13 +120,11 @@ internal fun Modifier.scaleInput(
     context: FieldContext,
     scale: ScalePoints,
     current: Int?,
+    focus: ScaleFocus,
 ): Modifier {
-    val tokens = LocalFormhausTokens.current
     val requester = remember { FocusRequester() }
-    var focused by remember { mutableStateOf(false) }
-    return focusRing(focused, tokens.radii.control, 2.dp)
-        .formhausFocus(context, requester)
-        .onFocusChanged { focused = it.isFocused }
+    return formhausFocus(context, requester)
+        .onFocusChanged { focus.focused = it.isFocused }
         .onKeyEvent { event ->
             if (event.type != KeyEventType.KeyDown || context.isLocked || event.hasCommandModifier) return@onKeyEvent false
             val step =
@@ -141,6 +140,14 @@ internal fun Modifier.scaleInput(
             true
         }.focusable(!context.isLocked)
 }
+
+@Stable
+internal class ScaleFocus {
+    var focused by mutableStateOf(false)
+}
+
+@Composable
+internal fun Modifier.scaleRing(focus: ScaleFocus): Modifier = focusRing(focus.focused, LocalFormhausTokens.current.radii.control, 2.dp)
 
 private val KeyEvent.hasCommandModifier: Boolean get() = isCtrlPressed || isAltPressed || isMetaPressed
 

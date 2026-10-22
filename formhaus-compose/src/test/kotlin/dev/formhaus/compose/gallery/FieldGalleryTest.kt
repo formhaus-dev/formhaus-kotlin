@@ -35,7 +35,7 @@ private const val SHEET = "sheet"
 
 @RunWith(ParameterizedRobolectricTestRunner::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
-@Config(qualifiers = "w360dp-h1400dp-xhdpi")
+@Config(qualifiers = "w360dp-h2400dp-xhdpi")
 class FieldGalleryTest(
     private val entry: GalleryEntry,
 ) {
@@ -57,7 +57,13 @@ class FieldGalleryTest(
     fun dark() = sheet("dark")
 
     @Test
-    fun focused() {
+    fun focused() = focusedSheet("focused")
+
+    @Test
+    @Config(qualifiers = "+night")
+    fun focusedDark() = focusedSheet("focused-dark")
+
+    private fun focusedSheet(name: String) {
         val form = stateModel(entry, FieldStateKind.FILLED)
         render { Row("focused", form) }
         compose.runOnIdle {
@@ -68,7 +74,7 @@ class FieldGalleryTest(
             )
         }
         compose.waitForIdle()
-        capture("focused")
+        capture(name)
     }
 
     private fun sheet(appearance: String) {

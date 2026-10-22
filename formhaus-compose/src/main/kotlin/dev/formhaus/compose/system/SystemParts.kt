@@ -1,5 +1,6 @@
 package dev.formhaus.compose.system
 
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedCard
@@ -19,10 +21,12 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
@@ -106,7 +110,16 @@ internal fun SystemStepHeader(model: FormModel) {
             stringMapOf("current" to JsonValue.Number(progress.current.toDouble()), "total" to JsonValue.Number(progress.total.toDouble())),
         )
     val muted = MaterialTheme.colorScheme.onSurfaceVariant
+    val tokens = LocalFormhausTokens.current
+    val fraction = if (progress.total > 0) progress.current.toFloat() / progress.total else 0f
+    val shown by animateFloatAsState(fraction, tokens.animation(tokens.motion.progress), label = "progress")
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        if (LocalFormComponents.current.slots.progress == null) {
+            LinearProgressIndicator(
+                progress = { shown },
+                modifier = Modifier.fillMaxWidth().padding(bottom = 6.dp).clearAndSetSemantics {},
+            )
+        }
         Text(counter, color = muted, style = MaterialTheme.typography.labelLarge)
         Text(
             title,

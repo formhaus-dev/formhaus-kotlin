@@ -81,7 +81,11 @@ public data class FormhausTheme(
         public val pointer: FormhausTheme =
             FormhausTheme(typography = Typography.fine, spacing = Spacing.regular, controls = Controls.fine)
         public val touch: FormhausTheme =
-            FormhausTheme(typography = Typography.coarse, spacing = Spacing.compact, controls = Controls.coarse)
+            FormhausTheme(
+                typography = Typography.coarse,
+                spacing = Spacing.compact,
+                controls = Controls.coarse.copy(height = NativeMetrics.hitTarget),
+            )
         public val standard: FormhausTheme get() = touch
     }
 }

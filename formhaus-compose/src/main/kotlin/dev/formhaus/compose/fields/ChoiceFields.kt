@@ -118,6 +118,7 @@ private fun ChoiceOptions(
             value in selected,
             picture,
             !context.isLocked,
+            context.isInvalid,
             context.text("enlargeImage", stringMapOf("label" to JsonValue.String(option.label.orEmpty()))),
             context.optionTestId(value),
             { selection.choose(value) },

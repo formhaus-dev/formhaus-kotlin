@@ -1,6 +1,8 @@
 package dev.formhaus.compose.containers
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -10,6 +12,7 @@ import androidx.compose.foundation.selection.selectable
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -26,6 +29,7 @@ import dev.formhaus.compose.components.ColumnGrid
 import dev.formhaus.compose.components.FieldError
 import dev.formhaus.compose.components.GridSpec
 import dev.formhaus.compose.components.IndicatorShape
+import dev.formhaus.compose.components.focusRing
 import dev.formhaus.compose.components.formhausFocus
 import dev.formhaus.compose.components.marked
 import dev.formhaus.compose.fields.ChoiceSelection
@@ -113,11 +117,15 @@ private fun MatrixCell(
     val value = option.value.orEmpty()
     val selection = ChoiceSelection(context)
     val selected = selection.isSelected(value)
+    val source = remember { MutableInteractionSource() }
+    val focused by source.collectIsFocusedAsState()
     Column(
         Modifier
             .heightIn(min = 48.dp)
             .selectable(
                 selected,
+                source,
+                null,
                 enabled = !context.isLocked,
                 role = if (shape == IndicatorShape.RADIO) Role.RadioButton else Role.Checkbox,
             ) { selection.choose(value) }
@@ -127,7 +135,7 @@ private fun MatrixCell(
         verticalArrangement = Arrangement.spacedBy(tokens.spacing.s1, if (caption) Alignment.Top else Alignment.CenterVertically),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        ChoiceIndicator(shape, selected)
+        ChoiceIndicator(shape, selected, Modifier.focusRing(focused, tokens.radii.indicator), context.isInvalid)
         if (caption) Text(option.label ?: value, textAlign = TextAlign.Center, style = tokens.textStyle(TextRole.caption))
     }
 }

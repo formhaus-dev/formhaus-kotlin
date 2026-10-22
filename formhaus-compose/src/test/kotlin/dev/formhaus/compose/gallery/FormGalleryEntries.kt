@@ -45,19 +45,59 @@ private val contact =
       {"key": "message", "type": "textarea", "label": "Message", "validation": {"required": true, "minLength": 10}}]}
     """.trimIndent()
 
+private val survey =
+    """
+    {"id": "survey", "title": "Survey", "submit": {"label": "Send"}, "fields": [
+      {"key": "rate", "type": "section", "title": "How was your stay?", "layout": "matrix", "fields": [
+        {"key": "room", "type": "radio", "label": "Room", "validation": {"required": true}, "options": $GRADES},
+        {"key": "food", "type": "radio", "label": "Food", "options": $GRADES},
+        {"key": "staff", "type": "radio", "label": "Staff", "options": $GRADES}]}]}
+    """.trimIndent()
+
+private const val GRADES = """[{"value": "1", "label": "Poor"}, {"value": "2", "label": "Fair"}, {"value": "3", "label": "Good"}]"""
+
+private val signup =
+    """
+    {"id": "signup", "title": "Sign up", "submit": {"label": "Create account", "disabled": [{"field": "agree", "neq": true}]},
+     "fields": [
+       {"key": "email", "type": "email", "label": "Email"},
+       {"key": "agree", "type": "checkbox", "label": "I agree to the terms"}]}
+    """.trimIndent()
+
+private val arabic =
+    """
+    {"id": "contact", "title": "تواصل", "lang": "ar", "submit": {"label": "إرسال"}, "fields": [
+      {"key": "name", "type": "text", "label": "الاسم", "validation": {"required": true}},
+      {"key": "topic", "type": "radio", "label": "الموضوع", "options": [{"value": "sales", "label": "المبيعات"}, {"value": "help", "label": "المساعدة"}]},
+      {"key": "news", "type": "switch", "label": "أرسل لي الأخبار", "helperText": "مرة في الشهر"},
+      {"key": "message", "type": "textarea", "label": "الرسالة"}]}
+    """.trimIndent()
+
 private const val ONE_TRAVELLER = """{"travellers": [{"name": "Ada Lovelace", "email": "ada@example.com"}]}"""
 private const val TWO_TRAVELLERS =
     """{"travellers": [{"name": "Ada Lovelace", "email": "ada@example.com"}, {"name": "Charles Babbage"}], "seat": "w"}"""
+private const val INVALID_TRAVELLERS =
+    """{"travellers": [{"name": "Ada Lovelace", "email": "ada@example.com"}, {"email": "charles@"}]}"""
 private const val FILLED_CONTACT = """{"name": "Ada", "email": "ada@example.com", "message": "Please call me back tomorrow."}"""
 
 private val plainText: Slot<FieldContext> = { context ->
     OutlinedTextField(context.text, { context.setValue(JsonValue.String(it)) }, Modifier.fillMaxWidth(), label = { Text(context.label) })
 }
 
+private val plainSelect: Slot<FieldContext> = { context ->
+    val chosen =
+        context.options
+            .firstOrNull { it.value == context.text }
+            ?.label
+            .orEmpty()
+    OutlinedTextField(chosen, {}, Modifier.fillMaxWidth(), readOnly = true, label = { Text(context.label) })
+}
+
 private val headless: FormComponents =
     FormComponents.headless
         .field("text", plainText)
         .field("email", plainText)
+        .field("select", plainSelect)
         .field("checkbox") { CheckboxField(it) }
 
 class FormEntry(
@@ -65,6 +105,9 @@ class FormEntry(
     val components: FormComponents = FormComponents.standard,
     val behavior: FormBehavior = FormBehavior(errorSummary = true, stepErrorMarks = true),
     val prepare: suspend FormModel.() -> Unit = {},
+    val rtl: Boolean = false,
+    val fontScale: Float = 1f,
+    val hostColors: Boolean = false,
     val build: () -> FormModel,
 ) {
     override fun toString(): String = name
@@ -93,5 +136,12 @@ val formEntries: List<FormEntry> =
         FormEntry("form-rejected", prepare = { submit() }, build = ::rejecting),
         FormEntry("system-step-one", FormComponents.system) { model(trip, ONE_TRAVELLER) },
         FormEntry("system-errors", FormComponents.system, prepare = { submit() }) { model(contact, """{"message": "Hi"}""") },
-        FormEntry("headless", headless) { model(contact.replace("textarea", "text"), """{"name": "Ada"}""") },
+        FormEntry("headless", headless, hostColors = true) {
+            model(contact.replace("textarea", "text"), """{"name": "Ada", "topic": "help"}""")
+        },
+        FormEntry("form-matrix", prepare = { submit() }) { model(survey, """{"food": "3"}""") },
+        FormEntry("form-group-invalid", prepare = { next() }) { model(trip, INVALID_TRAVELLERS) },
+        FormEntry("form-submit-disabled") { model(signup, """{"email": "ada@example.com"}""") },
+        FormEntry("form-large-text", fontScale = 1.3f) { model(contact, FILLED_CONTACT) },
+        FormEntry("form-rtl", rtl = true, prepare = { submit() }) { model(arabic, """{"topic": "help"}""") },
     )

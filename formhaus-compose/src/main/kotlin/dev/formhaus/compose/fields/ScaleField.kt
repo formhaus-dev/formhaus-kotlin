@@ -33,14 +33,16 @@ public fun ScaleField(context: FieldContext) {
     val tokens = LocalFormhausTokens.current
     val scale = ScalePoints(context)
     val current = scale.selected(context.value)
+    val focus = remember { ScaleFocus() }
     FieldShell(context, variant = FieldShellVariant.GROUP) {
-        Column(Modifier.scaleInput(context, scale, current), verticalArrangement = Arrangement.spacedBy(tokens.spacing.s2)) {
-            ColumnGrid(tokens.spacing.s2, ::scaleColumns, Modifier.selectableGroup()) {
+        Column(Modifier.scaleInput(context, scale, current, focus), verticalArrangement = Arrangement.spacedBy(tokens.spacing.s2)) {
+            ColumnGrid(tokens.spacing.s2, ::scaleColumns, Modifier.scaleRing(focus).selectableGroup()) {
                 for (point in scale.points) {
                     ScaleBox(
                         "$point",
                         current == point,
                         !context.isLocked,
+                        context.isInvalid,
                         pointDescription(point, scale.anchor(point)),
                         Modifier.formhausTestId(context.optionTestId("$point")),
                     ) { context.commit(JsonValue.Number(point.toDouble())) }
@@ -61,6 +63,7 @@ private fun ScaleBox(
     label: String,
     selected: Boolean,
     enabled: Boolean,
+    invalid: Boolean,
     description: String,
     modifier: Modifier,
     choose: () -> Unit,
@@ -71,7 +74,7 @@ private fun ScaleBox(
         modifier
             .fillMaxWidth()
             .heightIn(min = maxOf(tokens.controls.height, tokens.controls.hitTarget))
-            .selectableSurface(selected, invalid = false, solid = true, enabled = enabled, source = source)
+            .selectableSurface(selected, invalid, solid = true, enabled = enabled, source = source)
             .selectable(selected, source, null, enabled, Role.RadioButton, choose)
             .semantics { contentDescription = description },
         contentAlignment = Alignment.Center,

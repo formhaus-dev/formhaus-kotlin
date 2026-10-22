@@ -25,6 +25,7 @@ internal fun ChoiceCard(
     selected: Boolean,
     picture: Boolean,
     enabled: Boolean,
+    invalid: Boolean,
     zoomLabel: String,
     testId: String?,
     choose: () -> Unit,
@@ -38,14 +39,14 @@ internal fun ChoiceCard(
             selected,
             choose,
             fill.formhausTestId(testId),
-            invalid = false,
+            invalid = invalid,
             enabled = enabled,
             shape = shape,
             top = if (picture) tokens.spacing.s3 else tokens.spacing.s5,
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(tokens.spacing.s3)) {
                 if (image != null) OptionImage(image)
-                OptionRow(shape, option.label ?: option.value.orEmpty(), selected)
+                OptionRow(shape, option.label ?: option.value.orEmpty(), selected, invalid = invalid)
             }
         }
         if (image != null) {

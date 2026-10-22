@@ -68,7 +68,6 @@ val galleryEntries: List<GalleryEntry> =
             "radio-inline",
             """{"key": "size", "type": "radio", "label": "Size", "layout": "inline", "options": $SIZES}""",
             "\"m\"",
-            listOf(FieldStateKind.FILLED, FieldStateKind.ERROR),
         ),
         GalleryEntry(
             "multiselect",
@@ -79,7 +78,12 @@ val galleryEntries: List<GalleryEntry> =
             "pictures",
             """{"key": "color", "type": "radio", "label": "Colour", "columns": 2, "options": $pictures}""",
             "\"b\"",
-            listOf(FieldStateKind.FILLED, FieldStateKind.ERROR, FieldStateKind.DISABLED),
+        ),
+        GalleryEntry(
+            "pictures-multi",
+            """{"key": "colors", "type": "multiselect", "label": "Colours", "columns": 2, "options": $pictures}""",
+            """["a", "c"]""",
+            listOf(FieldStateKind.EMPTY, FieldStateKind.FILLED),
         ),
         GalleryEntry(
             "checkbox",

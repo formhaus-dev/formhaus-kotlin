@@ -152,6 +152,8 @@ class TokenSourceTest {
         assertEquals(Spacing.regular.cardPadding, FormhausTheme.pointer.spacing.cardPadding)
         assertEquals(Spacing.compact.cardPadding, FormhausTheme.touch.spacing.cardPadding)
         assertEquals(Controls.coarse.star, FormhausTheme.touch.controls.star)
+        assertEquals(48f, FormhausTheme.touch.controls.height.value)
+        assertEquals(Controls.fine.height, FormhausTheme.pointer.controls.height)
         assertEquals(FormhausTheme.touch, FormhausTheme.standard)
     }
 }

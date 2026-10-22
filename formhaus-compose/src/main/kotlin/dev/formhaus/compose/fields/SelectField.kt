@@ -26,7 +26,6 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
 import dev.formhaus.compose.components.FieldShell
 import dev.formhaus.compose.components.FormhausIcons
 import dev.formhaus.compose.components.LoadingIndicator
@@ -76,7 +75,7 @@ public fun SelectField(context: FieldContext) {
                     style = tokens.textStyle(TextRole.body, colored = false),
                 )
                 LoadingIndicator(context.loading)
-                Icon(FormhausIcons.chevronsUpDown, null, Modifier.size(tokens.typography.small.value.dp), tint = colors.textMuted)
+                Icon(FormhausIcons.arrowDropDown, null, Modifier.size(tokens.controls.indicator * 4 / 3), tint = colors.textMuted)
             }
             SelectMenu(context, open) { open = false }
         }

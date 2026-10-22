@@ -16,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -30,6 +31,7 @@ import dev.formhaus.core.json.JsonValue
 
 private const val STAR_REACH = 1.4f
 private const val GLYPH = 0.8f
+private const val DISABLED_ALPHA = 0.6f
 
 @Composable
 public fun RatingField(context: FieldContext) {
@@ -41,13 +43,21 @@ public fun RatingField(context: FieldContext) {
     val hovered = hovers.indexOfFirst { it.value }.takeIf { it >= 0 }?.let { scale.points[it] }
     val shown = hovered ?: current ?: 0
     val width = minOf(tokens.controls.star, tokens.controls.hitTarget * STAR_REACH) + tokens.spacing.s1
+    val focus = remember { ScaleFocus() }
     FieldShell(context, variant = FieldShellVariant.GROUP) {
-        Column(Modifier.scaleInput(context, scale, current), verticalArrangement = Arrangement.spacedBy(tokens.spacing.s2)) {
-            Row(Modifier.offset(x = -tokens.spacing.s1 / 2).selectableGroup()) {
+        Column(Modifier.scaleInput(context, scale, current, focus), verticalArrangement = Arrangement.spacedBy(tokens.spacing.s2)) {
+            Row(
+                Modifier
+                    .offset(x = -tokens.spacing.s1 / 2)
+                    .scaleRing(focus)
+                    .alpha(if (context.isLocked) DISABLED_ALPHA else 1f)
+                    .selectableGroup(),
+            ) {
                 scale.points.forEachIndexed { index, point ->
                     Star(
                         point <= shown,
                         hovered != null,
+                        context.isInvalid,
                         current == point,
                         !context.isLocked,
                         width,
@@ -66,6 +76,7 @@ public fun RatingField(context: FieldContext) {
 private fun Star(
     filled: Boolean,
     hovering: Boolean,
+    invalid: Boolean,
     selected: Boolean,
     enabled: Boolean,
     width: Dp,
@@ -78,7 +89,7 @@ private fun Star(
     val colors = tokens.colors
     val tint =
         when {
-            !filled -> colors.control
+            !filled -> if (invalid) colors.error else colors.control
             hovering -> colors.primaryHover
             else -> colors.primary
         }

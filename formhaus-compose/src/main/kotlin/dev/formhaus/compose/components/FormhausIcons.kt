@@ -20,17 +20,18 @@ private fun lucide(
     name: String,
     vararg paths: String,
     filled: Boolean = false,
-    stroke: Float = 2f,
+    stroke: Float? = 2f,
+    mirrored: Boolean = false,
 ): ImageVector =
     ImageVector
-        .Builder(name, VIEWPORT.dp, VIEWPORT.dp, VIEWPORT, VIEWPORT)
+        .Builder(name, VIEWPORT.dp, VIEWPORT.dp, VIEWPORT, VIEWPORT, autoMirror = mirrored)
         .apply {
             for (path in paths) {
                 addPath(
                     addPathNodes(path),
                     fill = if (filled) SolidColor(Color.Black) else null,
-                    stroke = SolidColor(Color.Black),
-                    strokeLineWidth = stroke,
+                    stroke = stroke?.let { SolidColor(Color.Black) },
+                    strokeLineWidth = stroke ?: 0f,
                     strokeLineCap = StrokeCap.Round,
                     strokeLineJoin = StrokeJoin.Round,
                 )
@@ -53,9 +54,9 @@ internal object FormhausIcons {
             "m16 6-8.414 8.586a2 2 0 0 0 2.829 2.829l8.414-8.586a4 4 0 1 0-5.657-5.657l-8.379 8.551a6 6 0 1 0 8.485 8.485l8.379-8.551",
         )
     }
-    val chevronsUpDown: ImageVector by lazy { lucide("chevrons-up-down", "m7 15 5 5 5-5", "m7 9 5-5 5 5", stroke = 2.5f) }
+    val arrowDropDown: ImageVector by lazy { lucide("arrow-drop-down", "M7 10l5 5 5-5z", filled = true, stroke = null) }
     val maximize: ImageVector by lazy { lucide("maximize-2", "M15 3h6v6", "m21 3-7 7", "m3 21 7-7", "M9 21H3v-6", stroke = 2.5f) }
     val plus: ImageVector by lazy { lucide("plus", "M5 12h14", "M12 5v14", stroke = 2.5f) }
-    val chevronRight: ImageVector by lazy { lucide("chevron-right", "m9 18 6-6-6-6", stroke = 2.5f) }
+    val chevronRight: ImageVector by lazy { lucide("chevron-right", "m9 18 6-6-6-6", stroke = 2.5f, mirrored = true) }
     val alert: ImageVector by lazy { lucide("circle-alert", CIRCLE, "M12 8v4", "M12 16h.01") }
 }

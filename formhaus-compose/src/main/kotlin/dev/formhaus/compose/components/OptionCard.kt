@@ -2,6 +2,7 @@ package dev.formhaus.compose.components
 
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
@@ -56,11 +57,13 @@ internal fun OptionCardBox(
     val tokens = LocalFormhausTokens.current
     val source = remember { MutableInteractionSource() }
     val pressed by source.collectIsPressedAsState()
+    val focused by source.collectIsFocusedAsState()
     Box(
         modifier
             .scale(if (pressed && !tokens.reduceMotion) 0.99f else 1f)
             .fillMaxWidth()
             .heightIn(min = tokens.controls.hitTarget)
+            .focusRing(focused, tokens.radii.control)
             .selectableSurface(selected, invalid, solid = false, enabled = enabled, source = source)
             .focusable(enabled, source)
             .choice(selected, shape, enabled, source, onClick)

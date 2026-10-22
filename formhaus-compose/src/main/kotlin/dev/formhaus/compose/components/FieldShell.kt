@@ -11,6 +11,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.layout.AlignmentLine
+import androidx.compose.ui.layout.HorizontalAlignmentLine
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.error
@@ -52,7 +55,7 @@ public fun FieldShell(
             .measured("${context.key}/field"),
     ) {
         if (!inline) FieldHeader(context, variant, helper)
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(Modifier.trimmedToText(inline && (helper != null || error != null)), verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f, fill = false).measured("${context.key}/control")) { content() }
             if (variant == FieldShellVariant.INLINE) {
                 Spacer(Modifier.padding(start = tokens.spacing.s3))
@@ -137,6 +140,26 @@ internal fun FormhausTokens.marked(
     buildAnnotatedString {
         append(text)
         if (required) withStyle(SpanStyle(color = colors.error)) { append(" *") }
+    }
+
+private val TextBottom = HorizontalAlignmentLine(::maxOf)
+
+internal fun Modifier.textBottom(): Modifier =
+    layout { measurable, constraints ->
+        val placeable = measurable.measure(constraints)
+        layout(placeable.width, placeable.height, mapOf(TextBottom to placeable.height)) { placeable.place(0, 0) }
+    }
+
+private fun Modifier.trimmedToText(trim: Boolean): Modifier =
+    if (!trim) {
+        this
+    } else {
+        layout { measurable, constraints ->
+            val placeable = measurable.measure(constraints)
+            val bottom = placeable[TextBottom]
+            val height = if (bottom == AlignmentLine.Unspecified) placeable.height else minOf(placeable.height, bottom)
+            layout(placeable.width, height) { placeable.place(0, 0) }
+        }
     }
 
 public enum class FieldShellVariant { STANDARD, INLINE, ROW, GROUP }
