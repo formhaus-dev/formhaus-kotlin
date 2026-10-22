@@ -7,6 +7,8 @@
 - **Breaking:** `dev.formhaus.research.Research` moved to the new `formhaus-research` package. `FormEngineOptions.research` and the `FormResearch` interface stay in core.
 - **Breaking:** `FormEngineOptions.debugChecks` is a `Boolean?`. `null`, the default, keeps the checks off.
 - New renderer API `Locale.withPreferredCalendar()` adds the calendar CLDR prefers for the locale, such as Buddhist for `th-TH` and Persian for `fa-IR`.
+- New `FormSnapshot` and `FormEngine.snapshot()`. The `restoring` parameter of the `FormEngine` constructors restores the values, the current step, the skipped steps and the seed without validating.
+- A snapshot of another form or snapshot version, or with a step the definition no longer has, starts the form fresh and reports the `snapshot-mismatch` warning.
 
 ### formhaus-compose
 
@@ -16,6 +18,11 @@
 - Custom composables replace any field type, and the section, group, group item, confirm dialog, progress and actions containers.
 - `FormhausTheme` holds the Formhaus design tokens for light, dark and raised contrast.
 - `TestIds.Automatic` and `TestIds.Custom` add test tags with the scheme of the web `testIds`.
+- `FormhausForm(definition)` keeps its values, step and picked files across configuration changes and restores them after process death. A submit that is already sending finishes when the form goes away.
+- `restoring` and `onSnapshotChange` on `FormhausForm` and `FormModel` save and restore progress with a `FormSnapshot`.
+- `FormModel.close()` stops a model you created and deletes the files picked in it.
+- `FormhausForm(definition)` turns `debugChecks` on in a debuggable app when it is `null`, so an engine call from another thread throws there.
+- Options with an `image` need the `android.permission.INTERNET` permission.
 
 ### formhaus-research
 

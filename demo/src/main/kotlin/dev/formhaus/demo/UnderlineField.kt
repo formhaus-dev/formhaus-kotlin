@@ -22,7 +22,6 @@ import androidx.compose.ui.unit.dp
 import dev.formhaus.compose.components.FieldShell
 import dev.formhaus.compose.components.formhausFocus
 import dev.formhaus.compose.form.FieldContext
-import dev.formhaus.compose.form.formhausScrollAnchor
 import dev.formhaus.compose.theme.LocalFormhausTokens
 import dev.formhaus.compose.theme.TextRole
 import dev.formhaus.compose.theme.textStyle
@@ -33,7 +32,7 @@ fun UnderlineField(context: FieldContext) {
     val tokens = LocalFormhausTokens.current
     val requester = remember { FocusRequester() }
     var focused by remember { mutableStateOf(false) }
-    FieldShell(context, Modifier.formhausScrollAnchor(context)) {
+    FieldShell(context) {
         Column {
             BasicTextField(
                 value = context.text,

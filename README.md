@@ -72,19 +72,56 @@ import dev.formhaus.core.engine.SubmitResult
 import dev.formhaus.core.json.JsonValue
 import dev.formhaus.core.json.toJsonString
 import dev.formhaus.core.model.FormDefinition
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 val definition = FormDefinition(JsonValue.parse(assets.open("signup.json").readBytes()))
 
 @Composable
 fun SignupScreen() {
     FormhausForm(definition) { values, _ ->
-        val response = api.post("https://example.com/signup", values.toJsonString())
+        val response = withContext(Dispatchers.IO) { api.post("https://example.com/signup", values.toJsonString()) }
         SubmitResult.of(JsonValue.parse(response))
     }
 }
 ```
 
-`SubmitResult.of(json)` reads the `{ ok, errors, formErrors }` object that a Formhaus endpoint returns. `FormhausForm` takes `initialValues`, `engineOptions` and `renderer` options. For a form whose state lives outside the composable, create a `FormModel` and pass it to `FormhausForm(model)`. `FormhausFormContent(model)` renders the form without its own scroll container.
+The submit handler runs on the main thread and returns a `SubmitResult?`. `SubmitResult.of(json)` reads the `{ ok, errors, formErrors }` object that a Formhaus endpoint returns. `FormhausForm` takes `initialValues`, `engineOptions` and `renderer` options. `FormhausFormContent(model)` renders the form without its own scroll container.
+
+`FormhausForm(definition)` keeps its values, step and picked files when the activity is recreated, for example on rotation or a dark mode switch, and restores them after process death. A submit that is already sending runs to the end.
+
+Options with an `image` load the picture over the network, so the app needs the `android.permission.INTERNET` permission.
+
+### Keep a model in a ViewModel
+
+For a form whose state lives outside the composable, create a `FormModel` and pass it to `FormhausForm(model)`. A model you create is yours to close. `close()` stops its work and deletes the files picked in it:
+
+```kotlin
+import androidx.lifecycle.ViewModel
+import dev.formhaus.compose.model.FormModel
+
+class SignupViewModel : ViewModel() {
+    val form = FormModel(definition) { values, _ -> send(values) }
+
+    override fun onCleared() {
+        form.close()
+    }
+}
+```
+
+### Saving progress
+
+`onSnapshotChange` receives a `FormSnapshot` after the values, the step or the skipped steps change, at most once per frame, and `null` once a submit succeeds. Store `snapshot.toJson()` and pass it back as `restoring` to continue where the respondent left off:
+
+```kotlin
+FormhausForm(
+    definition,
+    restoring = saved?.let(FormSnapshot::fromJson),
+    onSnapshotChange = { snapshot -> store(snapshot?.toJson()) },
+) { values, _ -> send(values) }
+```
+
+A snapshot restores the values, the current step, the skipped steps and the option order seed without running validation. A snapshot of another form or another snapshot version, or one whose step no longer exists, starts the form fresh and reports a `snapshot-mismatch` warning. `restoring` takes precedence over the state `FormhausForm` saved for process death. `FormModel` takes the same two parameters, and `FormEngine` takes `restoring` and has `snapshot()`.
 
 ## Quick start without a UI
 
@@ -143,6 +180,7 @@ import dev.formhaus.research.Research
 
 FormhausForm(definition, engineOptions = FormEngineOptions(research = Research())) { values, _ ->
     send(values)
+    SubmitResult.Ok
 }
 ```
 
@@ -184,7 +222,7 @@ val brand = FormComponents.standard
 @Composable
 fun UnderlineField(context: FieldContext) {
     val requester = remember { FocusRequester() }
-    FieldShell(context, Modifier.formhausScrollAnchor(context)) {
+    FieldShell(context) {
         BasicTextField(
             value = context.text,
             onValueChange = { context.setValue(JsonValue.String(it)) },
@@ -194,7 +232,7 @@ fun UnderlineField(context: FieldContext) {
 }
 ```
 
-`FieldShell` draws the label, helper text and error. `formhausFocus` joins focus to the first error, and `formhausScrollAnchor` lets the form scroll to the field. `section`, `group`, `groupItem`, `confirmDialog`, `progress` and `actions` replace the containers. `FormComponents.headless` has no built-in fields, so every type comes from your registrations. The demo app has a complete custom field in [`demo/src/main/kotlin/dev/formhaus/demo/UnderlineField.kt`](demo/src/main/kotlin/dev/formhaus/demo/UnderlineField.kt).
+`FieldShell` draws the label, helper text and error, and lets the form scroll to the field. `formhausFocus` joins focus to the first error. `section`, `group`, `groupItem`, `confirmDialog`, `progress` and `actions` replace the containers. `FormComponents.headless` has no built-in fields, so every type comes from your registrations. The demo app has a complete custom field in [`demo/src/main/kotlin/dev/formhaus/demo/UnderlineField.kt`](demo/src/main/kotlin/dev/formhaus/demo/UnderlineField.kt).
 
 Switching the components or the theme of a running form keeps its values, step and errors.
 
@@ -298,7 +336,7 @@ println(missing.messages)
 | `seed` | Fixes the random option order of `randomize` fields. The same seed gives the same order. |
 | `research` | A `FormResearch` that creates seeds and orders options. `Research()` from `formhaus-research` is the built-in one. Without it, options show in written order. |
 | `hiddenValues` | `HiddenValues.CLEAR` (default) drops the value of a field that a condition hides. `HiddenValues.KEEP` keeps it in `engine.values` and in submitted values. |
-| `debugChecks` | Makes calls from a thread other than the creating one throw, and reports missing message keys. |
+| `debugChecks` | Makes calls from a thread other than the creating one throw, and reports missing message keys. With `FormhausForm(definition)`, `null`, the default, turns the checks on when the app is debuggable. |
 | `recallFormatter` | A `RecallFormatter` that formats recalled answers: lists, numbers, dates and times. The default follows CLDR 48. |
 
 The options class also takes `onBeforeStepChange`, `onAfterStepChange`, `onBeforeSubmit`, `onAfterSubmit`, `onStepValidate`, `onFormEvent`, `onWarning`, `validators`, `messages`, `lang` and `formatRecall`.
@@ -324,7 +362,7 @@ With `HiddenValues.KEEP`, conditions, validation and recall still treat hidden f
 
 ## Threading
 
-`FormEngine` is single-threaded. Create it and call it from one thread, such as the main thread, and do not share it. With `debugChecks = true`, a call from another thread throws `IllegalStateException` with both thread names. `validateSubmission`, `checkDefinition`, `localize` and the JSON parser can run on any thread, also at the same time.
+`FormEngine` is single-threaded. Create it and call it from one thread, such as the main thread, and do not share it. With `debugChecks = true`, a call from another thread throws `IllegalStateException` with both thread names. `FormhausForm(definition)` turns the checks on in a debuggable app unless `debugChecks` is `false`, so an engine call from a background thread throws there. A `FormModel` you create keeps them off unless you set `debugChecks = true`. `validateSubmission`, `checkDefinition`, `localize` and the JSON parser can run on any thread, also at the same time.
 
 ## Conformance
 
