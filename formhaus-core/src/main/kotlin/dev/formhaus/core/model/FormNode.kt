@@ -11,19 +11,26 @@ public sealed class FormNode : Conditional {
     internal abstract val children: List<FormNode>?
 }
 
-public class FormSection internal constructor(override val json: JsonObject, ordinals: Ordinals) : FormNode() {
-    override val ordinal: Int = ordinals.take()
+public class FormSection private constructor(
+    override val json: JsonObject,
+    override val ordinal: Int,
+    public val fields: List<FormNode>,
+) : FormNode() {
+    internal constructor(json: JsonObject, ordinals: Ordinals) : this(json, ordinals.take(), formNodes(json["fields"], ordinals).orEmpty())
+
     override val key: String = json["key"]?.stringValue ?: ""
     override val type: String get() = "section"
     override val show: List<ShowCondition>? = conditions(json["show"])
     override val showAny: List<ShowCondition>? = conditions(json["showAny"])
-    public val fields: List<FormNode> = formNodes(json["fields"], ordinals).orEmpty()
     override val children: List<FormNode> get() = fields
 
     public val title: String? get() = json["title"]?.stringValue
     public val description: String? get() = json["description"]?.stringValue
     public val layout: String? get() = json["layout"]?.stringValue
     public val isMatrix: Boolean get() = layout == "matrix"
+
+    internal fun filtered(include: (FormField) -> Boolean): FormSection =
+        FormSection(json, ordinal, fields.filter { it is FormField && include(it) })
 }
 
 internal fun formNodes(value: JsonValue?, ordinals: Ordinals): List<FormNode>? =

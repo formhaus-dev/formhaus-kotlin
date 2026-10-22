@@ -4,8 +4,14 @@ import dev.formhaus.core.json.JsonObject
 import dev.formhaus.core.json.JsonValue
 import dev.formhaus.core.json.isInteger
 
-public class FormField internal constructor(override val json: JsonObject, ordinals: Ordinals) : FormNode() {
-    override val ordinal: Int = ordinals.take()
+public class FormField private constructor(
+    override val json: JsonObject,
+    override val ordinal: Int,
+    public val fields: List<FormNode>?,
+) : FormNode() {
+    internal constructor(json: JsonObject, ordinals: Ordinals) :
+        this(json, ordinals.take(), if (json["type"]?.stringValue == "group") formNodes(json["fields"], ordinals) else null)
+
     override val key: String = json["key"]?.stringValue ?: ""
     override val type: String = json["type"]?.stringValue ?: ""
     override val show: List<ShowCondition>? = conditions(json["show"])
@@ -14,7 +20,6 @@ public class FormField internal constructor(override val json: JsonObject, ordin
     public val options: List<FieldOption>? =
         json["options"]?.arrayValue?.mapNotNull { item -> item.objectValue?.let(::FieldOption) }
     internal val optionIndex: OptionIndex? = options?.let(::OptionIndex)
-    public val fields: List<FormNode>? = if (type == "group") formNodes(json["fields"], ordinals) else null
     override val children: List<FormNode>? get() = fields
 
     public val label: String? get() = json["label"]?.stringValue
@@ -54,6 +59,8 @@ public class FormField internal constructor(override val json: JsonObject, ordin
         get() = json["optionsDependsOn"]?.arrayValue?.mapNotNull { it.stringValue }
 
     public val items: List<FormField> get() = fields.orEmpty().filterIsInstance<FormField>()
+
+    internal fun withJson(json: JsonObject): FormField = FormField(json, ordinal, fields)
 }
 
 private val pictureTypes = listOf("radio", "multiselect")
