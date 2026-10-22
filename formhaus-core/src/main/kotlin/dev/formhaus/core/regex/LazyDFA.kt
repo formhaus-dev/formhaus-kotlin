@@ -236,7 +236,7 @@ internal class LazyDFA(
         accepting[slot] = advance.accepts
         if (looks == null || memos[slot] != null) return
         val memo = LookMemo(looks, target, advance.accepts)
-        if (memory.reserve(memo.bytes)) memos[slot] = memo
+        if (memory.reserve(memo.bytes, reclaiming = false)) memos[slot] = memo
     }
 
     private fun intern(key: Key): Int? {

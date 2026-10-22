@@ -43,7 +43,7 @@ internal class AutomatonCache(
             },
         )
 
-    private inline fun <Value> run(
+    private inline fun <Value : Any> run(
         cached: (LazyDFA) -> Value,
         uncached: (ThreadStep) -> Value,
     ): Value {
@@ -52,12 +52,12 @@ internal class AutomatonCache(
             var index = ((Thread.currentThread().id * SPREAD) ushr 61).toInt() % current.size
             repeat(current.size) {
                 val shard = current[index]
-                if (shard.acquire()) return shard.holding(cached)
+                shard.runLocked(cached)?.let { return it }
                 index = if (index + 1 == current.size) 0 else index + 1
             }
         }
         val added = addShard()
-        if (added != null && added.acquire()) return added.holding(cached)
+        added?.runLocked(cached)?.let { return it }
         return uncached(plan.stepper())
     }
 
