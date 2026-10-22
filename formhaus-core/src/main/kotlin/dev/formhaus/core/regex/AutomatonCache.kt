@@ -1,7 +1,7 @@
 package dev.formhaus.core.regex
 
 internal class AutomatonCache(
-    private val plan: AutomatonPlan,
+    val plan: AutomatonPlan,
 ) {
     @Volatile
     private var shards: List<AutomatonShard> = emptyList()

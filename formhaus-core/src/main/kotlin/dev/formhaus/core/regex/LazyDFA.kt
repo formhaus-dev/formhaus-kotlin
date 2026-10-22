@@ -15,7 +15,7 @@ internal class AutomatonPlan(
 
 internal class LazyDFA(
     private val plan: AutomatonPlan,
-    private val memory: AutomatonMemory,
+    val memory: AutomatonMemory,
 ) {
     class Key(
         val pcs: IntArray,

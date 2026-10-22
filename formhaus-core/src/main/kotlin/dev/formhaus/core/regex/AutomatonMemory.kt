@@ -99,6 +99,7 @@ internal class AutomatonShard(
 
     private val memory = AutomatonMemory(plan.pool)
     private val lock = AtomicBoolean(false)
+    private val pendingRelease = AtomicBoolean(false)
     private var automaton = LazyDFA(plan, memory)
     private var recent = false
 
@@ -114,13 +115,13 @@ internal class AutomatonShard(
             recent = true
             return Ran(body(automaton))
         } finally {
-            lock.set(false)
+            unlock()
         }
     }
 
     fun release() {
-        evict(sparingRecent = false)
-        memory.release()
+        pendingRelease.set(true)
+        settle()
     }
 
     fun evict(sparingRecent: Boolean): Boolean {
@@ -131,10 +132,26 @@ internal class AutomatonShard(
                 recent = false
                 return false
             }
-            automaton.release()
-            automaton = LazyDFA(plan, memory)
+            drop()
             return true
         } finally {
+            unlock()
+        }
+    }
+
+    private fun drop() {
+        automaton.release()
+        automaton = LazyDFA(plan, memory)
+    }
+
+    private fun unlock() {
+        lock.set(false)
+        settle()
+    }
+
+    private fun settle() {
+        while (pendingRelease.get() && lock.compareAndSet(false, true)) {
+            if (pendingRelease.getAndSet(false)) drop()
             lock.set(false)
         }
     }
