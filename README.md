@@ -194,7 +194,7 @@ With `HiddenValues.KEEP`, conditions, validation and recall still treat hidden f
 
 ## Conformance
 
-Behaviour follows the [conformance suite](https://github.com/formhaus-dev/formhaus/tree/main/packages/core/fixtures/conformance) of `@formhaus/core`. The suite is pinned to `@formhaus/core@1.2.1`, recorded in `formhaus-core/src/test/resources/fixtures/VERSION`. Definition files, value cases, recall cases, option order vectors and every engine scenario run as tests.
+Behaviour follows the [conformance suite](https://github.com/formhaus-dev/formhaus/tree/main/packages/core/fixtures/conformance) of `@formhaus/core`. The pinned core ref is recorded in `formhaus-core/src/test/resources/fixtures/VERSION`. Definition files, value cases, recall cases, option order vectors and every engine scenario run as tests.
 
 To move to another release:
 

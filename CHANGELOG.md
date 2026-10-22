@@ -4,7 +4,7 @@
 
 ### formhaus-core
 
-- Initial Kotlin port of `@formhaus/core` for the JVM and Android API 26 and later. It passes the conformance suite of `@formhaus/core` 1.2.1.
+- Initial Kotlin port of `@formhaus/core` for the JVM and Android API 26 and later. It passes the `@formhaus/core` conformance suite.
 - `FormEngine` runs a form without a UI: values, steps and routes, conditions, validation, answer recall, repeating groups, `next`, `back`, `skip` and `submit`.
 - `FormEngineOptions` takes lifecycle hooks, custom validators, `messages`, `lang`, `seed`, `research`, `hiddenValues`, `debugChecks`, `formatRecall` and `recallFormatter`.
 - `validateSubmission` checks submitted values against a definition on a server, with the visibility, steps and routes of the client.
