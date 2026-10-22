@@ -55,6 +55,7 @@ dependencies {
     api(libs.compose.ui)
     implementation(libs.compose.foundation)
     implementation(libs.compose.material3)
+    implementation(libs.activity.compose)
     implementation(libs.kotlinx.coroutines.android)
     debugImplementation(libs.compose.ui.test.manifest)
     testImplementation(libs.junit4)
@@ -64,6 +65,14 @@ dependencies {
     testImplementation(libs.androidx.test.core)
     testImplementation(libs.compose.ui.test.junit4)
     testImplementation(libs.kotlinx.coroutines.test)
+}
+
+roborazzi {
+    outputDir.set(file("src/test/screenshots"))
+}
+
+tasks.named("check") {
+    dependsOn("verifyRoborazziDebug")
 }
 
 ktlint {
