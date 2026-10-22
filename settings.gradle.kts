@@ -18,3 +18,4 @@ rootProject.name = "formhaus-kotlin"
 
 include(":formhaus-core")
 include(":formhaus-compose")
+include(":formhaus-research")

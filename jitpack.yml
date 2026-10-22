@@ -1,4 +1,6 @@
 jdk:
   - openjdk17
+before_install:
+  - yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-37.0" "build-tools;36.0.0" > /dev/null
 install:
-  - ./gradlew :formhaus-core:publishToMavenLocal --no-daemon
+  - ./gradlew publishToMavenLocal --no-daemon

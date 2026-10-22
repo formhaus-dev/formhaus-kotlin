@@ -4,7 +4,10 @@ plugins {
     alias(libs.plugins.ktlint)
     alias(libs.plugins.detekt)
     alias(libs.plugins.roborazzi)
+    id("formhaus.publishing")
 }
+
+description = "Jetpack Compose renderer for Formhaus JSON form definitions."
 
 android {
     namespace = "dev.formhaus.compose"
@@ -21,6 +24,13 @@ android {
 
     buildFeatures {
         compose = true
+    }
+
+    publishing {
+        singleVariant("release") {
+            withSourcesJar()
+            withJavadocJar()
+        }
     }
 
     testOptions {
@@ -58,6 +68,7 @@ dependencies {
     implementation(libs.activity.compose)
     implementation(libs.kotlinx.coroutines.android)
     debugImplementation(libs.compose.ui.test.manifest)
+    testImplementation(project(":formhaus-research"))
     testImplementation(libs.junit4)
     testImplementation(libs.robolectric)
     testImplementation(libs.roborazzi)
@@ -88,4 +99,12 @@ detekt {
     buildUponDefaultConfig = true
     allRules = false
     parallel = false
+}
+
+publishing {
+    publications {
+        register<MavenPublication>("release") {
+            afterEvaluate { from(components["release"]) }
+        }
+    }
 }
