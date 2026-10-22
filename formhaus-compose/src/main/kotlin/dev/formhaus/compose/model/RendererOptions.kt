@@ -3,6 +3,10 @@ package dev.formhaus.compose.model
 import dev.formhaus.core.engine.RecallFormatFn
 import dev.formhaus.core.json.JsonObject
 import dev.formhaus.core.json.JsonValue
+import dev.formhaus.core.json.ValueParts
+import dev.formhaus.core.json.describe
+import dev.formhaus.core.json.equalParts
+import dev.formhaus.core.json.partsHash
 import dev.formhaus.core.model.FieldOption
 import dev.formhaus.core.renderer.LabelSource
 

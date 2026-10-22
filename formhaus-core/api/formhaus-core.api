@@ -730,6 +730,11 @@ public class dev/formhaus/core/json/StringMap : java/lang/Iterable, kotlin/jvm/i
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class dev/formhaus/core/json/ValuePartsKt {
+	public static final fun describe (Ljava/util/List;Ljava/lang/String;)Ljava/lang/String;
+	public static final fun partsHash (Ljava/util/List;)I
+}
+
 public abstract interface class dev/formhaus/core/model/Conditional {
 	public abstract fun getShow ()Ljava/util/List;
 	public abstract fun getShowAny ()Ljava/util/List;

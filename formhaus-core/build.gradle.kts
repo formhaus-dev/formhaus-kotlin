@@ -5,6 +5,12 @@ plugins {
 
 description = "Kotlin engine for Formhaus JSON form definitions."
 
+kotlin {
+    compilerOptions {
+        optIn.add("dev.formhaus.core.renderer.RendererApi")
+    }
+}
+
 dependencies {
     implementation(libs.kotlinx.coroutines.core)
     testImplementation(project(":formhaus-research"))

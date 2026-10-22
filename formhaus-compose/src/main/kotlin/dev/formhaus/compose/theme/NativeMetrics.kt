@@ -1,10 +1,10 @@
 package dev.formhaus.compose.theme
 
 import androidx.compose.ui.unit.dp
-import dev.formhaus.compose.model.ValueParts
-import dev.formhaus.compose.model.describe
-import dev.formhaus.compose.model.equalParts
-import dev.formhaus.compose.model.partsHash
+import dev.formhaus.core.json.ValueParts
+import dev.formhaus.core.json.describe
+import dev.formhaus.core.json.equalParts
+import dev.formhaus.core.json.partsHash
 
 internal object NativeMetrics {
     val hitTarget = 48.dp

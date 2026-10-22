@@ -7,6 +7,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import dev.formhaus.core.engine.GroupItem
 import dev.formhaus.core.json.JsonValue
+import dev.formhaus.core.json.ValueParts
+import dev.formhaus.core.json.describe
+import dev.formhaus.core.json.equalParts
+import dev.formhaus.core.json.partsHash
 import dev.formhaus.core.model.FieldOption
 
 @Stable

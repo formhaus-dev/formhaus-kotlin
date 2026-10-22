@@ -5,10 +5,10 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.em
-import dev.formhaus.compose.model.ValueParts
-import dev.formhaus.compose.model.describe
-import dev.formhaus.compose.model.equalParts
-import dev.formhaus.compose.model.partsHash
+import dev.formhaus.core.json.ValueParts
+import dev.formhaus.core.json.describe
+import dev.formhaus.core.json.equalParts
+import dev.formhaus.core.json.partsHash
 
 public class TextRole(
     public val size: Size,

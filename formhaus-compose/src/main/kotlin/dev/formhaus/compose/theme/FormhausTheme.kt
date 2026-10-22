@@ -4,10 +4,10 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
-import dev.formhaus.compose.model.ValueParts
-import dev.formhaus.compose.model.describe
-import dev.formhaus.compose.model.equalParts
-import dev.formhaus.compose.model.partsHash
+import dev.formhaus.core.json.ValueParts
+import dev.formhaus.core.json.describe
+import dev.formhaus.core.json.equalParts
+import dev.formhaus.core.json.partsHash
 
 public class Typography(
     public val body: TextUnit,

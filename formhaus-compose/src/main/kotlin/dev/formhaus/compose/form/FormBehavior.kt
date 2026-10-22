@@ -2,10 +2,10 @@ package dev.formhaus.compose.form
 
 import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.staticCompositionLocalOf
-import dev.formhaus.compose.model.ValueParts
-import dev.formhaus.compose.model.describe
-import dev.formhaus.compose.model.equalParts
-import dev.formhaus.compose.model.partsHash
+import dev.formhaus.core.json.ValueParts
+import dev.formhaus.core.json.describe
+import dev.formhaus.core.json.equalParts
+import dev.formhaus.core.json.partsHash
 
 public enum class BackPlacement { AUTOMATIC, BOTTOM, APP_BAR }
 

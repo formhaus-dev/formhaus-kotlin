@@ -2,6 +2,10 @@ package dev.formhaus.compose.model
 
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import dev.formhaus.core.json.ValueParts
+import dev.formhaus.core.json.describe
+import dev.formhaus.core.json.equalParts
+import dev.formhaus.core.json.partsHash
 import dev.formhaus.core.renderer.TestIdTarget
 
 public sealed interface TestIds {

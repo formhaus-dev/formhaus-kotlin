@@ -1,12 +1,18 @@
 package dev.formhaus.core.json
 
-internal typealias ValueParts = List<Pair<String, Any?>>
+import dev.formhaus.core.renderer.RendererApi
 
-internal inline fun <reified T : Any> T.equalParts(
+@RendererApi
+public typealias ValueParts = List<Pair<String, Any?>>
+
+@RendererApi
+public inline fun <reified T : Any> T.equalParts(
     other: Any?,
     parts: T.() -> ValueParts,
 ): Boolean = this === other || (other is T && parts() == other.parts())
 
-internal fun ValueParts.partsHash(): Int = map { it.second }.hashCode()
+@RendererApi
+public fun ValueParts.partsHash(): Int = map { it.second }.hashCode()
 
-internal fun ValueParts.describe(name: String): String = joinToString(prefix = "$name(", postfix = ")") { (key, value) -> "$key=$value" }
+@RendererApi
+public fun ValueParts.describe(name: String): String = joinToString(prefix = "$name(", postfix = ")") { (key, value) -> "$key=$value" }
