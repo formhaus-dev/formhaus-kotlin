@@ -1,5 +1,7 @@
 package dev.formhaus.research
 
+import dev.formhaus.core.definitionvalidation.IssueCode
+import dev.formhaus.core.definitionvalidation.checkDefinition
 import dev.formhaus.core.engine.FormEngine
 import dev.formhaus.core.engine.FormEngineOptions
 import dev.formhaus.core.json.JsonValue
@@ -32,6 +34,17 @@ class OptionOrderTest {
     @Test
     fun `the vectors keep the code units of a lone surrogate seed`() {
         assertTrue(Fixtures.orders("option-order").any { it["seed"]?.units == "\uD800" })
+    }
+
+    @Test
+    fun `option warnings come in option order`() {
+        val definition = JsonValue.parse(
+            """{"formatVersion":"1.6","id":"f","title":"F","submit":{"label":"S"},"fields":[{"key":"plan","type":"radio","label":"Plan",
+                "options":[{"value":"a","label":"A","pinned":true},{"value":"b","label":"B","image":"http://example.com/b.png"}]}]}""",
+        )
+        val codes = listOf(IssueCode.RANDOMIZE_NOT_APPLICABLE, IssueCode.UNSAFE_IMAGE_URL)
+        val paths = checkDefinition(definition).filter { it.code in codes }.map { it.path }
+        assertEquals(listOf("/fields/0/options/0/pinned", "/fields/0/options/1/image"), paths)
     }
 
     @Test

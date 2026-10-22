@@ -1,5 +1,6 @@
 package dev.formhaus.core.support
 
+import dev.formhaus.core.definitionvalidation.checkDefinition
 import dev.formhaus.core.json.JsonValue
 import dev.formhaus.core.model.FormDefinition
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -46,7 +47,10 @@ class ConformanceFilesTest {
             assertFalse(scenarios.isEmpty())
             for (scenario in scenarios) {
                 assertNotNull(scenario["name"]?.stringValue)
-                if (scenario["throws"] == null) decodes(scenario["definition"] ?: definition)
+                if (scenario["throws"] != null) continue
+                val own = requireNotNull(scenario["definition"] ?: definition)
+                decodes(own)
+                assertTrue(checkDefinition(own).none { it.isError }, scenario["name"]?.stringValue)
             }
         }
     }

@@ -2,7 +2,7 @@ package dev.formhaus.core.corpus
 
 import dev.formhaus.core.engine.HiddenValues
 import dev.formhaus.core.engine.RecallItem
-import dev.formhaus.core.i18n.applyOverlay
+import dev.formhaus.core.i18n.localize
 import dev.formhaus.core.json.JsonObject
 import dev.formhaus.core.json.JsonValue
 import dev.formhaus.core.json.MutableJsonObject
@@ -31,17 +31,26 @@ class RecallCase(json: JsonValue) {
     }
 }
 
+data class IssueEntry(val code: String, val path: String) : Comparable<IssueEntry> {
+    override fun compareTo(other: IssueEntry): Int = compareValuesBy(this, other, { it.path }, { it.code })
+
+    override fun toString(): String = "$path $code"
+
+    companion object {
+        fun list(value: JsonValue?): List<IssueEntry>? =
+            value?.arrayValue?.map { IssueEntry(it["code"]?.stringValue.orEmpty(), it["path"]?.stringValue.orEmpty()) }
+    }
+}
+
 class CorpusFixture(val name: String, json: JsonValue) {
-    val issues: List<JsonValue> = json["issues"]?.arrayValue.orEmpty()
+    val issues: List<IssueEntry> = IssueEntry.list(json["issues"]).orEmpty()
+    val warnings: List<IssueEntry>? = IssueEntry.list(json["warnings"])
     val definition: JsonValue = json["definition"] ?: JsonValue.Null
     private val overlay: JsonValue? = json["overlay"]
     val cases: List<CorpusCase> = json["cases"]?.arrayValue.orEmpty().map(::CorpusCase)
     val recall: List<RecallCase> = json["recall"]?.arrayValue.orEmpty().map(::RecallCase)
 
-    fun runtime(): FormDefinition {
-        val parsed = FormDefinition(requireNotNull(definition.objectValue))
-        return overlay?.let { applyOverlay(parsed, it).definition } ?: parsed
-    }
+    fun runtime(): FormDefinition = overlay?.let { localize(definition, it).definition } ?: FormDefinition(definition)
 
     companion object {
         val all: List<CorpusFixture> by lazy { Fixtures.conformanceNames.map { CorpusFixture(it, Fixtures.conformanceFile(it)) } }

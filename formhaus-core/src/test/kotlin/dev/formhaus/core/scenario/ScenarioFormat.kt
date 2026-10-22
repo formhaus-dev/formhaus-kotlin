@@ -1,11 +1,12 @@
 package dev.formhaus.core.scenario
 
+import dev.formhaus.core.definitionvalidation.FormDefinitionError
 import dev.formhaus.core.engine.FormEvent
 import dev.formhaus.core.engine.FormLifecycleError
 import dev.formhaus.core.engine.GoToStepResult
 import dev.formhaus.core.engine.StepChangeContext
 import dev.formhaus.core.engine.SubmitFailureReason
-import dev.formhaus.core.i18n.applyOverlay
+import dev.formhaus.core.i18n.localize
 import dev.formhaus.core.json.FieldErrors
 import dev.formhaus.core.json.JsonObject
 import dev.formhaus.core.json.JsonValue
@@ -19,10 +20,7 @@ import dev.formhaus.core.support.Fixtures
 class ScenarioFile(val name: String, val definition: JsonValue, val overlay: JsonValue?, val scenarios: List<JsonObject>) {
     fun runtime(scenario: JsonObject): FormDefinition = localized(scenario["definition"] ?: definition)
 
-    fun localized(source: JsonValue): FormDefinition {
-        val parsed = FormDefinition(requireNotNull(source.objectValue) { "definition is not an object" })
-        return overlay?.let { applyOverlay(parsed, it).definition } ?: parsed
-    }
+    fun localized(source: JsonValue): FormDefinition = overlay?.let { localize(source, it).definition } ?: FormDefinition(source)
 
     companion object {
         val all: List<ScenarioFile> by lazy {
@@ -100,6 +98,10 @@ fun errorProjection(error: Throwable, expected: JsonObject): JsonValue {
         is FormLifecycleError -> {
             fields += "name" to JsonValue.String("FormLifecycleError")
             fields += "phase" to JsonValue.String(error.phase.rawValue)
+            error.message.orEmpty()
+        }
+        is FormDefinitionError -> {
+            fields += "name" to JsonValue.String("FormDefinitionError")
             error.message.orEmpty()
         }
         else -> {
