@@ -1,5 +1,5 @@
 {
-  "path": ["formhaus-core/src", "formhaus-compose/src", "formhaus-research/src", "demo/src", "benchmarks/src", "buildSrc/src"],
+  "path": ["formhaus-core/src", "formhaus-compose/src", "formhaus-research/src", "demo/src", "benchmarks/src", "benchmarks-compose/src", "buildSrc/src"],
   "format": ["kotlin"],
   "ignore": ["**/resources/**", "**/build/**"],
   "minTokens": 65,
