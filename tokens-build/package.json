@@ -1,0 +1,12 @@
+{
+  "name": "formhaus-kotlin-tokens",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "check": "node build.mjs --check"
+  },
+  "devDependencies": {
+    "style-dictionary": "5.4.4"
+  }
+}
