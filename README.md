@@ -88,7 +88,7 @@ fun SignupScreen() {
 
 The submit handler runs on the main thread and returns a `SubmitResult?`. `SubmitResult.of(json)` reads the `{ ok, errors, formErrors }` object that a Formhaus endpoint returns. `FormhausForm` takes `initialValues`, `engineOptions` and `renderer` options. `FormhausFormContent(model)` renders the form without its own scroll container.
 
-`FormhausForm(definition)` keeps its values, step and picked files when the activity is recreated, for example on rotation or a dark mode switch, and restores them after process death. A submit that is already sending runs to the end.
+`FormhausForm(definition)` keeps its values, step and picked files when the activity is recreated, for example on rotation or a dark mode switch, and restores them after process death. It keeps them in a `ViewModel` of the nearest `ViewModelStoreOwner`, so a form that leaves the composition and comes back, such as a `LazyColumn` item, a tab or a screen in the back stack, shows the same state. The state is released when that owner is cleared. Without an owner, the form releases its state when it leaves the composition. A submit that is already sending runs to the end. Progress over 256 KB is not saved for process death and reports a `snapshot-too-large` warning. Password values are never saved.
 
 Options with an `image` load the picture over the network, so the app needs the `android.permission.INTERNET` permission.
 
@@ -121,7 +121,7 @@ FormhausForm(
 ) { values, _ -> send(values) }
 ```
 
-A snapshot restores the values, the current step, the skipped steps and the option order seed without running validation. A snapshot of another form or another snapshot version, or one whose step no longer exists, starts the form fresh and reports a `snapshot-mismatch` warning. `restoring` takes precedence over the state `FormhausForm` saved for process death. `FormModel` takes the same two parameters, and `FormEngine` takes `restoring` and has `snapshot()`.
+A snapshot restores the values, the current step, the skipped steps and the option order seed without running validation. A snapshot of another form or another snapshot version, or one whose step no longer exists, starts the form fresh and reports a `snapshot-mismatch` warning. `restoring` replaces `initialValues` and takes precedence over the state `FormhausForm` saved for process death. A snapshot leaves out the values of `password` fields, so they are empty after a restore. `FormModel` takes the same two parameters, and `FormEngine` takes `restoring` and has `snapshot()`.
 
 ## Quick start without a UI
 
