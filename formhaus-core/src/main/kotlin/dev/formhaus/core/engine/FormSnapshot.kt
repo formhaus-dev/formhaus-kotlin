@@ -8,16 +8,32 @@ import dev.formhaus.core.json.JsonValue
 import dev.formhaus.core.json.MutableJsonObject
 import dev.formhaus.core.json.toJsonString
 import dev.formhaus.core.model.FormDefinition
+import dev.formhaus.core.model.FormField
 import dev.formhaus.core.model.valueFields
 
-public data class FormSnapshot(
-    public val version: Int = CURRENT_VERSION,
+public class FormSnapshot internal constructor(
+    public val version: Int,
     public val definitionId: String?,
     public val values: JsonObject,
     public val step: String?,
     public val skipped: List<String>,
     public val seed: String,
 ) {
+    override fun equals(other: Any?): Boolean =
+        other is FormSnapshot &&
+            version == other.version &&
+            definitionId == other.definitionId &&
+            values == other.values &&
+            step == other.step &&
+            skipped == other.skipped &&
+            seed == other.seed
+
+    override fun hashCode(): Int = listOf(version, definitionId, values, step, skipped, seed).hashCode()
+
+    override fun toString(): String = "FormSnapshot(${toJson()})"
+
+    public fun withValues(values: JsonObject): FormSnapshot = FormSnapshot(version, definitionId, values, step, skipped, seed)
+
     public fun toJson(): String {
         val json = MutableJsonObject()
         json["version"] = JsonValue.Number(version.toDouble())
@@ -56,12 +72,28 @@ public data class FormSnapshot(
 
 public fun FormEngine.snapshot(): FormSnapshot =
     FormSnapshot(
+        version = FormSnapshot.CURRENT_VERSION,
         definitionId = definition.json["id"]?.stringValue,
-        values = values,
+        values = withoutPasswords(values, definition.allFields),
         step = if (isMultiStep) currentStep?.id else null,
         skipped = core.skipped.map { it.id },
         seed = seed,
     )
+
+public fun FormEngine.snapshotJson(maxBytes: Int): String? {
+    val json = snapshot().toJson()
+    if (json.encodeToByteArray().size <= maxBytes) return json
+    deliver(
+        warning(
+            IssueCode.SNAPSHOT_TOO_LARGE,
+            "",
+            "The saved progress is larger than $maxBytes bytes, so it is not saved",
+            "Keep long texts and many group items out of forms that save their progress",
+        ),
+        options,
+    )
+    return null
+}
 
 internal fun FormSnapshot.matching(
     definition: FormDefinition,
@@ -73,9 +105,17 @@ internal fun FormSnapshot.matching(
             .orEmpty()
             .map { it.id }
             .toSet()
-    val stepsKnown = (listOfNotNull(step) + skipped).all { it in steps }
+    val skippable =
+        definition.steps
+            .orEmpty()
+            .filter { it.canSkip }
+            .map { it.id }
+            .toSet()
+    val stepsKnown = (listOfNotNull(step) + skipped).all { it in steps } && skipped.all { it in skippable }
     val sameForm = id == null || definitionId == null || id == definitionId
-    if (version == FormSnapshot.CURRENT_VERSION && sameForm && stepsKnown) return this
+    if (version == FormSnapshot.CURRENT_VERSION && sameForm && stepsKnown) {
+        return withValues(withoutPasswords(values, definition.allFields))
+    }
     deliver(
         warning(
             IssueCode.SNAPSHOT_MISMATCH,
@@ -105,3 +145,27 @@ internal fun EngineCore.restore(snapshot: FormSnapshot) {
         if (index >= 0) index else maxOf(0, visible.count { step -> steps.indexOfFirst { it.id == step.id } < order } - 1)
     visibility.markChanged(structureChanged = true, valuesChanged = true)
 }
+
+private fun withoutPasswords(
+    values: JsonObject,
+    fields: List<FormField>,
+): JsonObject {
+    val result = MutableJsonObject()
+    for ((key, value) in values) {
+        val owners = fields.filter { it.key == key }
+        if (owners.any { it.type == PASSWORD }) continue
+        val group = owners.firstOrNull { it.isGroup }
+        result[key] = if (group == null) value else itemsWithoutPasswords(value, group.items)
+    }
+    return result
+}
+
+private fun itemsWithoutPasswords(
+    value: JsonValue,
+    items: List<FormField>,
+): JsonValue {
+    val entries = value.arrayValue ?: return value
+    return JsonValue.Array(entries.map { entry -> entry.objectValue?.let { JsonValue.Object(withoutPasswords(it, items)) } ?: entry })
+}
+
+private const val PASSWORD = "password"

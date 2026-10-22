@@ -60,6 +60,7 @@ class SnapshotTest {
                 example.replace("\"definitionId\":\"trip\"", "\"definitionId\":\"other\""),
                 example.replace("\"step\":\"seat\"", "\"step\":\"gone\""),
                 example.replace("[\"extras\"]", "[\"gone\"]"),
+                example.replace("[\"extras\"]", "[\"who\"]"),
             )
         for (case in cases) {
             issues.clear()
@@ -82,5 +83,53 @@ class SnapshotTest {
         for (text in listOf("", "[]", "{", """{"version":"1","values":{},"skipped":[],"seed":""}""")) {
             assertNull(FormSnapshot.fromJson(text))
         }
+    }
+
+    private val account =
+        """{"id":"account","submit":{"label":"Save"},"fields":[{"key":"email","type":"email","label":"Email"},
+        {"key":"secret","type":"password","label":"Password","validation":{"required":true}},
+        {"key":"people","type":"group","label":"People","fields":[{"key":"name","type":"text","label":"Name"},
+          {"key":"pin","type":"password","label":"PIN"}]}]}"""
+
+    @Test
+    fun `a snapshot leaves out password values, also inside group items`() {
+        val values = jsonObject("""{"email":"a@b.co","secret":"hunter2","people":[{"name":"Ann","pin":"1234"}]}""")
+        val snapshot = FormEngine(JsonValue.parse(account), values).snapshot()
+        assertEquals(jsonObject("""{"email":"a@b.co","people":[{"name":"Ann"}]}"""), snapshot.values)
+        assertTrue("hunter2" !in snapshot.toJson() && "1234" !in snapshot.toJson())
+    }
+
+    @Test
+    fun `password values in a restored snapshot stay empty`() {
+        val text =
+            """{"version":1,"definitionId":"account","values":{"email":"a@b.co","secret":"hunter2",
+            "people":[{"name":"Ann","pin":"1234"}]},"step":null,"skipped":[],"seed":""}"""
+        val engine = FormEngine(JsonValue.parse(account), restoring = FormSnapshot.fromJson(text))
+        assertNull(engine.values["secret"])
+        assertEquals("a@b.co", engine.values["email"]?.stringValue)
+        assertEquals(
+            jsonObject("""{"name":"Ann"}"""),
+            engine.values["people"]
+                ?.arrayValue
+                ?.first()
+                ?.objectValue,
+        )
+    }
+
+    @Test
+    fun `snapshots compare by value`() {
+        val first = FormSnapshot.fromJson(example)
+        assertEquals(first, FormSnapshot.fromJson(example))
+        assertEquals(first.hashCode(), FormSnapshot.fromJson(example).hashCode())
+        assertTrue(first.toString().contains("\"seed\":\"abc\""))
+    }
+
+    @Test
+    fun `snapshot json over the byte limit is not saved and reports a warning`() {
+        val engine = restored(example)
+        assertEquals(engine.snapshot().toJson(), engine.snapshotJson(4096))
+        assertTrue(issues.isEmpty())
+        assertNull(engine.snapshotJson(16))
+        assertEquals(listOf(IssueCode.SNAPSHOT_TOO_LARGE), issues.map { it.code })
     }
 }
