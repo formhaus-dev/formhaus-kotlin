@@ -3,6 +3,12 @@ plugins {
     alias(libs.plugins.ktlint)
     alias(libs.plugins.detekt)
     alias(libs.plugins.animalsniffer)
+    `maven-publish`
+}
+
+java {
+    withSourcesJar()
+    withJavadocJar()
 }
 
 kotlin {
@@ -45,3 +51,33 @@ detekt {
 }
 
 group = "dev.formhaus"
+version = "0.1.0"
+
+publishing {
+    publications {
+        create<MavenPublication>("release") {
+            from(components["java"])
+            pom {
+                name.set("formhaus-core")
+                description.set("Kotlin engine for Formhaus JSON form definitions.")
+                url.set("https://github.com/formhaus-dev/formhaus-kotlin")
+                licenses {
+                    license {
+                        name.set("MIT License")
+                        url.set("https://opensource.org/licenses/MIT")
+                    }
+                }
+                developers {
+                    developer {
+                        name.set("Formhaus contributors")
+                        url.set("https://formhaus.dev")
+                    }
+                }
+                scm {
+                    url.set("https://github.com/formhaus-dev/formhaus-kotlin")
+                    connection.set("scm:git:https://github.com/formhaus-dev/formhaus-kotlin.git")
+                }
+            }
+        }
+    }
+}
