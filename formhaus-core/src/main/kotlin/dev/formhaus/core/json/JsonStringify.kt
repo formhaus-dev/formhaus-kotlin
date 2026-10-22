@@ -146,16 +146,18 @@ private fun appendQuoted(
             }
 
             else -> {
-                if (char < ' ' || isLoneSurrogate(text, index)) {
-                    output.append("\\u").append(char.code.toString(16).padStart(4, '0'))
-                } else {
-                    output.append(char)
+                when {
+                    char < ' ' -> output.append("\\u").append(char.code.toString(16).padStart(4, '0'))
+                    isLoneSurrogate(text, index) -> output.append(REPLACEMENT_CHARACTER)
+                    else -> output.append(char)
                 }
             }
         }
     }
     output.append('"')
 }
+
+private const val REPLACEMENT_CHARACTER = '\uFFFD'
 
 private fun isLoneSurrogate(
     text: String,

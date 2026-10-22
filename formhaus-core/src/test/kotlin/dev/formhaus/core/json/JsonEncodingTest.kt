@@ -49,8 +49,27 @@ class JsonEncodingTest {
         val text = "\uFFFDA"
         val bytes = JsonValue.String(text).toJsonBytes()
         assertEquals(JsonValue.String(text), JsonValue.parse(bytes))
-        assertEquals("\"\\ud800\"", JsonValue.String("\uD800").toJsonString())
-        assertEquals(JsonValue.String("\uFFFD"), JsonValue.parse("\"\uD800\""))
+    }
+
+    @Test
+    fun `lone surrogates encode and parse as replacement characters`() {
+        val cases =
+            listOf(
+                "\uD800" to "\uFFFD",
+                "\uDC00" to "\uFFFD",
+                "a\uD83D" to "a\uFFFD",
+                "\uDE00\uD83D" to "\uFFFD\uFFFD",
+                "\uD83D\uD83D\uDE00" to "\uFFFD\uD83D\uDE00",
+                "\uD83D\uDE00" to "\uD83D\uDE00",
+            )
+        for ((text, expected) in cases) {
+            val value = JsonValue.Array(listOf(JsonValue.String(text)))
+            val encoded = value.toJsonString()
+            assertEquals("[\"$expected\"]", encoded)
+            assertEquals(JsonValue.parse(encoded), JsonValue.parse(value.toJsonBytes()))
+            assertEquals(JsonValue.parse(encoded), JsonValue.parse("[\"$text\"]"))
+            assertEquals(encoded, JsonValue.parse(encoded).toJsonString())
+        }
     }
 
     @Test
