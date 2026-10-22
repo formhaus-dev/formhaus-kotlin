@@ -1,0 +1,79 @@
+package dev.formhaus.compose.fields
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextOverflow
+import dev.formhaus.compose.components.FormhausIcons
+import dev.formhaus.compose.components.PickerInput
+import dev.formhaus.compose.form.FieldContext
+import dev.formhaus.compose.model.FormModel
+import dev.formhaus.compose.theme.LocalFormhausTokens
+import dev.formhaus.compose.theme.TextRole
+import dev.formhaus.compose.theme.textStyle
+import dev.formhaus.core.json.JsonObject
+import dev.formhaus.core.json.JsonValue
+import dev.formhaus.core.renderer.value
+import java.io.File
+
+@Composable
+public fun FileField(context: FieldContext) {
+    val tokens = LocalFormhausTokens.current
+    val colors = tokens.colors
+    val picker = rememberFilePicker(context)
+    PickerInput(context, picker.active, context.text.isNotEmpty(), JsonValue.Null, context.fileValueText, picker::open) {
+        Row(
+            Modifier.heightIn(min = tokens.controls.hitTarget),
+            horizontalArrangement = Arrangement.spacedBy(tokens.spacing.s3),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            if (context.reference == null) {
+                Icon(FormhausIcons.paperclip, null, Modifier.size(tokens.controls.indicator), tint = colors.textMuted)
+            }
+            Text(
+                context.fileName ?: context.reference ?: context.placeholder ?: context.text("chooseFile"),
+                Modifier.weight(1f),
+                color =
+                    when {
+                        context.fileName != null -> colors.text
+                        context.reference == null -> colors.control
+                        else -> colors.textMuted
+                    },
+                maxLines = 1,
+                overflow = TextOverflow.MiddleEllipsis,
+                style = tokens.textStyle(TextRole.body, colored = false),
+            )
+        }
+    }
+}
+
+internal val FieldContext.fileName: String? get() = UploadStore.owned(text, model)?.name
+
+internal val FieldContext.reference: String? get() = if (text.isEmpty() || fileName != null) null else text
+
+internal val FieldContext.fileValueText: String get() = fileName ?: reference ?: text("chooseFile")
+
+internal fun FieldContext.replaceFile(file: File?) {
+    setValue(file?.let { JsonValue.String(fileValue(it)) } ?: JsonValue.Null)
+}
+
+public fun FormModel.pickedFile(key: String): File? = engine.value(key)?.stringValue?.let { UploadStore.owned(it, this) }
+
+internal fun FormModel.pruneUploads(values: JsonObject) {
+    val files =
+        values.values
+            .mapNotNull { it.stringValue }
+            .filter { it.startsWith("file:") }
+            .toSet()
+    UploadStore.prune(this, files)
+}
+
+internal fun FormModel.releaseUploads() {
+    UploadStore.release(this)
+}

@@ -5,6 +5,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import dev.formhaus.compose.fields.pruneUploads
+import dev.formhaus.compose.fields.releaseUploads
 import dev.formhaus.core.engine.FormEngine
 import dev.formhaus.core.engine.FormEngineOptions
 import dev.formhaus.core.engine.SubmitHandler
@@ -165,6 +167,7 @@ public class FormModel private constructor(
     public fun close() {
         unsubscribe()
         scope.cancel()
+        releaseUploads()
     }
 
     internal fun updateHandlers(
@@ -236,7 +239,10 @@ public class FormModel private constructor(
         refreshStatus()
         if (previousStep != structure.currentStep?.nodeId) requestFocus(engine.firstErrorKey(), afterErrors = true)
         if (valuesChanged || structureChanged) reloadOptions()
-        if (valuesChanged) emitValues()
+        if (valuesChanged) {
+            emitValues()
+            pruneUploads(values)
+        }
     }
 
     private fun refreshGroup(state: GroupState) {
