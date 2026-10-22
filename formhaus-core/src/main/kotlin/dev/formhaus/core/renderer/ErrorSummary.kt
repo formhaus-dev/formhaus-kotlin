@@ -1,9 +1,7 @@
 package dev.formhaus.core.renderer
 
 import dev.formhaus.core.model.FormAction
-import java.text.Normalizer
-
-private val closingPunctuation = setOf('?'.code, '!'.code, ':'.code, '.'.code, '。'.code)
+import dev.formhaus.core.unicode.endsWithClosingPunctuation
 
 @ConsistentCopyVisibility
 public data class ErrorEntry internal constructor(
@@ -15,9 +13,7 @@ public data class ErrorEntry internal constructor(
 
     public val text: String
         get() {
-            val normalized = Normalizer.normalize(label, Normalizer.Form.NFKC)
-            val closing = normalized.isNotEmpty() && normalized.codePointBefore(normalized.length) in closingPunctuation
-            return label + (if (closing) " " else ": ") + message
+            return label + (if (endsWithClosingPunctuation(label)) " " else ": ") + message
         }
 }
 

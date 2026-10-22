@@ -2,6 +2,7 @@ package dev.formhaus.core.renderer
 
 import dev.formhaus.core.json.jsTrimmed
 import dev.formhaus.core.regex.JsRegex
+import dev.formhaus.core.unicode.jsLowercase
 
 private val specialSchemes = setOf("ftp", "file", "http", "https", "ws", "wss")
 private val rasterData = JsRegex.unchecked("^image\\/(?:png|jpeg|webp|gif)[;,]")
@@ -42,7 +43,7 @@ private class ImageUrl(
         var relative = true
         val colon = rest.indexOf(':'.code)
         if (colon >= 0 && isScheme(rest.subList(0, colon))) {
-            scheme = text(rest.subList(0, colon)).lowercase()
+            scheme = jsLowercase(text(rest.subList(0, colon)))
             rest = rest.subList(colon + 1, rest.size)
             relative = scheme == "https"
         }
@@ -90,7 +91,7 @@ public fun imageSource(image: String?): String? {
     return when (url.scheme) {
         "http", "https" -> if (url.emptyHost) null else image
         "blob" -> image
-        "data" -> if (rasterData.test(text(url.path).lowercase()) == true) image else null
+        "data" -> if (rasterData.test(jsLowercase(text(url.path))) == true) image else null
         else -> null
     }
 }

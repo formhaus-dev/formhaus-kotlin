@@ -1,5 +1,7 @@
 package dev.formhaus.core.regex
 
+import dev.formhaus.core.unicode.whiteSpace
+
 internal class CharSet private constructor(
     private val bounds: IntArray,
 ) {
@@ -80,19 +82,7 @@ internal class CharSet private constructor(
         val dot: CharSet = lineTerminator.inverted
         val notDigit: CharSet = digit.inverted
         val notWord: CharSet = word.inverted
-        val space: CharSet =
-            of(
-                '\u0009'..'\u000D',
-                ' '..' ',
-                ' '..' ',
-                ' '..' ',
-                ' '..' ',
-                ' '..' ',
-                ' '..' ',
-                ' '..' ',
-                '　'..'　',
-                '\uFEFF'..'\uFEFF',
-            )
+        val space: CharSet = of(whiteSpace.bounds)
         val notSpace: CharSet = space.inverted
 
         private fun mask(

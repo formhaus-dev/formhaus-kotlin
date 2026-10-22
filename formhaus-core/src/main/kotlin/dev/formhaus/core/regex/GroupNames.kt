@@ -1,5 +1,8 @@
 package dev.formhaus.core.regex
 
+import dev.formhaus.core.unicode.isIdContinue
+import dev.formhaus.core.unicode.isIdStart
+
 internal class CaptureScan(
     units: CharArray,
 ) {
@@ -109,9 +112,8 @@ private fun isNameScalar(
     start: Boolean,
 ): Boolean {
     if (scalar == '$'.code || scalar == '_'.code) return true
-    if (start) return Character.isUnicodeIdentifierStart(scalar)
-    return scalar == 0x200C || scalar == 0x200D ||
-        (Character.isUnicodeIdentifierPart(scalar) && !Character.isIdentifierIgnorable(scalar))
+    if (start) return isIdStart(scalar)
+    return scalar == 0x200C || scalar == 0x200D || isIdContinue(scalar)
 }
 
 private fun isLead(unit: Int): Boolean = unit in 0xD800..0xDBFF

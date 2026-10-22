@@ -3,6 +3,7 @@ package dev.formhaus.core.definitionvalidation
 import dev.formhaus.core.json.jsCollapsed
 import dev.formhaus.core.json.jsTrimmed
 import dev.formhaus.core.json.jsonStringify
+import dev.formhaus.core.unicode.jsLowercase
 import dev.formhaus.core.validation.builtInTypes
 
 private val autocompleteTypes =
@@ -76,12 +77,7 @@ private fun isSectionName(word: String): Boolean =
 
 private fun isAutofillToken(value: String): Boolean {
     val words =
-        ArrayDeque(
-            value.jsTrimmed
-                .lowercase()
-                .jsCollapsed
-                .split(' '),
-        )
+        ArrayDeque(jsLowercase(value.jsTrimmed).jsCollapsed.split(' '))
     if (words.size == 1 && (words.first() == "on" || words.first() == "off")) return true
     if (words.firstOrNull()?.let(::isSectionName) == true) words.removeAt(0)
     if (words.firstOrNull() == "shipping" || words.firstOrNull() == "billing") words.removeAt(0)

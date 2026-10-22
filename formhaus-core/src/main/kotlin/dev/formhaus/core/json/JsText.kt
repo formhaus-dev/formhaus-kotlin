@@ -1,29 +1,11 @@
 package dev.formhaus.core.json
 
-private val wideWhitespace =
-    setOf(
-        ' ',
-        ' ',
-        ' ',
-        ' ',
-        ' ',
-        ' ',
-        ' ',
-        ' ',
-        ' ',
-        ' ',
-        ' ',
-        ' ',
-        ' ',
-        ' ',
-        ' ',
-        ' ',
-        ' ',
-        '　',
-        '\uFEFF',
-    )
+import dev.formhaus.core.unicode.whiteSpace
 
-internal fun isJsWhitespace(char: Char): Boolean = char == ' ' || char in '\u0009'..'\u000D' || (char >= ' ' && char in wideWhitespace)
+private const val NO_BREAK_SPACE = 0xA0
+
+internal fun isJsWhitespace(char: Char): Boolean =
+    char == ' ' || char in '\u0009'..'\u000D' || (char.code >= NO_BREAK_SPACE && char.code in whiteSpace)
 
 internal val String.jsTrimmed: String get() = trim(::isJsWhitespace)
 
@@ -66,7 +48,7 @@ internal fun asciiDigit(
     return if (digit < radix) digit else -1
 }
 
-private val radixPrefixes = listOf("0x" to 16, "0o" to 8, "0b" to 2)
+private val radixes = mapOf('x' to 16, 'o' to 8, 'b' to 2, 'X' to 16, 'O' to 8, 'B' to 2)
 
 internal fun jsNumber(text: String): Double {
     val trimmed = text.jsTrimmed
@@ -75,8 +57,8 @@ internal fun jsNumber(text: String): Double {
         "Infinity", "+Infinity" -> return Double.POSITIVE_INFINITY
         "-Infinity" -> return Double.NEGATIVE_INFINITY
     }
-    for ((prefix, radix) in radixPrefixes) {
-        if (!trimmed.startsWith(prefix, ignoreCase = true)) continue
+    val radix = if (trimmed.length >= 2 && trimmed[0] == '0') radixes[trimmed[1]] else null
+    if (radix != null) {
         val body = trimmed.substring(2)
         if (body.isEmpty() || body.any { asciiDigit(it, radix) < 0 }) return Double.NaN
         return body.fold(0.0) { total, char -> total * radix + asciiDigit(char, radix) }

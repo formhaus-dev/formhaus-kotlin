@@ -113,7 +113,7 @@ private fun Backtracker.gate(reference: Backreference): Gate {
     if (start < 0 || end <= start) return Gate.Open
     val expected = text[if (reference.backward) end - 1 else start]
     if (!reference.ignoreCase) return Gate.Unit(expected.code, reference.backward)
-    return Gate.Folded(CaseFolding.canonical[expected.code], reference.backward)
+    return Gate.Folded(CaseFolding.canonical(expected.code), reference.backward)
 }
 
 private fun Backtracker.admits(
@@ -138,6 +138,6 @@ private fun Backtracker.admits(
                 .nextUnit(
                     position,
                     gate.backward,
-                ).let { it >= 0 && CaseFolding.canonical[it] == gate.expected }
+                ).let { it >= 0 && CaseFolding.canonical(it) == gate.expected }
         }
     }

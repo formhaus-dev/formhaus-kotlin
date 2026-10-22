@@ -77,7 +77,7 @@ private fun Backtracker.matchCapture(
         val left = text[start + index]
         val right = text[from + index]
         if (left != right &&
-            !(reference.ignoreCase && CaseFolding.canonical[left.code] == CaseFolding.canonical[right.code])
+            !(reference.ignoreCase && CaseFolding.canonical(left.code) == CaseFolding.canonical(right.code))
         ) {
             return null
         }

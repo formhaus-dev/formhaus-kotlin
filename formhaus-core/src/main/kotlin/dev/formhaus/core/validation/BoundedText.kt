@@ -1,6 +1,7 @@
 package dev.formhaus.core.validation
 
 import dev.formhaus.core.json.jsTrimmed
+import dev.formhaus.core.unicode.isLetterMarkNumber
 
 internal fun cut(text: String): String {
     if (text.length <= MAX_STRING_LENGTH) return text
@@ -27,23 +28,7 @@ private class FoundToken(
 
 private fun isWordChar(char: Char): Boolean = char in '0'..'9' || char in 'A'..'Z' || char in 'a'..'z' || char == '_'
 
-private val keyCategories =
-    setOf(
-        Character.UPPERCASE_LETTER,
-        Character.LOWERCASE_LETTER,
-        Character.TITLECASE_LETTER,
-        Character.MODIFIER_LETTER,
-        Character.OTHER_LETTER,
-        Character.NON_SPACING_MARK,
-        Character.COMBINING_SPACING_MARK,
-        Character.ENCLOSING_MARK,
-        Character.DECIMAL_DIGIT_NUMBER,
-        Character.LETTER_NUMBER,
-        Character.OTHER_NUMBER,
-    ).map(Byte::toInt).toSet()
-
-private fun isKeyCodePoint(point: Int): Boolean =
-    Character.getType(point) in keyCategories || point == '_'.code || point == '.'.code || point == '-'.code
+private fun isKeyCodePoint(point: Int): Boolean = isLetterMarkNumber(point) || point == '_'.code || point == '.'.code || point == '-'.code
 
 internal fun recallKey(content: String): String? {
     val key = content.jsTrimmed

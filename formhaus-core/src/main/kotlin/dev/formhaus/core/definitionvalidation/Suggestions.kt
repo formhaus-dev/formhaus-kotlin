@@ -1,6 +1,7 @@
 package dev.formhaus.core.definitionvalidation
 
 import dev.formhaus.core.json.quoteJson
+import dev.formhaus.core.unicode.jsLowercase
 
 private const val SHOWN_CHOICES = 10
 private const val SHORT_NAME = 4
@@ -31,9 +32,9 @@ internal fun closest(
     value: String,
     candidates: List<String>,
 ): String? {
-    val lower = value.lowercase()
+    val lower = jsLowercase(value)
     return candidates.firstOrNull { candidate ->
-        candidate != value && distance(lower, candidate.lowercase()) <= if (candidate.length > SHORT_NAME) 2 else 1
+        candidate != value && distance(lower, jsLowercase(candidate)) <= if (candidate.length > SHORT_NAME) 2 else 1
     }
 }
 

@@ -13,6 +13,7 @@ import dev.formhaus.core.json.jsTrimmed
 import dev.formhaus.core.model.FormField
 import dev.formhaus.core.model.FormNode
 import dev.formhaus.core.model.FormStep
+import dev.formhaus.core.unicode.jsLowercase
 import dev.formhaus.core.validation.MAX_GROUP_ITEMS
 import dev.formhaus.core.visibility.isBlank
 import dev.formhaus.core.visibility.itemsOf
@@ -122,7 +123,7 @@ public fun FormEngine.autocomplete(
 ): String? {
     val written = field.autocomplete?.stringValue ?: return null
     val token = written.jsTrimmed
-    val lower = token.lowercase()
+    val lower = jsLowercase(token)
     val parts = at?.let(core.visibility::parse)
     if (parts == null || token.isEmpty() || lower == "on" || lower == "off") return written
     val section = "section-${sectionName(parts.group)}-${parts.index}"
