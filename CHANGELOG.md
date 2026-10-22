@@ -6,6 +6,7 @@
 
 - **Breaking:** `dev.formhaus.research.Research` moved to the new `formhaus-research` package. `FormEngineOptions.research` and the `FormResearch` interface stay in core.
 - **Breaking:** `FormEngineOptions.debugChecks` is a `Boolean?`. `null`, the default, keeps the checks off.
+- **Breaking:** The `FormEvent` and `SubmitFailureReason.Error` cases, `SubmitResult.Rejected`, `StepChangeContext`, `StepProgress`, `GoToStepResult`, `DefinitionIssue`, `SubmissionResult`, `TextSlot`, `MissingKeys`, `TestIdTarget`, `ErrorEntry`, `ErrorGroup`, `FormActionsState`, `RecallDependency` and `RecalledTexts` are no longer data classes and lose `componentN`. `TestIdTarget` keeps `copy`.
 - New renderer API `Locale.withPreferredCalendar()` adds the calendar CLDR prefers for the locale, such as Buddhist for `th-TH` and Persian for `fa-IR`.
 - New `FormSnapshot` and `FormEngine.snapshot()`. The `restoring` parameter of the `FormEngine` constructors restores the values, the current step, the skipped steps and the seed without validating.
 - A snapshot of another snapshot version, with a step the definition no longer has, or that skips a step without a `skip` action starts the form fresh and reports the `snapshot-mismatch` warning. So does a snapshot whose `definitionId` is not the definition's `id`, where a missing `id` must match `null`.
