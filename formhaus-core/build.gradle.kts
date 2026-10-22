@@ -1,5 +1,7 @@
 plugins {
     alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.ktlint)
+    alias(libs.plugins.detekt)
 }
 
 kotlin {
@@ -20,4 +22,18 @@ dependencies {
 tasks.test {
     useJUnitPlatform()
     maxHeapSize = "1g"
+}
+
+ktlint {
+    version.set(
+        libs.versions.ktlint.engine
+            .get(),
+    )
+}
+
+detekt {
+    config.setFrom(rootProject.file("config/detekt.yml"))
+    buildUponDefaultConfig = true
+    allRules = false
+    parallel = false
 }

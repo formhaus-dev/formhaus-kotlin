@@ -1,0 +1,11 @@
+{
+  "path": ["formhaus-core/src"],
+  "format": ["kotlin"],
+  "ignore": ["**/resources/**", "**/build/**"],
+  "minTokens": 65,
+  "minLines": 8,
+  "threshold": 0.3,
+  "reporters": ["console"],
+  "gitignore": true,
+  "silent": false
+}
