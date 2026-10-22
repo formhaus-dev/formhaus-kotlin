@@ -23,7 +23,9 @@ private class PatternGroup(
 private sealed interface Trailing {
     data object Adjacent : Trailing
 
-    class Previous(val samples: Set<Char>?) : Trailing
+    class Previous(
+        val samples: Set<Char>?,
+    ) : Trailing
 }
 
 private sealed interface Closing {
@@ -33,19 +35,27 @@ private sealed interface Closing {
 
     data object Settled : Closing
 
-    class Repeated(val start: Int, val end: Int) : Closing
+    class Repeated(
+        val start: Int,
+        val end: Int,
+    ) : Closing
 }
 
 private fun samples(atom: String): Set<Char> {
-    val pattern = try {
-        CompiledPattern("^(?:$atom)$")
-    } catch (_: RegexSyntaxError) {
-        return emptySet()
-    }
+    val pattern =
+        try {
+            CompiledPattern("^(?:$atom)$")
+        } catch (_: RegexSyntaxError) {
+            return emptySet()
+        }
     return (0 until 128).map(Int::toChar).filter { pattern.test(it.toString()) == true }.toSet()
 }
 
-private fun trailing(group: PatternGroup, quantifier: PatternQuantifier, source: String): Trailing {
+private fun trailing(
+    group: PatternGroup,
+    quantifier: PatternQuantifier,
+    source: String,
+): Trailing {
     if (!quantifier.unbounded) return Trailing.Previous(if (quantifier.optional) group.previous else null)
     val repeated = samples(source)
     val previous = group.previous
@@ -53,7 +63,11 @@ private fun trailing(group: PatternGroup, quantifier: PatternQuantifier, source:
     return Trailing.Previous(if (quantifier.optional) repeated + previous.orEmpty() else repeated)
 }
 
-private fun close(groups: MutableList<PatternGroup>, quantifier: PatternQuantifier, end: Int): Closing {
+private fun close(
+    groups: MutableList<PatternGroup>,
+    quantifier: PatternQuantifier,
+    end: Int,
+): Closing {
     if (groups.size < 2) return Closing.Invalid
     val closed = groups.removeAt(groups.size - 1)
     val parent = groups.last()
@@ -81,7 +95,11 @@ internal fun slowPattern(pattern: String): SlowPattern? {
                 val entry = if (kind.look) null else groups.last().previous
                 groups.add(PatternGroup(start, look = kind.look, entry = entry))
             }
-            TokenKind.Other -> groups.last().separate(alternation = units[start] == '|')
+
+            TokenKind.Other -> {
+                groups.last().separate(alternation = units[start] == '|')
+            }
+
             is TokenKind.Atom -> {
                 val quantifier = lexer.quantifier(kind.end)
                 index = quantifier.end
@@ -89,9 +107,18 @@ internal fun slowPattern(pattern: String): SlowPattern? {
                 var to = kind.end
                 if (units[start] == ')') {
                     when (val closing = close(groups, quantifier, kind.end)) {
-                        Closing.Invalid -> return null
-                        Closing.Nested -> return SlowPattern.NESTED
-                        Closing.Settled -> continue
+                        Closing.Invalid -> {
+                            return null
+                        }
+
+                        Closing.Nested -> {
+                            return SlowPattern.NESTED
+                        }
+
+                        Closing.Settled -> {
+                            continue
+                        }
+
                         is Closing.Repeated -> {
                             from = closing.start
                             to = closing.end

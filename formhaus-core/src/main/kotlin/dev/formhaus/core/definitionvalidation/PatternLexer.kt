@@ -1,14 +1,21 @@
 package dev.formhaus.core.definitionvalidation
 
 internal sealed interface TokenKind {
-    class Open(val look: Boolean) : TokenKind
+    class Open(
+        val look: Boolean,
+    ) : TokenKind
 
-    class Atom(val end: Int) : TokenKind
+    class Atom(
+        val end: Int,
+    ) : TokenKind
 
     data object Other : TokenKind
 }
 
-internal class Token(val kind: TokenKind, val end: Int)
+internal class Token(
+    val kind: TokenKind,
+    val end: Int,
+)
 
 internal class PatternQuantifier(
     val end: Int,
@@ -20,16 +27,19 @@ internal class PatternQuantifier(
     fun ending(end: Int): PatternQuantifier = PatternQuantifier(end, present, repeats, unbounded, optional)
 }
 
-internal class PatternLexer(val units: CharArray) {
+internal class PatternLexer(
+    val units: CharArray,
+) {
     private val classEnds = IntArray(units.size + 2) { -1 }
 
     init {
         for (index in units.indices.reversed()) {
-            classEnds[index] = when (units[index]) {
-                ']' -> index + 1
-                '\\' -> classEnds[index + 2].takeIf { it >= 0 } ?: classEnds[index + 1]
-                else -> classEnds[index + 1]
-            }
+            classEnds[index] =
+                when (units[index]) {
+                    ']' -> index + 1
+                    '\\' -> classEnds[index + 2].takeIf { it >= 0 } ?: classEnds[index + 1]
+                    else -> classEnds[index + 1]
+                }
         }
     }
 
@@ -49,18 +59,25 @@ internal class PatternLexer(val units: CharArray) {
         if (unit(next) == '<' && unit(next + 1) in lookMarks) return Token(TokenKind.Open(true), next + 2)
         if (unit(next) == ':') return Token(TokenKind.Open(false), next + 1)
         if (unit(next) == '<') {
-            for (close in next + 1 until units.size) if (units[close] == '>') return Token(TokenKind.Open(false), close + 1)
+            for (close in next + 1 until units.size) {
+                if (units[close] ==
+                    '>'
+                ) {
+                    return Token(TokenKind.Open(false), close + 1)
+                }
+            }
         }
         return Token(TokenKind.Open(false), index + 1)
     }
 
-    private fun atomEnd(index: Int): Int? = when (units[index]) {
-        ')' -> index + 1
-        '\\' -> escapeEnd(index)
-        '[' -> classEnds[index + 1].takeIf { it >= 0 } ?: (index + 1)
-        '|', '^', '$' -> null
-        else -> index + 1
-    }
+    private fun atomEnd(index: Int): Int? =
+        when (units[index]) {
+            ')' -> index + 1
+            '\\' -> escapeEnd(index)
+            '[' -> classEnds[index + 1].takeIf { it >= 0 } ?: (index + 1)
+            '|', '^', '$' -> null
+            else -> index + 1
+        }
 
     private fun escapeEnd(index: Int): Int? {
         val char = unit(index + 1) ?: return null
@@ -72,9 +89,13 @@ internal class PatternLexer(val units: CharArray) {
         return if (lower == 'b') null else index + 2
     }
 
-    private fun hex(start: Int, count: Int): Boolean = (start until start + count).all { index ->
-        unit(index)?.let { it in '0'..'9' || it.lowercaseAscii() in 'a'..'f' } ?: false
-    }
+    private fun hex(
+        start: Int,
+        count: Int,
+    ): Boolean =
+        (start until start + count).all { index ->
+            unit(index)?.let { it in '0'..'9' || it.lowercaseAscii() in 'a'..'f' } ?: false
+        }
 
     private fun digitsEnd(start: Int): Int {
         var index = start
@@ -84,13 +105,26 @@ internal class PatternLexer(val units: CharArray) {
 
     fun quantifier(start: Int): PatternQuantifier {
         val char = unit(start) ?: return PatternQuantifier(start)
-        val result = when {
-            char == '*' || char == '+' || char == '?' -> PatternQuantifier(
-                start + 1, present = true, repeats = char != '?', unbounded = char != '?', optional = char != '+',
-            )
-            char == '{' -> braced(start) ?: return PatternQuantifier(start)
-            else -> return PatternQuantifier(start)
-        }
+        val result =
+            when {
+                char == '*' || char == '+' || char == '?' -> {
+                    PatternQuantifier(
+                        start + 1,
+                        present = true,
+                        repeats = char != '?',
+                        unbounded = char != '?',
+                        optional = char != '+',
+                    )
+                }
+
+                char == '{' -> {
+                    braced(start) ?: return PatternQuantifier(start)
+                }
+
+                else -> {
+                    return PatternQuantifier(start)
+                }
+            }
         return if (unit(result.end) == '?') result.ending(result.end + 1) else result
     }
 

@@ -15,35 +15,80 @@ import dev.formhaus.core.visibility.cleanItems
 import dev.formhaus.core.visibility.isVisible
 import dev.formhaus.core.visibility.shownFields
 
-private fun cachedItems(group: FormField, value: JsonValue?, scope: JsonObject, limits: ListLimits, cache: ItemCache<JsonValue>?): JsonValue? {
+private fun cachedItems(
+    group: FormField,
+    value: JsonValue?,
+    scope: JsonObject,
+    limits: ListLimits,
+    cache: ItemCache<JsonValue>?,
+): JsonValue? {
     val items = value?.arrayValue
     if (cache == null || items == null) return cleanItems(group, value, scope, limits)
     val fields = group.items
     val context = cache.context(group, scope, limits)
-    return JsonValue.Array(cache.map(group, items, context = context) { _, item -> Mapped(cleanItem(fields, item, scope, limits), true) }.items)
+    return JsonValue.Array(
+        cache
+            .map(
+                group,
+                items,
+                context = context,
+            ) { _, item -> Mapped(cleanItem(fields, item, scope, limits), true) }
+            .items,
+    )
 }
 
-private class Available(val values: MutableJsonObject = MutableJsonObject(), var limits: ListLimits = ListLimits.STANDARD)
+private class Available(
+    val values: MutableJsonObject = MutableJsonObject(),
+    var limits: ListLimits = ListLimits.STANDARD,
+)
 
-private fun addStepValues(nodes: List<FormNode>, values: JsonObject, target: Available, cache: ItemCache<JsonValue>?) {
+private fun addStepValues(
+    nodes: List<FormNode>,
+    values: JsonObject,
+    target: Available,
+    cache: ItemCache<JsonValue>?,
+) {
     val fields = valueFields(nodes)
     target.limits = target.limits.trimmed(fields)
     val limits = target.limits
     val available = target.values
     val saved = fields.map { it.key to available[it.key] }
     for (field in fields) available.assign(field.key, trimValue(field, values[field.key]))
-    val shown = shownFields(nodes, available, limits).filter { values[it.key] != null }.map { field ->
-        field.key to if (field.isGroup) cachedItems(field, values[field.key], available, limits, cache) else trimValue(field, values[field.key])
-    }
+    val shown =
+        shownFields(nodes, available, limits).filter { values[it.key] != null }.map { field ->
+            field.key to
+                if (field.isGroup) {
+                    cachedItems(
+                        field,
+                        values[field.key],
+                        available,
+                        limits,
+                        cache,
+                    )
+                } else {
+                    trimValue(field, values[field.key])
+                }
+        }
     for ((key, value) in saved.asReversed()) available.assign(key, value)
     for ((key, value) in shown) available.assign(key, value)
 }
 
-internal class ActivePath(val steps: List<FormStep>, val values: JsonObject, val limits: ListLimits) {
+internal class ActivePath(
+    val steps: List<FormStep>,
+    val values: JsonObject,
+    val limits: ListLimits,
+) {
     private val ordinals = steps.mapTo(HashSet()) { it.ordinal }
 
     fun ordered(definition: FormDefinition): JsonObject {
-        val fields = if (definition.isMultiStep) steps.flatMap { valueFields(it.fields) } else valueFields(definition.fields.orEmpty())
+        val fields =
+            if (definition.isMultiStep) {
+                steps.flatMap {
+                    valueFields(it.fields)
+                }
+            } else {
+                valueFields(definition.fields.orEmpty())
+            }
         val sorted = MutableJsonObject()
         for (field in fields) {
             if (field.key in sorted) continue
@@ -57,7 +102,11 @@ internal class ActivePath(val steps: List<FormStep>, val values: JsonObject, val
     companion object {
         val EMPTY: ActivePath = ActivePath(emptyList(), MutableJsonObject(), ListLimits.STANDARD)
 
-        fun walk(definition: FormDefinition, values: JsonObject, cache: ItemCache<JsonValue>? = null): ActivePath {
+        fun walk(
+            definition: FormDefinition,
+            values: JsonObject,
+            cache: ItemCache<JsonValue>? = null,
+        ): ActivePath {
             val steps = definition.steps.orEmpty()
             val indexes = stepIndexes(steps)
             val result = ArrayList<FormStep>()
@@ -72,12 +121,13 @@ internal class ActivePath(val steps: List<FormStep>, val values: JsonObject, val
                 }
                 result.add(step)
                 addStepValues(step.fields, values, available, cache)
-                val route = step.routes?.firstOrNull { route ->
-                    if (!isVisible(route, available.values, available.limits)) return@firstOrNull false
-                    if (route.endsForm) return@firstOrNull true
-                    val target = route.to?.let(indexes::get) ?: return@firstOrNull false
-                    target > index && isVisible(steps[target], available.values, available.limits)
-                }
+                val route =
+                    step.routes?.firstOrNull { route ->
+                        if (!isVisible(route, available.values, available.limits)) return@firstOrNull false
+                        if (route.endsForm) return@firstOrNull true
+                        val target = route.to?.let(indexes::get) ?: return@firstOrNull false
+                        target > index && isVisible(steps[target], available.values, available.limits)
+                    }
                 if (route?.endsForm == true) break
                 index = route?.to?.let(indexes::get) ?: (index + 1)
             }
@@ -86,7 +136,9 @@ internal class ActivePath(val steps: List<FormStep>, val values: JsonObject, val
     }
 }
 
-internal class PathCache(private val definition: FormDefinition) {
+internal class PathCache(
+    private val definition: FormDefinition,
+) {
     private var source: JsonObject? = null
     private var path = ActivePath.EMPTY
     private var ordered: JsonObject? = null
@@ -107,11 +159,22 @@ internal class PathCache(private val definition: FormDefinition) {
     }
 }
 
-internal fun stepIndexes(steps: List<FormStep>): Map<String, Int> = steps.withIndex().associate { (index, step) -> step.id to index }
+internal fun stepIndexes(steps: List<FormStep>): Map<String, Int> =
+    steps.withIndex().associate { (index, step) ->
+        step.id to
+            index
+    }
 
-internal fun activeSteps(definition: FormDefinition, values: JsonObject): List<FormStep> = ActivePath.walk(definition, values).steps
+internal fun activeSteps(
+    definition: FormDefinition,
+    values: JsonObject,
+): List<FormStep> = ActivePath.walk(definition, values).steps
 
-internal fun reconcileStepIndex(previous: List<FormStep>, next: List<FormStep>, index: Int): Int {
+internal fun reconcileStepIndex(
+    previous: List<FormStep>,
+    next: List<FormStep>,
+    index: Int,
+): Int {
     val previousStep = previous.getOrNull(index) ?: previous.lastOrNull()
     if (previousStep != null) {
         val preserved = next.indexOfFirst { it.id == previousStep.id }

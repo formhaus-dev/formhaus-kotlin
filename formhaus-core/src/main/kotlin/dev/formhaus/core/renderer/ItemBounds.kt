@@ -18,7 +18,10 @@ import dev.formhaus.core.visibility.isBlank
 import dev.formhaus.core.visibility.itemsOf
 
 @ConsistentCopyVisibility
-public data class ItemBounds internal constructor(public val min: Int, public val max: Int)
+public data class ItemBounds internal constructor(
+    public val min: Int,
+    public val max: Int,
+)
 
 @RendererApi
 public val FormEngine.version: Int get() = core.version
@@ -53,10 +56,16 @@ public fun FormEngine.hasValue(key: String): Boolean = value(key).let { it != nu
 @RendererApi
 public fun FormEngine.itemLimits(group: FormField): ItemBounds {
     val limits = group.itemLimits
-    return ItemBounds(clampedInt(limits.min, 0..1_000_000) ?: 0, clampedInt(limits.max, 0..MAX_GROUP_ITEMS) ?: MAX_GROUP_ITEMS)
+    return ItemBounds(
+        clampedInt(limits.min, 0..1_000_000) ?: 0,
+        clampedInt(limits.max, 0..MAX_GROUP_ITEMS) ?: MAX_GROUP_ITEMS,
+    )
 }
 
-private fun hasContent(fields: List<FormField>, item: JsonValue): Boolean {
+private fun hasContent(
+    fields: List<FormField>,
+    item: JsonValue,
+): Boolean {
     val entry = item.objectValue ?: return false
     return fields.any { field ->
         val raw = entry[field.key]
@@ -68,7 +77,10 @@ private fun hasContent(fields: List<FormField>, item: JsonValue): Boolean {
 private fun FormEngine.group(key: String): FormField? = core.visibility.groups.firstOrNull { it.key == key }
 
 @RendererApi
-public fun FormEngine.itemHasContent(key: String, index: Int): Boolean {
+public fun FormEngine.itemHasContent(
+    key: String,
+    index: Int,
+): Boolean {
     val group = group(key) ?: return false
     val item = itemsOf(core.values[key]).getOrNull(index) ?: return false
     return hasContent(group.items, item)
@@ -78,9 +90,15 @@ public fun FormEngine.itemHasContent(key: String, index: Int): Boolean {
 public fun FormEngine.itemsHaveContent(key: String): List<Boolean> {
     val group = group(key) ?: return emptyList()
     val fields = group.items
-    return core.visibility.filled.map(group, itemsOf(core.values[key]), context = ItemContext.FIXED, sharing = true) { _, item ->
-        Mapped(hasContent(fields, item), true)
-    }.items
+    return core.visibility.filled
+        .map(
+            group,
+            itemsOf(core.values[key]),
+            context = ItemContext.FIXED,
+            sharing = true,
+        ) { _, item ->
+            Mapped(hasContent(fields, item), true)
+        }.items
 }
 
 @RendererApi
@@ -90,14 +108,18 @@ public fun FormEngine.firstErrorKey(): String? {
     return errorKeys(currentStep?.fields ?: definition.fields.orEmpty(), errors, core.values.json).firstOrNull()
 }
 
-private fun sectionName(key: String): String = buildString {
-    for (unit in key) {
-        if (unit in 'a'..'z' || unit in '0'..'9') append(unit) else append("_${unit.code.toString(16)}_")
+private fun sectionName(key: String): String =
+    buildString {
+        for (unit in key) {
+            if (unit in 'a'..'z' || unit in '0'..'9') append(unit) else append("_${unit.code.toString(16)}_")
+        }
     }
-}
 
 @RendererApi
-public fun FormEngine.autocomplete(field: FormField, at: String? = null): String? {
+public fun FormEngine.autocomplete(
+    field: FormField,
+    at: String? = null,
+): String? {
     val written = field.autocomplete?.stringValue ?: return null
     val token = written.jsTrimmed
     val lower = token.lowercase()

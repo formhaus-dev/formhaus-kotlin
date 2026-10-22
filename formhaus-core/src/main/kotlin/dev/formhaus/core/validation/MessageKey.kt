@@ -1,7 +1,9 @@
 package dev.formhaus.core.validation
 
 @JvmInline
-public value class MessageKey(public val rawValue: String) {
+public value class MessageKey(
+    public val rawValue: String,
+) {
     override fun toString(): String = rawValue
 
     public companion object {

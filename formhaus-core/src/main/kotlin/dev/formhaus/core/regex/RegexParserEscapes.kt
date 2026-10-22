@@ -8,26 +8,39 @@ internal fun RegexParser.parseAtomEscape(): RegexParser.Atom {
             val assertion = if (unit == 'b') RegexAssertion.WORD_BOUNDARY else RegexAssertion.NOT_WORD_BOUNDARY
             return RegexParser.Atom(RegexNode.Assertion(assertion), false)
         }
-        in '1'..'9' -> decimalReference()?.let { return RegexParser.Atom(it, true) }
-        'k' -> if (groups.hasNames) return RegexParser.Atom(namedReference(), true)
-        'c' -> if (!controlFollows(inClass = false)) return literal('\\')
-        else -> classEscape(unit)?.let {
-            index++
-            return setAtom(it)
+
+        in '1'..'9' -> {
+            decimalReference()?.let { return RegexParser.Atom(it, true) }
+        }
+
+        'k' -> {
+            if (groups.hasNames) return RegexParser.Atom(namedReference(), true)
+        }
+
+        'c' -> {
+            if (!controlFollows(inClass = false)) return literal('\\')
+        }
+
+        else -> {
+            classEscape(unit)?.let {
+                index++
+                return setAtom(it)
+            }
         }
     }
     return literal(parseCharacterEscape())
 }
 
-private fun classEscape(unit: Char): CharSet? = when (unit) {
-    'd' -> CharSet.digit
-    'D' -> CharSet.notDigit
-    's' -> CharSet.space
-    'S' -> CharSet.notSpace
-    'w' -> CharSet.word
-    'W' -> CharSet.notWord
-    else -> null
-}
+private fun classEscape(unit: Char): CharSet? =
+    when (unit) {
+        'd' -> CharSet.digit
+        'D' -> CharSet.notDigit
+        's' -> CharSet.space
+        'S' -> CharSet.notSpace
+        'w' -> CharSet.word
+        'W' -> CharSet.notWord
+        else -> null
+    }
 
 private fun RegexParser.controlFollows(inClass: Boolean): Boolean {
     val next = peek(1) ?: return false
@@ -39,20 +52,50 @@ private fun RegexParser.parseCharacterEscape(): Char {
     val unit = units[index]
     index++
     return when (unit) {
-        'f' -> '\u000C'
-        'n' -> '\n'
-        'r' -> '\r'
-        't' -> '\t'
-        'v' -> '\u000B'
+        'f' -> {
+            '\u000C'
+        }
+
+        'n' -> {
+            '\n'
+        }
+
+        'r' -> {
+            '\r'
+        }
+
+        't' -> {
+            '\t'
+        }
+
+        'v' -> {
+            '\u000B'
+        }
+
         'c' -> {
             index++
             (units[index - 1].code % 32).toChar()
         }
-        in '0'..'7' -> legacyOctal(unit)
-        'x' -> hexEscape(2) ?: unit
-        'u' -> hexEscape(4) ?: unit
-        'k' -> if (groups.hasNames) throw RegexSyntaxError else unit
-        else -> unit
+
+        in '0'..'7' -> {
+            legacyOctal(unit)
+        }
+
+        'x' -> {
+            hexEscape(2) ?: unit
+        }
+
+        'u' -> {
+            hexEscape(4) ?: unit
+        }
+
+        'k' -> {
+            if (groups.hasNames) throw RegexSyntaxError else unit
+        }
+
+        else -> {
+            unit
+        }
     }
 }
 
@@ -144,7 +187,10 @@ private fun RegexParser.parseClassAtom(): ClassAtom {
     return ClassAtom(parseCharacterEscape(), null)
 }
 
-private class ClassAtom(val single: Char?, private val set: CharSet?) {
+private class ClassAtom(
+    val single: Char?,
+    private val set: CharSet?,
+) {
     fun addTo(ranges: IntList) {
         if (single != null) ranges.addRange(single.code, single.code)
         if (set != null) for (index in 0 until set.rangeCount) ranges.addRange(set.lowerAt(index), set.upperAt(index))

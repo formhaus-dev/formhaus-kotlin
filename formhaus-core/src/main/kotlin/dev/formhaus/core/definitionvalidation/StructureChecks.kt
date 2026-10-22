@@ -5,14 +5,30 @@ import dev.formhaus.core.model.FormField
 import dev.formhaus.core.model.FormSection
 import dev.formhaus.core.model.FormStep
 
-internal val reservedKeys = setOf(
-    "constructor", "__defineGetter__", "__defineSetter__", "hasOwnProperty", "__lookupGetter__", "__lookupSetter__",
-    "isPrototypeOf", "propertyIsEnumerable", "toString", "valueOf", "__proto__", "toLocaleString", "prototype",
-)
+internal val reservedKeys =
+    setOf(
+        "constructor",
+        "__defineGetter__",
+        "__defineSetter__",
+        "hasOwnProperty",
+        "__lookupGetter__",
+        "__lookupSetter__",
+        "isPrototypeOf",
+        "propertyIsEnumerable",
+        "toString",
+        "valueOf",
+        "__proto__",
+        "toLocaleString",
+        "prototype",
+    )
 
 private fun isConditional(source: Conditional): Boolean = !source.show.isNullOrEmpty() || !source.showAny.isNullOrEmpty()
 
-private fun successors(steps: List<FormStep>, indexes: Map<String, Int>, from: Int): List<Int> {
+private fun successors(
+    steps: List<FormStep>,
+    indexes: Map<String, Int>,
+    from: Int,
+): List<Int> {
     val next = ArrayList<Int>()
     for (route in steps[from].routes.orEmpty()) {
         if (route.endsForm && !isConditional(route)) return next
@@ -31,11 +47,16 @@ internal fun stepIndexes(steps: List<FormStep>): Map<String, Int> {
     return indexes
 }
 
-private class StepReachability(private val steps: List<FormStep>) {
+private class StepReachability(
+    private val steps: List<FormStep>,
+) {
     private val indexes = stepIndexes(steps)
     private val memo = HashMap<Int, Set<Int>>()
 
-    fun reaches(start: Int, target: Int): Boolean {
+    fun reaches(
+        start: Int,
+        target: Int,
+    ): Boolean {
         if (start !in steps.indices) return false
         memo[start]?.let { return target in it }
         val seen = HashSet<Int>()
@@ -72,7 +93,14 @@ private fun stepIssues(context: CheckContext): List<DefinitionIssue> {
             if (target != null && target > index) continue
             val later = steps.drop(index + 1).map { it.id }
             val problem = if (target == null) "\"$to\" is not a step id" else "\"$to\" is not a later step"
-            val hint = if (later.isEmpty()) "Use null to end the form here" else "${oneOf(later)}, or null to end the form here"
+            val hint =
+                if (later.isEmpty()) {
+                    "Use null to end the form here"
+                } else {
+                    "${oneOf(
+                        later,
+                    )}, or null to end the form here"
+                }
             issues.add(error(IssueCode.ROUTE_TARGET, "/steps/$index/routes/$position/to", problem, hint))
         }
     }
@@ -100,10 +128,23 @@ private fun keyClashes(context: CheckContext): List<NodeEntry?> {
     }
 }
 
-private fun keyIssue(entry: NodeEntry, clash: NodeEntry?, prefix: NodeEntry?): DefinitionIssue? {
+private fun keyIssue(
+    entry: NodeEntry,
+    clash: NodeEntry?,
+    prefix: NodeEntry?,
+): DefinitionIssue? {
     val key = entry.node.key
     val path = "${entry.path}/key"
-    if (key in reservedKeys) return error(IssueCode.RESERVED_KEY, path, "\"$key\" is a built-in object property name", "Rename the field key")
+    if (key in
+        reservedKeys
+    ) {
+        return error(
+            IssueCode.RESERVED_KEY,
+            path,
+            "\"$key\" is a built-in object property name",
+            "Rename the field key",
+        )
+    }
     if (clash != null) {
         val inGroup = entry.group != null
         val problem = "key \"$key\" is already used by ${clash.path}${if (inGroup) "" else " on the same path"}"
@@ -111,32 +152,55 @@ private fun keyIssue(entry: NodeEntry, clash: NodeEntry?, prefix: NodeEntry?): D
         return error(IssueCode.DUPLICATE_KEY, path, problem, hint)
     }
     prefix ?: return null
-    return error(IssueCode.DUPLICATE_KEY, path, "key \"$key\" starts with the group key \"${prefix.node.key}.\"", "Rename the field")
+    return error(
+        IssueCode.DUPLICATE_KEY,
+        path,
+        "key \"$key\" starts with the group key \"${prefix.node.key}.\"",
+        "Rename the field",
+    )
 }
 
 private fun keyIssues(context: CheckContext): List<DefinitionIssue> {
     val groups = context.nodes.filter { it.group == null && (it.node as? FormField)?.isGroup == true }
     return context.nodes.zip(keyClashes(context)).mapNotNull { (entry, clash) ->
-        val prefix = if (entry.group == null) groups.firstOrNull { entry.node.key.startsWith("${it.node.key}.") } else null
+        val prefix =
+            if (entry.group ==
+                null
+            ) {
+                groups.firstOrNull { entry.node.key.startsWith("${it.node.key}.") }
+            } else {
+                null
+            }
         keyIssue(entry, clash, prefix)
     }
 }
 
 private val groupedTypes = listOf("group", "file", "hidden")
 
-private fun nestingIssues(context: CheckContext): List<DefinitionIssue> = context.nodes.mapNotNull { entry ->
-    val parent = entry.parent ?: return@mapNotNull null
-    if (entry.node !is FormSection && !(entry.group != null && entry.node.type in groupedTypes)) return@mapNotNull null
-    error(IssueCode.INVALID_NESTING, "${entry.path}/type", "a ${entry.node.type} cannot be inside a ${parent.type}", "Move it to the fields of the step")
-}
+private fun nestingIssues(context: CheckContext): List<DefinitionIssue> =
+    context.nodes.mapNotNull { entry ->
+        val parent = entry.parent ?: return@mapNotNull null
+        if (entry.node !is FormSection &&
+            !(entry.group != null && entry.node.type in groupedTypes)
+        ) {
+            return@mapNotNull null
+        }
+        error(
+            IssueCode.INVALID_NESTING,
+            "${entry.path}/type",
+            "a ${entry.node.type} cannot be inside a ${parent.type}",
+            "Move it to the fields of the step",
+        )
+    }
 
 internal fun structureIssues(context: CheckContext): List<DefinitionIssue> {
     val definition = context.definition
-    val mixed = if (!definition.fields.isNullOrEmpty() && !definition.steps.isNullOrEmpty()) {
-        val hint = "Move the top-level fields into a step, or remove \"steps\""
-        listOf(error(IssueCode.FIELDS_AND_STEPS, "", "the definition has both \"fields\" and \"steps\"", hint))
-    } else {
-        emptyList()
-    }
+    val mixed =
+        if (!definition.fields.isNullOrEmpty() && !definition.steps.isNullOrEmpty()) {
+            val hint = "Move the top-level fields into a step, or remove \"steps\""
+            listOf(error(IssueCode.FIELDS_AND_STEPS, "", "the definition has both \"fields\" and \"steps\"", hint))
+        } else {
+            emptyList()
+        }
     return mixed + stepIssues(context) + keyIssues(context) + nestingIssues(context)
 }

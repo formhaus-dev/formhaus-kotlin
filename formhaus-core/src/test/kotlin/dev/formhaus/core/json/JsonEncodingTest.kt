@@ -16,12 +16,23 @@ class JsonEncodingTest {
 
     @Test
     fun `numbers format like JSON stringify`() {
-        val cases = listOf(
-            1e21 to "1e+21", 1e20 to "100000000000000000000", 0.1 + 0.2 to "0.30000000000000004",
-            -0.0 to "0", 3.0 to "3", -12.0 to "-12", 1.5 to "1.5", 1e-7 to "1e-7", 0.000001 to "0.000001",
-            5e-324 to "5e-324", Double.NaN to "null", Double.POSITIVE_INFINITY to "null",
-            Double.NEGATIVE_INFINITY to "null", 2.82879384806159e17 to "282879384806159000",
-        )
+        val cases =
+            listOf(
+                1e21 to "1e+21",
+                1e20 to "100000000000000000000",
+                0.1 + 0.2 to "0.30000000000000004",
+                -0.0 to "0",
+                3.0 to "3",
+                -12.0 to "-12",
+                1.5 to "1.5",
+                1e-7 to "1e-7",
+                0.000001 to "0.000001",
+                5e-324 to "5e-324",
+                Double.NaN to "null",
+                Double.POSITIVE_INFINITY to "null",
+                Double.NEGATIVE_INFINITY to "null",
+                2.82879384806159e17 to "282879384806159000",
+            )
         for ((number, expected) in cases) assertEquals(expected, JsonValue.Number(number).toJsonString())
     }
 
@@ -53,11 +64,12 @@ class JsonEncodingTest {
 
     @Test
     fun `JsonObject and JsonValue encode the same bytes`() {
-        val members = stringMapOf(
-            "email" to JsonValue.String("a@b.c"),
-            "age" to JsonValue.Number(30),
-            "tags" to JsonValue.Array(listOf(JsonValue.String("x"), JsonValue.Null)),
-        )
+        val members =
+            stringMapOf(
+                "email" to JsonValue.String("a@b.c"),
+                "age" to JsonValue.Number(30),
+                "tags" to JsonValue.Array(listOf(JsonValue.String("x"), JsonValue.Null)),
+            )
         assertEquals("""{"email":"a@b.c","age":30,"tags":["x",null]}""", members.toJsonString())
         assertArrayEquals(JsonValue.Object(members).toJsonBytes(), members.toJsonBytes())
     }

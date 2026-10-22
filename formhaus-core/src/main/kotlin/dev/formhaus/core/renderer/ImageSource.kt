@@ -12,12 +12,15 @@ private const val AT = '@'.code
 
 private fun isAsciiLetter(point: Int): Boolean = point in 'a'.code..'z'.code || point in 'A'.code..'Z'.code
 
-private fun isScheme(name: List<Int>): Boolean = name.isNotEmpty() && isAsciiLetter(name[0]) &&
-    name.all { isAsciiLetter(it) || it in '0'.code..'9'.code || it == '+'.code || it == '-'.code || it == '.'.code }
+private fun isScheme(name: List<Int>): Boolean =
+    name.isNotEmpty() && isAsciiLetter(name[0]) &&
+        name.all { isAsciiLetter(it) || it in '0'.code..'9'.code || it == '+'.code || it == '-'.code || it == '.'.code }
 
 private fun text(points: List<Int>): String = buildString { points.forEach(::appendCodePoint) }
 
-private class ImageUrl(source: String) {
+private class ImageUrl(
+    source: String,
+) {
     var scheme = "https"
         private set
     var authority: List<Int>? = null
@@ -27,7 +30,12 @@ private class ImageUrl(source: String) {
     private var rest: List<Int>
 
     init {
-        val kept = source.codePoints().filter { it !in removed }.toArray().asList()
+        val kept =
+            source
+                .codePoints()
+                .filter { it !in removed }
+                .toArray()
+                .asList()
         val start = kept.indexOfFirst { it > 0x20 }.takeIf { it >= 0 } ?: kept.size
         val end = maxOf(start, kept.indexOfLast { it > 0x20 } + 1)
         rest = kept.subList(start, end)
@@ -40,7 +48,7 @@ private class ImageUrl(source: String) {
         }
         val special = scheme in specialSchemes
         val slashes = rest.takeWhile { if (special) it == '/'.code || it == '\\'.code else it == '/'.code }.size
-        if (special && !relative || slashes >= 2) {
+        if ((special && !relative) || slashes >= 2) {
             val after = rest.subList(if (special) slashes else 2, rest.size)
             val ends = if (special) specialEnds else plainEnds
             val host = after.takeWhile { it !in ends }

@@ -14,7 +14,11 @@ import org.junit.jupiter.api.assertThrows
 class CoreAdditionsTest {
     @Test
     fun `replaceDefinition takes JSON and rejects an invalid definition`() {
-        val engine = engine("""{"id":"f","submit":{"label":"S"},"fields":[{"key":"a","type":"text","label":"A"}]}""", """{"a":"x"}""")
+        val engine =
+            engine(
+                """{"id":"f","submit":{"label":"S"},"fields":[{"key":"a","type":"text","label":"A"}]}""",
+                """{"a":"x"}""",
+            )
         engine.replaceDefinition(
             JsonValue.parse(
                 """{"id":"f","submit":{"label":"S"},"fields":[
@@ -28,11 +32,12 @@ class CoreAdditionsTest {
 
     @Test
     fun `error groups follow the steps and join labels by punctuation`() {
-        val engine = engine(
-            """{"id":"f","submit":{"label":"S"},"steps":[
+        val engine =
+            engine(
+                """{"id":"f","submit":{"label":"S"},"steps":[
                 {"id":"one","title":"Contact","fields":[{"key":"a","type":"text","label":"Name?"}]},
                 {"id":"two","fields":[{"key":"b","type":"text","label":"City"},{"key":"c","type":"text","label":"Zip："}]}]}""",
-        )
+            )
         engine.setErrors(errorsOf("""{"c":"Bad","a":"Taken","b":"Missing"}"""))
         val groups = engine.errorGroups(null)
         assertEquals(listOf("one", "two"), groups.map { it.id })

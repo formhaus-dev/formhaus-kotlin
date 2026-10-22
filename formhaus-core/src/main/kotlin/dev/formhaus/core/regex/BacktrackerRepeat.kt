@@ -3,14 +3,27 @@ package dev.formhaus.core.regex
 private sealed interface Gate {
     data object Open : Gate
 
-    class Unit(val expected: Int, val backward: Boolean) : Gate
+    class Unit(
+        val expected: Int,
+        val backward: Boolean,
+    ) : Gate
 
-    class Members(val set: CharSet, val backward: Boolean) : Gate
+    class Members(
+        val set: CharSet,
+        val backward: Boolean,
+    ) : Gate
 
-    class Folded(val expected: Char, val backward: Boolean) : Gate
+    class Folded(
+        val expected: Char,
+        val backward: Boolean,
+    ) : Gate
 }
 
-internal fun Backtracker.enterRepeat(repeated: Instruction.RepeatSet, pc: Int, offset: Int): Int? {
+internal fun Backtracker.enterRepeat(
+    repeated: Instruction.RepeatSet,
+    pc: Int,
+    offset: Int,
+): Int? {
     val step = if (repeated.backward) -1 else 1
     val limit = if (repeated.greedy) repeated.max ?: Int.MAX_VALUE else repeated.min
     val members = Gate.Members(program.sets[repeated.set], repeated.backward)
@@ -73,10 +86,21 @@ private fun Backtracker.gate(entry: Int): Gate {
     while (true) {
         when (val instruction = program.instructions[pc]) {
             is Instruction.Unit -> return Gate.Unit(instruction.unit.code, instruction.backward)
+
             is Instruction.Set -> return Gate.Members(program.sets[instruction.set], instruction.backward)
-            is Instruction.Backreference -> return if (pc == entry) gate(program.references[instruction.reference]) else Gate.Open
+
+            is Instruction.Backreference -> return if (pc ==
+                entry
+            ) {
+                gate(program.references[instruction.reference])
+            } else {
+                Gate.Open
+            }
+
             is Instruction.State -> if (instruction.change is StateChange.Progress) return Gate.Open else pc++
+
             is Instruction.Jump -> pc = instruction.target
+
             else -> return Gate.Open
         }
     }
@@ -92,9 +116,28 @@ private fun Backtracker.gate(reference: Backreference): Gate {
     return Gate.Folded(CaseFolding.canonical[expected.code], reference.backward)
 }
 
-private fun Backtracker.admits(gate: Gate, position: Int): Boolean = when (gate) {
-    Gate.Open -> true
-    is Gate.Unit -> text.nextUnit(position, gate.backward) == gate.expected
-    is Gate.Members -> gate.set.containsCode(text.nextUnit(position, gate.backward))
-    is Gate.Folded -> text.nextUnit(position, gate.backward).let { it >= 0 && CaseFolding.canonical[it] == gate.expected }
-}
+private fun Backtracker.admits(
+    gate: Gate,
+    position: Int,
+): Boolean =
+    when (gate) {
+        Gate.Open -> {
+            true
+        }
+
+        is Gate.Unit -> {
+            text.nextUnit(position, gate.backward) == gate.expected
+        }
+
+        is Gate.Members -> {
+            gate.set.containsCode(text.nextUnit(position, gate.backward))
+        }
+
+        is Gate.Folded -> {
+            text
+                .nextUnit(
+                    position,
+                    gate.backward,
+                ).let { it >= 0 && CaseFolding.canonical[it] == gate.expected }
+        }
+    }

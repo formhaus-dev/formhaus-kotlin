@@ -8,11 +8,20 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.yield
 import kotlin.coroutines.cancellation.CancellationException
 
-internal class StepMove(val step: FormStep, val target: FormStep, val index: Int, val forward: Boolean, val skipping: Boolean) {
+internal class StepMove(
+    val step: FormStep,
+    val target: FormStep,
+    val index: Int,
+    val forward: Boolean,
+    val skipping: Boolean,
+) {
     val validating: Boolean get() = forward && !skipping
 }
 
-internal fun EngineCore.plannedMove(forward: Boolean, reason: StepChangeReason): StepMove? {
+internal fun EngineCore.plannedMove(
+    forward: Boolean,
+    reason: StepChangeReason,
+): StepMove? {
     val skipping = reason == StepChangeReason.SKIP
     if (!isMultiStep || stepValidating || submitting) return null
     if (!skipping && (if (forward) isLastStep else isFirstStep)) return null
@@ -38,7 +47,10 @@ internal fun EngineCore.watchCheckedInputs(checked: JsonObject): () -> Boolean {
     val seen = checked.keys.map { it to values.slot(it) }
     return {
         activePathKey() != path || seen.any { (key, slot) -> !values.slot(key).isSame(slot) } ||
-            getSubmitValues().keys.any { key -> key !in checked && visibility.activeField(key, values.json)?.type != "hidden" }
+            getSubmitValues().keys.any { key ->
+                key !in checked &&
+                    visibility.activeField(key, values.json)?.type != "hidden"
+            }
     }
 }
 
@@ -56,12 +68,13 @@ private suspend fun settle() {
 }
 
 internal suspend fun <T> suspended(body: suspend () -> T): T {
-    val result = try {
-        body()
-    } catch (error: Throwable) {
-        settle()
-        throw error
-    }
+    val result =
+        try {
+            body()
+        } catch (error: Throwable) {
+            settle()
+            throw error
+        }
     settle()
     return result
 }
@@ -75,7 +88,10 @@ internal suspend fun FormEngine.reportErrors(action: suspend () -> Boolean): Boo
     return done
 }
 
-internal suspend fun afterCommit(phase: FormLifecycleError.Phase, callback: suspend () -> Unit) {
+internal suspend fun afterCommit(
+    phase: FormLifecycleError.Phase,
+    callback: suspend () -> Unit,
+) {
     try {
         suspended(callback)
     } catch (error: CancellationException) {
@@ -87,7 +103,10 @@ internal suspend fun afterCommit(phase: FormLifecycleError.Phase, callback: susp
 
 internal suspend fun FormEngine.advance(reason: StepChangeReason): Boolean = reportErrors { changeStep(true, reason) }
 
-internal suspend fun FormEngine.changeStep(forward: Boolean, reason: StepChangeReason): Boolean {
+internal suspend fun FormEngine.changeStep(
+    forward: Boolean,
+    reason: StepChangeReason,
+): Boolean {
     val core = core
     val move = core.plannedMove(forward, reason) ?: return false
     val step = move.step
@@ -97,7 +116,8 @@ internal suspend fun FormEngine.changeStep(forward: Boolean, reason: StepChangeR
     val operation = core.beginOperation()
     val inputsChanged = core.watchCheckedInputs(context.values)
     val stale = {
-        epoch != core.validationEpoch || operation != core.operationEpoch || core.currentStep?.id != step.id || inputsChanged()
+        epoch != core.validationEpoch || operation != core.operationEpoch || core.currentStep?.id != step.id ||
+            inputsChanged()
     }
     core.stepValidating = true
     core.notify()
@@ -105,7 +125,11 @@ internal suspend fun FormEngine.changeStep(forward: Boolean, reason: StepChangeR
         if (!approve(move, context, stale)) return false
         committed = true
         commit(move)
-        suspended { afterCommit(FormLifecycleError.Phase.AFTER_STEP_CHANGE) { options.onAfterStepChange?.invoke(context) } }
+        suspended {
+            afterCommit(
+                FormLifecycleError.Phase.AFTER_STEP_CHANGE,
+            ) { options.onAfterStepChange?.invoke(context) }
+        }
         return true
     } catch (error: CancellationException) {
         return committed
@@ -120,7 +144,11 @@ internal suspend fun FormEngine.changeStep(forward: Boolean, reason: StepChangeR
     }
 }
 
-private suspend fun FormEngine.approve(move: StepMove, context: StepChangeContext, stale: () -> Boolean): Boolean {
+private suspend fun FormEngine.approve(
+    move: StepMove,
+    context: StepChangeContext,
+    stale: () -> Boolean,
+): Boolean {
     if (stale()) return false
     val validate = options.onStepValidate
     if (move.validating && validate != null) {
@@ -141,7 +169,11 @@ private suspend fun FormEngine.approve(move: StepMove, context: StepChangeContex
 }
 
 private fun FormEngine.commit(move: StepMove) {
-    if (move.forward) core.emit(if (move.skipping) FormEvent.StepSkipped(move.step.id) else FormEvent.StepCompleted(move.step.id))
+    if (move.forward) {
+        core.emit(
+            if (move.skipping) FormEvent.StepSkipped(move.step.id) else FormEvent.StepCompleted(move.step.id),
+        )
+    }
     if (move.skipping) core.skipCurrentStep()
     moveTo(move.index)
 }

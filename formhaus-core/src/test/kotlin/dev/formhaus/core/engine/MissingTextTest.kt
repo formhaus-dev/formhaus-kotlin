@@ -20,12 +20,13 @@ class MissingTextTest {
     @Test
     fun `a shown message and label absent from the catalogs warn once per key`() {
         val issues = ArrayList<DefinitionIssue>()
-        val engine = engine(
-            """{"id":"w","title":"W","submit":{"label":"Send"},"fields":[
+        val engine =
+            engine(
+                """{"id":"w","title":"W","submit":{"label":"Send"},"fields":[
                 {"key":"at","type":"time","label":"At"},{"key":"name","type":"text","label":"Name"}]}""",
-            """{"at":"late"}""",
-            FormEngineOptions(onWarning = { issues.add(it) }, messages = messages),
-        )
+                """{"at":"late"}""",
+                FormEngineOptions(onWarning = { issues.add(it) }, messages = messages),
+            )
         engine.validate()
         engine.validate()
         engine.label("missingTextProbe", labels)
@@ -44,12 +45,13 @@ class MissingTextTest {
     @Test
     fun `texts the definition supplies do not warn`() {
         val issues = ArrayList<DefinitionIssue>()
-        val engine = engine(
-            """{"id":"d","title":"D","submit":{"label":"Send"},"messages":{"date":"Datum ungültig"},"labels":{"missingTextDefined":"Definiert"},
+        val engine =
+            engine(
+                """{"id":"d","title":"D","submit":{"label":"Send"},"messages":{"date":"Datum ungültig"},"labels":{"missingTextDefined":"Definiert"},
                "fields":[{"key":"on","type":"date","label":"On"}]}""",
-            """{"on":"soon"}""",
-            FormEngineOptions(onWarning = { issues.add(it) }, messages = messages),
-        )
+                """{"on":"soon"}""",
+                FormEngineOptions(onWarning = { issues.add(it) }, messages = messages),
+            )
         assertEquals("Datum ungültig", engine.validate()["on"])
         assertEquals("Definiert", engine.label("missingTextDefined", labels))
         assertTrue(issues.none { it.code == IssueCode.MISSING_MESSAGE_KEY || it.code == IssueCode.MISSING_LABEL_KEY })

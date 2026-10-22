@@ -5,10 +5,15 @@ import dev.formhaus.core.json.JsonValue
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.yield
 
-class ScriptError(message: String) : Exception(message)
+class ScriptError(
+    message: String,
+) : Exception(message)
 
 class Script {
-    private class Deferred(val name: String, var release: () -> Unit)
+    private class Deferred(
+        val name: String,
+        var release: () -> Unit,
+    )
 
     private val deferred = ArrayList<Deferred>()
 
@@ -36,7 +41,9 @@ class Script {
     }
 }
 
-class Replies(entries: List<JsonValue>) {
+class Replies(
+    entries: List<JsonValue>,
+) {
     private val entries = ArrayDeque(entries)
 
     fun next(): JsonValue? = entries.removeFirstOrNull()

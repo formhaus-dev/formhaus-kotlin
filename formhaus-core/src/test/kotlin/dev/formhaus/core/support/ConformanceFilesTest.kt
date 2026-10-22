@@ -28,32 +28,34 @@ class ConformanceFilesTest {
     }
 
     @TestFactory
-    fun `definition file loads and decodes`(): List<DynamicTest> = Fixtures.conformanceNames.map { name ->
-        DynamicTest.dynamicTest(name) {
-            val file = Fixtures.conformanceFile(name)
-            assertNotNull(file["name"]?.stringValue)
-            decodes(file["definition"])
-        }
-    }
-
-    @TestFactory
-    fun `scenario file loads and decodes`(): List<DynamicTest> = Fixtures.scenarioNames.map { name ->
-        DynamicTest.dynamicTest(name) {
-            val file = Fixtures.scenarioFile(name)
-            assertNotNull(file["name"]?.stringValue)
-            val definition = file["definition"]
-            decodes(definition)
-            val scenarios = requireNotNull(file["scenarios"]?.arrayValue)
-            assertFalse(scenarios.isEmpty())
-            for (scenario in scenarios) {
-                assertNotNull(scenario["name"]?.stringValue)
-                if (scenario["throws"] != null) continue
-                val own = requireNotNull(scenario["definition"] ?: definition)
-                decodes(own)
-                assertTrue(checkDefinition(own).none { it.isError }, scenario["name"]?.stringValue)
+    fun `definition file loads and decodes`(): List<DynamicTest> =
+        Fixtures.conformanceNames.map { name ->
+            DynamicTest.dynamicTest(name) {
+                val file = Fixtures.conformanceFile(name)
+                assertNotNull(file["name"]?.stringValue)
+                decodes(file["definition"])
             }
         }
-    }
+
+    @TestFactory
+    fun `scenario file loads and decodes`(): List<DynamicTest> =
+        Fixtures.scenarioNames.map { name ->
+            DynamicTest.dynamicTest(name) {
+                val file = Fixtures.scenarioFile(name)
+                assertNotNull(file["name"]?.stringValue)
+                val definition = file["definition"]
+                decodes(definition)
+                val scenarios = requireNotNull(file["scenarios"]?.arrayValue)
+                assertFalse(scenarios.isEmpty())
+                for (scenario in scenarios) {
+                    assertNotNull(scenario["name"]?.stringValue)
+                    if (scenario["throws"] != null) continue
+                    val own = requireNotNull(scenario["definition"] ?: definition)
+                    decodes(own)
+                    assertTrue(checkDefinition(own).none { it.isError }, scenario["name"]?.stringValue)
+                }
+            }
+        }
 
     @Test
     fun `lone surrogate fixtures load through the raw reader`() {

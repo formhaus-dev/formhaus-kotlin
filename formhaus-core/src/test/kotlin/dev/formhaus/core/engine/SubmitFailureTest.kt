@@ -12,15 +12,19 @@ import org.junit.jupiter.api.Test
 import java.io.IOException
 
 class SubmitFailureTest {
-    private class ServerError(override val status: Int?) : Exception(), SubmitStatusError
+    private class ServerError(
+        override val status: Int?,
+    ) : Exception(),
+        SubmitStatusError
 
-    private fun failure(error: Throwable): FormEvent? = runBlocking {
-        val events = ArrayList<FormEvent>()
-        val engine = engine(Forms.FLAT, options = FormEngineOptions(onFormEvent = { events.add(it) }))
-        engine.start()
-        assertTrue(runCatching { engine.submit { _, _ -> throw error } }.isFailure)
-        events.lastOrNull()
-    }
+    private fun failure(error: Throwable): FormEvent? =
+        runBlocking {
+            val events = ArrayList<FormEvent>()
+            val engine = engine(Forms.FLAT, options = FormEngineOptions(onFormEvent = { events.add(it) }))
+            engine.start()
+            assertTrue(runCatching { engine.submit { _, _ -> throw error } }.isFailure)
+            events.lastOrNull()
+        }
 
     private fun outcome(result: GoToStepResult): String = "${result.stepId} ${result.reached} ${result.reason?.rawValue}"
 
@@ -45,23 +49,26 @@ class SubmitFailureTest {
     }
 
     @Test
-    fun `goToStep while a step change is pending stays on the current step`(): Unit = runBlocking {
-        withTimeout(60_000) {
-            val started = Channel<Unit>(Channel.UNLIMITED)
-            val engine = engine(
-                Forms.STEPS,
-                options = FormEngineOptions(onStepValidate = { _, _ ->
-                    started.send(Unit)
-                    delay(3_600_000)
-                    null
-                }),
-            )
-            val job = launch { engine.next() }
-            started.receive()
-            assertEquals("one false blocked", outcome(engine.goToStep("two")))
-            assertEquals("one false blocked", outcome(engine.goToStep("one")))
-            job.cancel()
-            job.join()
+    fun `goToStep while a step change is pending stays on the current step`(): Unit =
+        runBlocking {
+            withTimeout(60_000) {
+                val started = Channel<Unit>(Channel.UNLIMITED)
+                val engine =
+                    engine(
+                        Forms.STEPS,
+                        options =
+                            FormEngineOptions(onStepValidate = { _, _ ->
+                                started.send(Unit)
+                                delay(3_600_000)
+                                null
+                            }),
+                    )
+                val job = launch { engine.next() }
+                started.receive()
+                assertEquals("one false blocked", outcome(engine.goToStep("two")))
+                assertEquals("one false blocked", outcome(engine.goToStep("one")))
+                job.cancel()
+                job.join()
+            }
         }
-    }
 }

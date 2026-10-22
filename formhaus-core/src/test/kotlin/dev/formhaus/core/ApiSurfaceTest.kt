@@ -21,13 +21,14 @@ import java.util.concurrent.Callable
 import java.util.concurrent.Executors
 
 class ApiSurfaceTest {
-    private val definition = JsonValue.parse(
-        """{"id":"f","title":"F","submit":{"label":"S"},"steps":[
+    private val definition =
+        JsonValue.parse(
+            """{"id":"f","title":"F","submit":{"label":"S"},"steps":[
             {"id":"one","title":"One","fields":[{"key":"a","type":"text","label":"A","validation":{"required":true}}],
              "routes":[{"to":null,"show":[{"field":"a","eq":"end"}]}]},
             {"id":"two","title":"Two","show":[{"field":"a","neq":"skip"}],
              "fields":[{"key":"s","type":"section","title":"S","showAny":[{"field":"a","eq":"x"}],"fields":[]}]}]}""",
-    )
+        )
 
     @Test
     fun `issue codes are an open string set`() {
@@ -39,7 +40,19 @@ class ApiSurfaceTest {
 
     @Test
     fun `message functions receive message keys`() {
-        val options = SubmissionOptions(messages = MessageSource.Function { key, _, field -> if (key == MessageKey.REQUIRED) "Need ${field.key}" else null })
+        val options =
+            SubmissionOptions(
+                messages =
+                    MessageSource.Function { key, _, field ->
+                        if (key ==
+                            MessageKey.REQUIRED
+                        ) {
+                            "Need ${field.key}"
+                        } else {
+                            null
+                        }
+                    },
+            )
         val result = validateSubmission(definition, JsonValue.Object(MutableJsonObject()), options)
         assertEquals(mapOf("a" to "Need a"), result.errors.toMap())
     }
@@ -48,17 +61,24 @@ class ApiSurfaceTest {
     fun `checks, submissions and slots run from any thread`() {
         val pool = Executors.newFixedThreadPool(4)
         try {
-            val results = pool.invokeAll(
-                List(16) {
-                    Callable {
-                        val issues = checkDefinition(definition).count { it.isError }
-                        val errors = validateSubmission(definition, JsonValue.parse("""{"a":"x"}""")).errors.size
-                        val slots = textSlots(FormDefinition(definition)).size
-                        val localized = localize(definition, JsonValue.parse("""{"title":"T"}""")).definition.title == "T"
-                        issues + errors + (if (slots > 0) 0 else 100) + (if (localized) 0 else 1000)
-                    }
-                },
-            ).map { it.get() }
+            val results =
+                pool
+                    .invokeAll(
+                        List(16) {
+                            Callable {
+                                val issues = checkDefinition(definition).count { it.isError }
+                                val errors =
+                                    validateSubmission(
+                                        definition,
+                                        JsonValue.parse("""{"a":"x"}"""),
+                                    ).errors.size
+                                val slots = textSlots(FormDefinition(definition)).size
+                                val localized =
+                                    localize(definition, JsonValue.parse("""{"title":"T"}""")).definition.title == "T"
+                                issues + errors + (if (slots > 0) 0 else 100) + (if (localized) 0 else 1000)
+                            }
+                        },
+                    ).map { it.get() }
             assertEquals(List(16) { 0 }, results)
         } finally {
             pool.shutdown()

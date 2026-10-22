@@ -1,7 +1,13 @@
 package dev.formhaus.core.regex
 
-internal class PatternCache(private val limit: Int = LIMIT, private val byteLimit: Int = BYTE_LIMIT) {
-    private class Entry(val pattern: CompiledPattern?, val bytes: Int)
+internal class PatternCache(
+    private val limit: Int = LIMIT,
+    private val byteLimit: Int = BYTE_LIMIT,
+) {
+    private class Entry(
+        val pattern: CompiledPattern?,
+        val bytes: Int,
+    )
 
     private val entries = LinkedHashMap<String, Entry>(16, 0.75f, true)
     private var used = 0
@@ -10,16 +16,20 @@ internal class PatternCache(private val limit: Int = LIMIT, private val byteLimi
 
     fun pattern(source: String): CompiledPattern? {
         synchronized(this) { entries[source]?.let { return it.pattern } }
-        val compiled = try {
-            CompiledPattern(source)
-        } catch (_: RegexSyntaxError) {
-            null
-        }
+        val compiled =
+            try {
+                CompiledPattern(source)
+            } catch (_: RegexSyntaxError) {
+                null
+            }
         synchronized(this) { insert(source, compiled) }
         return compiled
     }
 
-    private fun insert(source: String, pattern: CompiledPattern?) {
+    private fun insert(
+        source: String,
+        pattern: CompiledPattern?,
+    ) {
         val size = utf8Length(source) + (pattern?.bytes ?: 0)
         if (source in entries || size > byteLimit) return
         val oldest = entries.values.iterator()
@@ -42,12 +52,13 @@ internal class PatternCache(private val limit: Int = LIMIT, private val byteLimi
             while (index < text.length) {
                 val char = text[index]
                 val pair = char.isHighSurrogate() && index + 1 < text.length && text[index + 1].isLowSurrogate()
-                length += when {
-                    pair -> 4
-                    char.code < 0x80 -> 1
-                    char.code < 0x800 -> 2
-                    else -> 3
-                }
+                length +=
+                    when {
+                        pair -> 4
+                        char.code < 0x80 -> 1
+                        char.code < 0x800 -> 2
+                        else -> 3
+                    }
                 index += if (pair) 2 else 1
             }
             return length

@@ -51,17 +51,26 @@ class RegexBudgetTest {
 
     @Test
     fun `public validators run in their own budget`() {
-        val probe = stringMapOf<ValidatorFn>("probe" to { _, _ -> if (CallBudget.current.value == null) "outside" else null })
-        val form = definition("""{"id":"p","submit":{"label":"S"},"fields":[{"key":"a","type":"text","label":"A","validation":{"validator":"probe"}}]}""")
+        val probe =
+            stringMapOf<ValidatorFn>("probe" to { _, _ -> if (CallBudget.current.value == null) "outside" else null })
+        val form =
+            definition(
+                """{"id":"p","submit":{"label":"S"},"fields":[{"key":"a","type":"text","label":"A","validation":{"validator":"probe"}}]}""",
+            )
         val nodes = requireNotNull(form.fields)
-        assertNull(validateFieldValue(form.allFields.first(), JsonValue.String("x"), stringMapOf(), ValidateOptions(probe)))
+        assertNull(
+            validateFieldValue(form.allFields.first(), JsonValue.String("x"), stringMapOf(), ValidateOptions(probe)),
+        )
         assertTrue(validateFields(nodes, stringMapOf("a" to JsonValue.String("x")), ValidateOptions(probe)).isEmpty())
     }
 
     @Test
     fun `one validation tests at most 10,000 values against patterns`() {
         val limit = CallBudget.patternTestLimit.value
-        val fields = (0..limit).joinToString(",") { """{"key":"f$it","type":"text","label":"F","validation":{"pattern":"^a$"}}""" }
+        val fields =
+            (0..limit).joinToString(",") {
+                """{"key":"f$it","type":"text","label":"F","validation":{"pattern":"^a$"}}"""
+            }
         val form = definition("""{"id":"p","submit":{"label":"S"},"fields":[$fields]}""")
         val nodes = requireNotNull(form.fields)
         val values = MutableJsonObject()

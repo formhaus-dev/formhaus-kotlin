@@ -1,7 +1,9 @@
 package dev.formhaus.core.definitionvalidation
 
 @JvmInline
-public value class IssueCode(public val rawValue: String) {
+public value class IssueCode(
+    public val rawValue: String,
+) {
     override fun toString(): String = rawValue
 
     public companion object {

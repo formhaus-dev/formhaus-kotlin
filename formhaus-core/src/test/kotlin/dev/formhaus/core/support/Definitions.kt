@@ -13,7 +13,12 @@ fun definition(text: String): FormDefinition = FormDefinition(jsonObject(text))
 
 fun field(text: String): FormField = definition("""{"id":"f","submit":{"label":"S"},"fields":[$text]}""").allFields.first()
 
-fun engine(definition: String, values: String = "{}", options: FormEngineOptions = FormEngineOptions(onWarning = {})): FormEngine =
-    FormEngine(definition(definition), jsonObject(values), options)
+fun engine(
+    definition: String,
+    values: String = "{}",
+    options: FormEngineOptions =
+        FormEngineOptions(onWarning = {
+        }),
+): FormEngine = FormEngine(definition(definition), jsonObject(values), options)
 
 fun text(value: String): JsonValue = JsonValue.String(value)

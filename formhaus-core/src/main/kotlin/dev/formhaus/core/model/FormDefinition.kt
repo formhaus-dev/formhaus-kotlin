@@ -8,7 +8,10 @@ import dev.formhaus.core.json.MutableJsonObject
 import dev.formhaus.core.json.jsNumber
 import dev.formhaus.core.json.jsString
 
-public class FormStep internal constructor(internal val json: JsonObject, ordinals: Ordinals) : Conditional {
+public class FormStep internal constructor(
+    internal val json: JsonObject,
+    ordinals: Ordinals,
+) : Conditional {
     internal val ordinal: Int = ordinals.take()
     public val id: String = json["id"]?.stringValue ?: ""
     public val fields: List<FormNode> = formNodes(json["fields"], ordinals).orEmpty()
@@ -24,14 +27,17 @@ public class FormStep internal constructor(internal val json: JsonObject, ordina
     public val description: String? get() = json["description"]?.stringValue
     public val canSkip: Boolean get() = json["skip"]?.isTruthy == true
 
-    internal fun button(name: String): StepButton = when (name) {
-        "next" -> next
-        "back" -> back
-        else -> skip
-    }
+    internal fun button(name: String): StepButton =
+        when (name) {
+            "next" -> next
+            "back" -> back
+            else -> skip
+        }
 }
 
-public class FormDefinition internal constructor(internal val json: JsonObject) {
+public class FormDefinition internal constructor(
+    internal val json: JsonObject,
+) {
     public constructor(json: JsonValue) : this(checkedRoot(json))
 
     private val ordinals = Ordinals()
@@ -41,7 +47,11 @@ public class FormDefinition internal constructor(internal val json: JsonObject) 
     public val fields: List<FormNode>? = formNodes(json["fields"], ordinals)
     public val steps: List<FormStep>? =
         json["steps"]?.arrayValue?.mapNotNull { item -> item.objectValue?.let { FormStep(it, ordinals) } }
-    internal val recallsAnswers: Boolean = formatParts(json["formatVersion"]).let { (major, minor) -> major > 1 || minor >= 5 }
+    internal val recallsAnswers: Boolean =
+        formatParts(json["formatVersion"]).let { (major, minor) ->
+            major > 1 ||
+                minor >= 5
+        }
 
     public val title: String? get() = json["title"]?.stringValue
     public val description: String? get() = json["description"]?.stringValue

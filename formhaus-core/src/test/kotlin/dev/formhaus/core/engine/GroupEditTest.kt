@@ -11,18 +11,30 @@ import org.junit.jupiter.api.Assumptions.assumeTrue
 import org.junit.jupiter.api.Test
 
 class GroupEditTest {
-    private fun groups(count: Int, items: Int): String {
-        val fields = (0 until count).joinToString(",") { index ->
-            """{"key":"g$index","type":"group","label":"G","defaultItems":$items,"fields":[
+    private fun groups(
+        count: Int,
+        items: Int,
+    ): String {
+        val fields =
+            (0 until count).joinToString(",") { index ->
+                """{"key":"g$index","type":"group","label":"G","defaultItems":$items,"fields":[
                 {"key":"a","type":"text","label":"A"},
                 {"key":"b","type":"text","label":"B","show":[{"field":"a","neq":"hide"}]},
                 {"key":"c","type":"text","label":"C","show":[{"field":"mode","eq":"full"}]}]}"""
-        }
+            }
         return """{"id":"p","title":"P","submit":{"label":"S"},"fields":[{"key":"mode","type":"text","label":"M"},$fields]}"""
     }
 
-    private fun FormEngine.item(group: String, index: Int, field: String): JsonValue? =
-        values[group]?.arrayValue?.get(index)?.objectValue?.get(field)
+    private fun FormEngine.item(
+        group: String,
+        index: Int,
+        field: String,
+    ): JsonValue? =
+        values[group]
+            ?.arrayValue
+            ?.get(index)
+            ?.objectValue
+            ?.get(field)
 
     private val full = """{"mode":"full"}"""
 
@@ -31,7 +43,12 @@ class GroupEditTest {
         val engine = engine(groups(2, 3), full)
         engine.setItemValue("g0", 1, "b", text("kept"))
         engine.setItemValue("g0", 1, "a", text("hide"))
-        assertEquals(listOf(listOf("a", "b", "c"), listOf("a", "c"), listOf("a", "b", "c")), engine.items("g0").map { item -> item.fields.map { it.key } })
+        assertEquals(
+            listOf(listOf("a", "b", "c"), listOf("a", "c"), listOf("a", "b", "c")),
+            engine.items("g0").map { item ->
+                item.fields.map { it.key }
+            },
+        )
         assertNull(engine.item("g0", 1, "b"))
         engine.setItemValue("g0", 1, "a", text("show"))
         assertEquals(text("kept"), engine.item("g0", 1, "b"))
@@ -70,11 +87,15 @@ class GroupEditTest {
         assertEquals(listOf(FormEvent.FieldHidden("g2.3.b"), FormEvent.FieldShown("g2.3.b")) + hidden, events.drop(1))
     }
 
-    private fun fastest(runs: Int, block: () -> Unit): Long = (0 until runs).minOf {
-        val start = System.nanoTime()
-        block()
-        System.nanoTime() - start
-    }
+    private fun fastest(
+        runs: Int,
+        block: () -> Unit,
+    ): Long =
+        (0 until runs).minOf {
+            val start = System.nanoTime()
+            block()
+            System.nanoTime() - start
+        }
 
     @Test
     fun `one edit costs the same with 1 or 64 large groups`() {

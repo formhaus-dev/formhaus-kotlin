@@ -1,6 +1,9 @@
 package dev.formhaus.core.regex
 
-internal class Backtracker(val program: RegexProgram, val context: MatchContext) {
+internal class Backtracker(
+    val program: RegexProgram,
+    val context: MatchContext,
+) {
     val text: CharArray = context.text
     var slots: IntArray = IntArray(2 * (program.captureCount + 1)) { -1 }
     val registers: IntArray = IntArray(program.registerCount) { -1 }
@@ -26,7 +29,10 @@ internal class Backtracker(val program: RegexProgram, val context: MatchContext)
         return false
     }
 
-    fun run(entry: Int, position: Int): Boolean {
+    fun run(
+        entry: Int,
+        position: Int,
+    ): Boolean {
         val outerPc = pc
         val outerOffset = offset
         val base = frames.size
@@ -56,22 +62,31 @@ internal class Backtracker(val program: RegexProgram, val context: MatchContext)
                     offset = frames.b(frame)
                     return true
                 }
-                Frames.REGISTER -> registers[frames.a(frame)] = frames.b(frame)
+
+                Frames.REGISTER -> {
+                    registers[frames.a(frame)] = frames.b(frame)
+                }
+
                 Frames.CAPTURE -> {
                     val group = frames.a(frame)
                     slots[2 * group] = frames.b(frame)
                     slots[2 * group + 1] = frames.c(frame)
                 }
+
                 Frames.CAPTURES -> {
                     val index = frames.a(frame)
                     slots = saved[index]
                     saved.subList(index, saved.size).clear()
                 }
+
                 Frames.SCAN -> {
                     resumeScan(frames.scan(frame))
                     return true
                 }
-                else -> if (resumeExtend(frames.scan(frame))) return true
+
+                else -> {
+                    if (resumeExtend(frames.scan(frame))) return true
+                }
             }
         }
         return false
@@ -81,45 +96,74 @@ internal class Backtracker(val program: RegexProgram, val context: MatchContext)
 
     private fun execute(): Int {
         if (memoized(pc) && memo?.insert((pc - program.memoFrom) * width + offset) == false) return FAILURE
-        when (val instruction = program.instructions[pc]) {
-            is Instruction.Unit, is Instruction.Set -> return if (consume()) PROCEED else FAILURE
-            is Instruction.Split -> {
-                if (program.instructions[instruction.second] == Instruction.Match) return SUCCESS
-                frames.push(Frames.RESUME, instruction.second, offset)
-                pc = instruction.first
-                return PROCEED
+        return when (val instruction = program.instructions[pc]) {
+            is Instruction.Unit, is Instruction.Set -> {
+                if (consume()) PROCEED else FAILURE
             }
+
+            is Instruction.Split -> {
+                split(instruction)
+            }
+
             is Instruction.Jump -> {
                 pc = instruction.target
-                return PROCEED
+                PROCEED
             }
-            is Instruction.Assertion -> if (!text.holds(instruction.assertion, offset)) return FAILURE
-            is Instruction.Look -> if (!evaluateLook(instruction.look, offset)) return FAILURE
-            is Instruction.Backreference -> offset = matchReference(program.references[instruction.reference], offset) ?: return FAILURE
-            Instruction.Succeed, Instruction.Match -> return SUCCESS
-            is Instruction.RepeatSet -> offset = enterRepeat(instruction, pc, offset) ?: return FAILURE
-            is Instruction.State -> if (!apply(instruction.change, pc, offset)) return FAILURE
+
+            Instruction.Succeed, Instruction.Match -> {
+                SUCCESS
+            }
+
+            else -> {
+                if (passes(instruction)) {
+                    pc++
+                    PROCEED
+                } else {
+                    FAILURE
+                }
+            }
         }
-        pc++
+    }
+
+    private fun split(instruction: Instruction.Split): Int {
+        if (program.instructions[instruction.second] == Instruction.Match) return SUCCESS
+        frames.push(Frames.RESUME, instruction.second, offset)
+        pc = instruction.first
         return PROCEED
     }
+
+    private fun passes(instruction: Instruction): Boolean =
+        when (instruction) {
+            is Instruction.Assertion -> text.holds(instruction.assertion, offset)
+            is Instruction.Look -> evaluateLook(instruction.look, offset)
+            is Instruction.Backreference -> matchReference(program.references[instruction.reference], offset)?.also { offset = it } != null
+            is Instruction.RepeatSet -> enterRepeat(instruction, pc, offset)?.also { offset = it } != null
+            is Instruction.State -> apply(instruction.change, pc, offset)
+            else -> true
+        }
 
     private fun consume(): Boolean {
         var steps = 0
         var matched = true
         while (steps == 0 || memo == null) {
             val instruction = program.instructions[pc]
-            val backward = when (instruction) {
-                is Instruction.Unit -> {
-                    matched = text.nextUnit(offset, instruction.backward) == instruction.unit.code
-                    instruction.backward
+            val backward =
+                when (instruction) {
+                    is Instruction.Unit -> {
+                        matched = text.nextUnit(offset, instruction.backward) == instruction.unit.code
+                        instruction.backward
+                    }
+
+                    is Instruction.Set -> {
+                        matched =
+                            program.sets[instruction.set].containsCode(text.nextUnit(offset, instruction.backward))
+                        instruction.backward
+                    }
+
+                    else -> {
+                        break
+                    }
                 }
-                is Instruction.Set -> {
-                    matched = program.sets[instruction.set].containsCode(text.nextUnit(offset, instruction.backward))
-                    instruction.backward
-                }
-                else -> break
-            }
             if (!matched) break
             offset += if (backward) -1 else 1
             pc++
@@ -137,7 +181,9 @@ internal class Backtracker(val program: RegexProgram, val context: MatchContext)
     }
 }
 
-internal class Bitset(count: Int) {
+internal class Bitset(
+    count: Int,
+) {
     private val words = LongArray((count + 63) / 64)
 
     fun insert(index: Int): Boolean {

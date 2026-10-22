@@ -10,15 +10,22 @@ private val lastToken = AtomicInteger()
 
 internal fun freshToken(): Int = lastToken.incrementAndGet()
 
-internal data class Ref(val token: Int, val items: List<Int>) {
+internal data class Ref(
+    val token: Int,
+    val items: List<Int>,
+) {
     companion object {
-        fun fresh(value: JsonValue?): Ref? = when (value) {
-            is JsonValue.Array -> Ref(freshToken(), value.items.map { freshToken() })
-            is JsonValue.Object -> Ref(freshToken(), emptyList())
-            else -> null
-        }
+        fun fresh(value: JsonValue?): Ref? =
+            when (value) {
+                is JsonValue.Array -> Ref(freshToken(), value.items.map { freshToken() })
+                is JsonValue.Object -> Ref(freshToken(), emptyList())
+                else -> null
+            }
 
-        fun preset(value: JsonValue, ordinal: Int): Ref? {
+        fun preset(
+            value: JsonValue,
+            ordinal: Int,
+        ): Ref? {
             val base = -(ordinal + 1) * 1_000_000
             return when (value) {
                 is JsonValue.Array -> Ref(-(ordinal + 1), value.items.indices.map { base - it - 1 })
@@ -29,7 +36,10 @@ internal data class Ref(val token: Int, val items: List<Int>) {
     }
 }
 
-internal class ValueSlot(val value: JsonValue?, ref: Ref?) {
+internal class ValueSlot(
+    val value: JsonValue?,
+    ref: Ref?,
+) {
     val ref: Ref? = if (value == null) null else ref
 
     fun isSame(other: ValueSlot): Boolean {
@@ -46,13 +56,20 @@ internal class ValueSlot(val value: JsonValue?, ref: Ref?) {
     }
 }
 
-internal fun samePrimitive(lhs: JsonValue?, rhs: JsonValue?): Boolean = when {
-    lhs == null || rhs == null -> lhs == null && rhs == null
-    lhs is JsonValue.Array || lhs is JsonValue.Object -> false
-    else -> lhs == rhs
-}
+internal fun samePrimitive(
+    lhs: JsonValue?,
+    rhs: JsonValue?,
+): Boolean =
+    when {
+        lhs == null || rhs == null -> lhs == null && rhs == null
+        lhs is JsonValue.Array || lhs is JsonValue.Object -> false
+        else -> lhs == rhs
+    }
 
-internal class Values private constructor(private var storage: MutableJsonObject, private var refs: MutableStringMap<Ref>) {
+internal class Values private constructor(
+    private var storage: MutableJsonObject,
+    private var refs: MutableStringMap<Ref>,
+) {
     private var shared = false
 
     constructor() : this(MutableJsonObject(), MutableStringMap())
@@ -87,7 +104,10 @@ internal class Values private constructor(private var storage: MutableJsonObject
         shared = false
     }
 
-    fun set(key: String, slot: ValueSlot) {
+    fun set(
+        key: String,
+        slot: ValueSlot,
+    ) {
         val value = slot.value ?: return remove(key)
         own()
         storage[key] = value
@@ -107,7 +127,10 @@ internal class Values private constructor(private var storage: MutableJsonObject
 
     fun itemIds(key: String): List<Int> = refs[key]?.items.orEmpty()
 
-    fun itemId(key: String, index: Int): Int? = itemIds(key).getOrNull(index)
+    fun itemId(
+        key: String,
+        index: Int,
+    ): Int? = itemIds(key).getOrNull(index)
 
     fun changedKeys(other: Values): Set<String> {
         val changed = HashSet<String>()

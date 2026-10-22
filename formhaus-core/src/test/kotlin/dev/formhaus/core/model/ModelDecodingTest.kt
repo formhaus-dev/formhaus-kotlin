@@ -12,8 +12,9 @@ class ModelDecodingTest {
 
     @Test
     fun `steps, routes, buttons and sections decode`() {
-        val form = definition(
-            """
+        val form =
+            definition(
+                """
             {"id":"f","title":"F","submit":{"label":"S"},"steps":[
               {"id":"one","title":"One","next":{"label":"Go"},"back":false,"skip":true,
                "fields":[{"key":"a","type":"text","label":"A","validation":{"required":true}}],
@@ -24,7 +25,7 @@ class ModelDecodingTest {
               "junk"
             ]}
             """,
-        )
+            )
         val steps = requireNotNull(form.steps)
         assertEquals(listOf("one", "two"), steps.map { it.id })
         assertTrue(form.isMultiStep)
@@ -51,8 +52,9 @@ class ModelDecodingTest {
 
     @Test
     fun `scale, rating, picture options and matrix sections expose their settings`() {
-        val form = definition(
-            """
+        val form =
+            definition(
+                """
             {"formatVersion":"1.3","id":"f","title":"F","submit":{"label":"S"},"fields":[
               {"key":"nps","type":"scale","label":"N","validation":{"min":0,"max":10}},
               {"key":"stars","type":"rating","label":"R","validation":{"min":3}},
@@ -61,7 +63,7 @@ class ModelDecodingTest {
               {"key":"grid","type":"section","layout":"matrix","title":"G","fields":[]}
             ]}
             """,
-        )
+            )
         val nodes = requireNotNull(form.fields)
         val nps = nodes[0] as FormField
         val stars = nodes[1] as FormField
@@ -86,14 +88,15 @@ class ModelDecodingTest {
 
     @Test
     fun `groups own their item fields and lenient values fall back`() {
-        val form = definition(
-            """
+        val form =
+            definition(
+                """
             {"formatVersion":"1.5","id":7,"submit":"x","fields":[
               {"key":"g","type":"group","fields":[{"key":"x","type":"text"},{"key":"y","type":"section","fields":[]}]},
               {"key":"t","type":"text","fields":[{"key":"ignored","type":"text"}],"columns":2.5}
             ]}
             """,
-        )
+            )
         val nodes = requireNotNull(form.fields)
         val group = nodes[0] as FormField
         val text = nodes[1] as FormField

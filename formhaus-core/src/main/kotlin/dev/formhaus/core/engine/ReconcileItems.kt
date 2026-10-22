@@ -12,9 +12,19 @@ import dev.formhaus.core.visibility.itemScope
 import dev.formhaus.core.visibility.itemsOf
 import dev.formhaus.core.visibility.splitPath
 
-private class ReconciledItem(val item: JsonValue, val cleared: List<String>, val stable: Boolean)
+private class ReconciledItem(
+    val item: JsonValue,
+    val cleared: List<String>,
+    val stable: Boolean,
+)
 
-private fun VisibilityState.reconcileItem(fields: List<FormField>, item: JsonValue, id: Int?, scope: JsonObject, limits: ListLimits): ReconciledItem {
+private fun VisibilityState.reconcileItem(
+    fields: List<FormField>,
+    item: JsonValue,
+    id: Int?,
+    scope: JsonObject,
+    limits: ListLimits,
+): ReconciledItem {
     var entry: JsonObject = item.objectValue ?: return ReconciledItem(item, emptyList(), true)
     val cleared = ArrayList<String>()
     repeat(fields.size + 1) {
@@ -40,7 +50,11 @@ private fun VisibilityState.reconcileItem(fields: List<FormField>, item: JsonVal
     return ReconciledItem(JsonValue.Object(entry), cleared, false)
 }
 
-internal fun VisibilityState.reconcileItems(values: Values, errors: MutableStringMap<String>, cleared: MutableSet<String>) {
+internal fun VisibilityState.reconcileItems(
+    values: Values,
+    errors: MutableStringMap<String>,
+    cleared: MutableSet<String>,
+) {
     for (group in groups) {
         if (activeField(group.key, values.json)?.ordinal != group.ordinal) continue
         val source = itemsOf(values[group.key])
@@ -49,13 +63,18 @@ internal fun VisibilityState.reconcileItems(values: Values, errors: MutableStrin
         val limits = limits(values.json)
         val fields = group.items
         val context = reconciled.context(group, scope, limits, starts.itemEpoch)
-        val mapped = reconciled.map(group, source, ids, context) { position, item ->
-            val result = reconcileItem(fields, item, ids.getOrNull(position), scope, limits)
-            for (key in result.cleared) cleared.add(itemPath(group.key, position, key))
-            Mapped(result.item, result.stable && result.cleared.isEmpty())
-        }
+        val mapped =
+            reconciled.map(group, source, ids, context) { position, item ->
+                val result = reconcileItem(fields, item, ids.getOrNull(position), scope, limits)
+                for (key in result.cleared) cleared.add(itemPath(group.key, position, key))
+                Mapped(result.item, result.stable && result.cleared.isEmpty())
+            }
         if (mapped.reused) continue
-        if (mapped.items != source) values.set(group.key, ValueSlot(JsonValue.Array(mapped.items), Ref(freshToken(), ids)))
+        if (mapped.items !=
+            source
+        ) {
+            values.set(group.key, ValueSlot(JsonValue.Array(mapped.items), Ref(freshToken(), ids)))
+        }
         dropHiddenErrors(group, mapped.items, values.json, errors, cleared)
     }
 }
@@ -75,9 +94,17 @@ private fun VisibilityState.dropHiddenErrors(
     for (key in errors.keys) {
         val (position, field) = splitPath(group.key, key) ?: continue
         if (position < items.size) {
-            val keys = shown.getOrPut(position) {
-                fields.filter { isVisible(it, itemScope(fields, items[position], scope), limits) }.mapTo(HashSet()) { it.key }
-            }
+            val keys =
+                shown.getOrPut(position) {
+                    fields
+                        .filter {
+                            isVisible(
+                                it,
+                                itemScope(fields, items[position], scope),
+                                limits,
+                            )
+                        }.mapTo(HashSet()) { it.key }
+                }
             if (field in keys) continue
         }
         errors.remove(key)

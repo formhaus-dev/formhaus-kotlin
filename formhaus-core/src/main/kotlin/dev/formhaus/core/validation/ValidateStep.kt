@@ -15,31 +15,58 @@ import dev.formhaus.core.visibility.itemScope
 import dev.formhaus.core.visibility.itemsOf
 import dev.formhaus.core.visibility.shownFields
 
-public fun validateStep(step: FormStep, values: JsonObject, options: ValidateOptions = ValidateOptions()): FieldErrors =
-    validateFields(step.fields, values, options)
+public fun validateStep(
+    step: FormStep,
+    values: JsonObject,
+    options: ValidateOptions = ValidateOptions(),
+): FieldErrors = validateFields(step.fields, values, options)
 
-public fun validateFields(fields: List<FormNode>, values: JsonObject, options: ValidateOptions = ValidateOptions()): FieldErrors =
-    CallBudget.run { validateShown(fields, values, values, ShownChecks(options.validators, options.messages, ListLimits.STANDARD)) }
+public fun validateFields(
+    fields: List<FormNode>,
+    values: JsonObject,
+    options: ValidateOptions = ValidateOptions(),
+): FieldErrors =
+    CallBudget.run {
+        validateShown(fields, values, values, ShownChecks(options.validators, options.messages, ListLimits.STANDARD))
+    }
 
 internal fun customRules(nodes: List<FormNode>): Boolean =
     valueFields(nodes).any { field -> (listOf(field) + field.items).any { it.validation?.validator != null } }
 
-internal class ShownChecks(val validators: Validators, val messages: MessageSource?, val limits: ListLimits) {
+internal class ShownChecks(
+    val validators: Validators,
+    val messages: MessageSource?,
+    val limits: ListLimits,
+) {
     val options: ValidateOptions get() = ValidateOptions(validators, messages)
 }
 
-private fun validateItems(group: FormField, values: JsonObject, scope: JsonObject, checks: ShownChecks, errors: MutableStringMap<String>) {
+private fun validateItems(
+    group: FormField,
+    values: JsonObject,
+    scope: JsonObject,
+    checks: ShownChecks,
+    errors: MutableStringMap<String>,
+) {
     itemsOf(values[group.key]).forEachIndexed { index, item ->
         val own = itemScope(group, item, values)
         val shown = itemScope(group, item, scope)
         for (field in group.items) {
             if (!isVisible(field, shown, checks.limits)) continue
-            validateFieldValue(field, own[field.key], own, checks.options)?.let { errors[itemPath(group.key, index, field.key)] = it }
+            validateFieldValue(field, own[field.key], own, checks.options)?.let {
+                errors[itemPath(group.key, index, field.key)] =
+                    it
+            }
         }
     }
 }
 
-internal fun validateShown(fields: List<FormNode>, values: JsonObject, scope: JsonObject, checks: ShownChecks): FieldErrors {
+internal fun validateShown(
+    fields: List<FormNode>,
+    values: JsonObject,
+    scope: JsonObject,
+    checks: ShownChecks,
+): FieldErrors {
     val errors = MutableStringMap<String>()
     for (field in shownFields(fields, scope, checks.limits)) {
         validateFieldValue(field, values[field.key], values, checks.options)?.let { errors[field.key] = it }

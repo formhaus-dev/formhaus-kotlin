@@ -9,10 +9,19 @@ import org.junit.jupiter.api.Test
 class SlowPatternTest {
     @Test
     fun `adjacent repeated parts that overlap are slow`() {
-        val slow = listOf(
-            "^\\d*\\d*\\d*\\d*\\d*x$", "a*a*b", ".*.*x", "\\d+\\w+", "[a-c]+[c-e]*", "(?:a|b)*a{2,}", "x(?:\\s*\\s+)y",
-            "^\\d+\\.?\\d*$", "a+b{0,3}a+", "\\d+(?:-)?\\d+",
-        )
+        val slow =
+            listOf(
+                "^\\d*\\d*\\d*\\d*\\d*x$",
+                "a*a*b",
+                ".*.*x",
+                "\\d+\\w+",
+                "[a-c]+[c-e]*",
+                "(?:a|b)*a{2,}",
+                "x(?:\\s*\\s+)y",
+                "^\\d+\\.?\\d*$",
+                "a+b{0,3}a+",
+                "\\d+(?:-)?\\d+",
+            )
         val fast = listOf("^\\d+-\\d+$", "[a-z]+@[a-z]+", "a*b*", "\\d*\\D*", "a?a?", "a+(?=a)a+", "\\(a*\\)a*")
         for (pattern in slow) assertNotNull(slowPattern(pattern), pattern)
         assertEquals(SlowPattern.ADJACENT, slowPattern(slow.first()))

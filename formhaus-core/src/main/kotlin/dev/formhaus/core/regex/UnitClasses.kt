@@ -1,6 +1,8 @@
 package dev.formhaus.core.regex
 
-internal class UnitClasses(program: RegexProgram) {
+internal class UnitClasses(
+    program: RegexProgram,
+) {
     val starts: IntArray
     private val latin = IntArray(LATIN)
 
@@ -50,17 +52,21 @@ internal class UnitClasses(program: RegexProgram) {
             return boundaries
         }
 
-        fun merged(first: List<Int>, second: List<Int>): IntArray {
+        fun merged(
+            first: List<Int>,
+            second: List<Int>,
+        ): IntArray {
             val starts = IntList()
             var left = 0
             var right = 0
             var last = -1
             while (left < first.size || right < second.size) {
-                val next = if (right == second.size || (left < first.size && first[left] <= second[right])) {
-                    first[left++]
-                } else {
-                    second[right++]
-                }
+                val next =
+                    if (right == second.size || (left < first.size && first[left] <= second[right])) {
+                        first[left++]
+                    } else {
+                        second[right++]
+                    }
                 if (next <= CharSet.MAX_UNIT && next != last) {
                     starts.add(next)
                     last = next

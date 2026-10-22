@@ -13,4 +13,9 @@ object Forms {
 }
 
 fun errorsOf(text: String): FieldErrors =
-    MutableStringMap<String>().also { map -> for ((key, value) in jsonObject(text)) map[key] = value.stringValue.orEmpty() }
+    MutableStringMap<String>().also { map ->
+        for ((key, value) in jsonObject(text)) {
+            map[key] =
+                value.stringValue.orEmpty()
+        }
+    }

@@ -16,7 +16,10 @@ public class FormSection private constructor(
     override val ordinal: Int,
     public val fields: List<FormNode>,
 ) : FormNode() {
-    internal constructor(json: JsonObject, ordinals: Ordinals) : this(json, ordinals.take(), formNodes(json["fields"], ordinals).orEmpty())
+    internal constructor(
+        json: JsonObject,
+        ordinals: Ordinals,
+    ) : this(json, ordinals.take(), formNodes(json["fields"], ordinals).orEmpty())
 
     override val key: String = json["key"]?.stringValue ?: ""
     override val type: String get() = "section"
@@ -33,15 +36,19 @@ public class FormSection private constructor(
         FormSection(json, ordinal, fields.filter { it is FormField && include(it) })
 }
 
-internal fun formNodes(value: JsonValue?, ordinals: Ordinals): List<FormNode>? =
+internal fun formNodes(
+    value: JsonValue?,
+    ordinals: Ordinals,
+): List<FormNode>? =
     value?.arrayValue?.mapNotNull { item ->
         val json = item.objectValue ?: return@mapNotNull null
         if (json["type"]?.stringValue == "section") FormSection(json, ordinals) else FormField(json, ordinals)
     }
 
-internal fun valueFields(nodes: List<FormNode>): List<FormField> = nodes.flatMap { node ->
-    when (node) {
-        is FormField -> listOf(node)
-        is FormSection -> node.fields.filterIsInstance<FormField>()
+internal fun valueFields(nodes: List<FormNode>): List<FormField> =
+    nodes.flatMap { node ->
+        when (node) {
+            is FormField -> listOf(node)
+            is FormSection -> node.fields.filterIsInstance<FormField>()
+        }
     }
-}

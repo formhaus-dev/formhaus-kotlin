@@ -12,7 +12,14 @@ class RegexLimitTest {
     @Test
     fun `linear patterns finish inside the linear step budget on pathological input`() {
         val text = "a".repeat(MAX_STRING_LENGTH - 1) + "!"
-        for (source in listOf("(a+)+$", "(a|aa)+$", "^(a+)+$", "(.*a){20}$")) assertEquals(false, regex(source).test(text), source)
+        for (source in listOf(
+            "(a+)+$",
+            "(a|aa)+$",
+            "^(a+)+$",
+            "(.*a){20}$",
+        )) {
+            assertEquals(false, regex(source).test(text), source)
+        }
         assertEquals(false, regex("(x+x+)+y").test("x".repeat(MAX_STRING_LENGTH)))
     }
 
@@ -36,7 +43,13 @@ class RegexLimitTest {
         val source = "(?:a|".repeat(depth) + "b" + ")".repeat(depth)
         val tooDeep = "(".repeat(RegexParser.MAX_DEPTH + 1) + ")".repeat(RegexParser.MAX_DEPTH + 1)
         var results: Pair<Boolean?, Boolean>? = null
-        val thread = Thread(null, { results = JsRegex.compile(source)?.test("b") to (JsRegex.compile(tooDeep) == null) }, "small-stack", 512L * 1024)
+        val thread =
+            Thread(
+                null,
+                { results = JsRegex.compile(source)?.test("b") to (JsRegex.compile(tooDeep) == null) },
+                "small-stack",
+                512L * 1024,
+            )
         thread.start()
         thread.join()
         assertEquals(true to true, results)

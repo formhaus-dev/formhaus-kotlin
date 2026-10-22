@@ -4,19 +4,47 @@ internal fun RegexParser.parseAtom(): RegexParser.Atom {
     val unit = units[index]
     index++
     return when (unit) {
-        '^' -> RegexParser.Atom(
-            RegexNode.Assertion(if (modifiers.multiline) RegexAssertion.LINE_START else RegexAssertion.INPUT_START), false,
-        )
-        '$' -> RegexParser.Atom(
-            RegexNode.Assertion(if (modifiers.multiline) RegexAssertion.LINE_END else RegexAssertion.INPUT_END), false,
-        )
-        '.' -> RegexParser.Atom(RegexNode.Set(if (modifiers.dotAll) CharSet.all else CharSet.dot), true)
-        '(' -> parseGroup()
-        '[' -> RegexParser.Atom(parseClass(), true)
-        '\\' -> parseAtomEscape()
-        '*', '+', '?' -> throw RegexSyntaxError
-        '{' -> if (isBracedQuantifier(index - 1)) throw RegexSyntaxError else literal(unit)
-        else -> literal(unit)
+        '^' -> {
+            RegexParser.Atom(
+                RegexNode.Assertion(if (modifiers.multiline) RegexAssertion.LINE_START else RegexAssertion.INPUT_START),
+                false,
+            )
+        }
+
+        '$' -> {
+            RegexParser.Atom(
+                RegexNode.Assertion(if (modifiers.multiline) RegexAssertion.LINE_END else RegexAssertion.INPUT_END),
+                false,
+            )
+        }
+
+        '.' -> {
+            RegexParser.Atom(RegexNode.Set(if (modifiers.dotAll) CharSet.all else CharSet.dot), true)
+        }
+
+        '(' -> {
+            parseGroup()
+        }
+
+        '[' -> {
+            RegexParser.Atom(parseClass(), true)
+        }
+
+        '\\' -> {
+            parseAtomEscape()
+        }
+
+        '*', '+', '?' -> {
+            throw RegexSyntaxError
+        }
+
+        '{' -> {
+            if (isBracedQuantifier(index - 1)) throw RegexSyntaxError else literal(unit)
+        }
+
+        else -> {
+            literal(unit)
+        }
     }
 }
 
@@ -52,7 +80,10 @@ private fun RegexParser.parseGroup(): RegexParser.Atom {
     return RegexParser.Atom(parseModified(), true)
 }
 
-private fun RegexParser.parseGroupBody(capture: Int? = null, name: String? = null): RegexNode {
+private fun RegexParser.parseGroupBody(
+    capture: Int? = null,
+    name: String? = null,
+): RegexNode {
     val enclosing = scope
     try {
         scope = enclosing.opening(capture ?: captures)
@@ -78,7 +109,11 @@ private fun RegexParser.parseModified(): RegexNode {
     val added = modifierFlags()
     val removed = if (consume('-')) modifierFlags() else null
     val flags = added + removed.orEmpty()
-    if (!consume(':') || flags.toSet().size != flags.size || (removed != null && flags.isEmpty())) throw RegexSyntaxError
+    if (!consume(':') || flags.toSet().size != flags.size ||
+        (removed != null && flags.isEmpty())
+    ) {
+        throw RegexSyntaxError
+    }
     val saved = modifiers
     try {
         for (flag in added) modifiers = modified(flag, true)
@@ -100,8 +135,12 @@ private fun RegexParser.modifierFlags(): List<Char> {
     return flags
 }
 
-private fun RegexParser.modified(flag: Char, value: Boolean): RegexModifiers = when (flag) {
-    'i' -> modifiers.copy(ignoreCase = value)
-    'm' -> modifiers.copy(multiline = value)
-    else -> modifiers.copy(dotAll = value)
-}
+private fun RegexParser.modified(
+    flag: Char,
+    value: Boolean,
+): RegexModifiers =
+    when (flag) {
+        'i' -> modifiers.copy(ignoreCase = value)
+        'm' -> modifiers.copy(multiline = value)
+        else -> modifiers.copy(dotAll = value)
+    }

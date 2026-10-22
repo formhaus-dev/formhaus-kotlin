@@ -5,11 +5,17 @@ import dev.formhaus.core.json.JsonObject
 import dev.formhaus.core.json.MutableStringMap
 import kotlin.coroutines.cancellation.CancellationException
 
-internal class Box<V>(var value: V)
+internal class Box<V>(
+    var value: V,
+)
 
 internal val SubmitResult?.isRejection: Boolean get() = this is SubmitResult.Rejected
 
-private fun FormEngine.applyRejection(errors: FieldErrors, formErrors: List<String>, sent: Values) {
+private fun FormEngine.applyRejection(
+    errors: FieldErrors,
+    formErrors: List<String>,
+    sent: Values,
+) {
     val accepted = MutableStringMap<String>()
     for ((key, message) in errors) {
         val owner = core.visibility.owner(key)
@@ -18,7 +24,11 @@ private fun FormEngine.applyRejection(errors: FieldErrors, formErrors: List<Stri
     core.applyValidationErrors(accepted, server = true, formErrors = formErrors)
 }
 
-internal suspend fun FormEngine.submitForm(submit: SubmitHandler, keepSkipped: Boolean = false, operationBox: Box<Int>? = null): Boolean {
+internal suspend fun FormEngine.submitForm(
+    submit: SubmitHandler,
+    keepSkipped: Boolean = false,
+    operationBox: Box<Int>? = null,
+): Boolean {
     val core = core
     if (core.submitting || core.stepValidating) return false
     if (!keepSkipped) core.includeCurrentStep()
@@ -28,7 +38,7 @@ internal suspend fun FormEngine.submitForm(submit: SubmitHandler, keepSkipped: B
     operationBox?.value = operation
     val checked = core.getSubmitValues(payload = true)
     val inputsChanged = core.watchCheckedInputs(checked)
-    val stale = { epoch != core.validationEpoch || operation != core.operationEpoch || inputsChanged() }
+    val stale = core.staleCheck(epoch, operation, inputsChanged)
     core.submitting = true
     core.notify()
     try {
@@ -37,12 +47,16 @@ internal suspend fun FormEngine.submitForm(submit: SubmitHandler, keepSkipped: B
         val skippedSteps = core.skipped.map { it.id }
         val sent = core.values.copy()
         val serverErrors = core.serverErrorsGeneration
-        if (keepSkipped) core.currentStep?.let { core.emit(FormEvent.StepSkipped(it.id)) }
+        if (keepSkipped) core.emitStepSkipped()
         val result = send(submit, values, skippedSteps)
         if (operation != core.operationEpoch) return !result.isRejection
         if (!accept(result, sent, serverErrors)) return false
         succeeded = true
-        suspended { afterCommit(FormLifecycleError.Phase.AFTER_SUBMIT) { options.onAfterSubmit?.invoke(values, skippedSteps) } }
+        suspended {
+            afterCommit(
+                FormLifecycleError.Phase.AFTER_SUBMIT,
+            ) { options.onAfterSubmit?.invoke(values, skippedSteps) }
+        }
         return true
     } catch (error: CancellationException) {
         return succeeded
@@ -57,7 +71,11 @@ internal suspend fun FormEngine.submitForm(submit: SubmitHandler, keepSkipped: B
     }
 }
 
-private fun FormEngine.accept(result: SubmitResult?, sent: Values, serverErrors: Int): Boolean {
+private fun FormEngine.accept(
+    result: SubmitResult?,
+    sent: Values,
+    serverErrors: Int,
+): Boolean {
     if (result is SubmitResult.Rejected) {
         applyRejection(result.errors, result.formErrors, sent)
         return false
@@ -66,7 +84,10 @@ private fun FormEngine.accept(result: SubmitResult?, sent: Values, serverErrors:
     return true
 }
 
-private suspend fun FormEngine.approveSubmission(checked: JsonObject, stale: () -> Boolean): JsonObject? {
+private suspend fun FormEngine.approveSubmission(
+    checked: JsonObject,
+    stale: () -> Boolean,
+): JsonObject? {
     if (stale() || invalid(stale)) return null
     val before = options.onBeforeSubmit ?: return checked
     val allowed = suspended { before(checked) }
@@ -80,14 +101,37 @@ private fun FormEngine.invalid(stale: () -> Boolean): Boolean {
     return true
 }
 
-private suspend fun FormEngine.send(submit: SubmitHandler, values: JsonObject, skippedSteps: List<String>): SubmitResult? {
+private suspend fun FormEngine.send(
+    submit: SubmitHandler,
+    values: JsonObject,
+    skippedSteps: List<String>,
+): SubmitResult? {
     core.emit(FormEvent.FormSubmitted(values.size))
-    val result = try {
-        suspended { submit(values, skippedSteps) }
-    } catch (error: Throwable) {
-        core.emit(FormEvent.FormSubmitFailed(SubmitFailureReason.Error(submitStatus(error))))
-        throw error
-    }
-    core.emit(if (result.isRejection) FormEvent.FormSubmitFailed(SubmitFailureReason.Rejected) else FormEvent.FormSubmitSucceeded)
+    val result =
+        try {
+            suspended { submit(values, skippedSteps) }
+        } catch (error: Throwable) {
+            core.emit(FormEvent.FormSubmitFailed(SubmitFailureReason.Error(submitStatus(error))))
+            throw error
+        }
+    core.emit(
+        if (result.isRejection) {
+            FormEvent.FormSubmitFailed(
+                SubmitFailureReason.Rejected,
+            )
+        } else {
+            FormEvent.FormSubmitSucceeded
+        },
+    )
     return result
+}
+
+private fun EngineCore.staleCheck(
+    epoch: Int,
+    operation: Int,
+    inputsChanged: () -> Boolean,
+): () -> Boolean = { epoch != validationEpoch || operation != operationEpoch || inputsChanged() }
+
+private fun EngineCore.emitStepSkipped() {
+    currentStep?.let { emit(FormEvent.StepSkipped(it.id)) }
 }

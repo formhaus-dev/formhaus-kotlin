@@ -15,25 +15,33 @@ import java.util.Locale
 import java.util.concurrent.ConcurrentHashMap
 
 public sealed class RecallAnswer {
-    public data class Text(public val text: String) : RecallAnswer()
+    public data class Text(
+        public val text: String,
+    ) : RecallAnswer()
 
-    public data class Number(public val number: Double) : RecallAnswer()
+    public data class Number(
+        public val number: Double,
+    ) : RecallAnswer()
 
-    public data class Items(public val items: List<String>) : RecallAnswer()
+    public data class Items(
+        public val items: List<String>,
+    ) : RecallAnswer()
 
     public val stored: String
-        get() = when (this) {
-            is Text -> text
-            is Number -> jsNumberString(number)
-            is Items -> items.joinToString(", ")
-        }
+        get() =
+            when (this) {
+                is Text -> text
+                is Number -> jsNumberString(number)
+                is Items -> items.joinToString(", ")
+            }
 
     internal val collapsed: RecallAnswer
-        get() = when (this) {
-            is Text -> Text(text.jsCollapsed)
-            is Number -> this
-            is Items -> Items(items.map { it.jsCollapsed })
-        }
+        get() =
+            when (this) {
+                is Text -> Text(text.jsCollapsed)
+                is Number -> this
+                is Items -> Items(items.map { it.jsCollapsed })
+            }
 }
 
 public typealias RecallFormatFn = (RecallAnswer, FormField, String) -> String
@@ -62,38 +70,76 @@ internal fun recallLocale(tag: String): Locale {
     return supportedLocale(tag).also { locales[tag] = it }
 }
 
-private fun stamp(type: String, value: String): LocalDateTime? {
+private fun stamp(
+    type: String,
+    value: String,
+): LocalDateTime? {
     val digits = value.split(Regex("[^0-9]+")).filter { it.isNotEmpty() }.mapNotNull { it.toIntOrNull() }
     val parts = if (type == "time") listOf(1970, 1, 1) + digits else digits
     if (parts.size < 3) return null
-    return runCatching { LocalDateTime.of(parts[0], parts[1], parts[2], parts.getOrElse(3) { 0 }, parts.getOrElse(4) { 0 }) }.getOrNull()
+    return runCatching {
+        LocalDateTime.of(parts[0], parts[1], parts[2], parts.getOrElse(3) { 0 }, parts.getOrElse(4) { 0 })
+    }.getOrNull()
 }
 
-private fun dateFormatter(type: String, locale: Locale): DateTimeFormatter = when (type) {
-    "date" -> DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)
-    "time" -> DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT)
-    else -> DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT)
-}.withLocale(locale)
+private fun dateFormatter(
+    type: String,
+    locale: Locale,
+): DateTimeFormatter =
+    when (type) {
+        "date" -> DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)
+        "time" -> DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT)
+        else -> DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT)
+    }.withLocale(locale)
 
-private fun andList(items: List<String>, locale: Locale): String {
+private fun andList(
+    items: List<String>,
+    locale: Locale,
+): String {
     if (locale.language != "en" || items.size < 2) return items.joinToString(", ")
     if (items.size == 2) return "${items[0]} and ${items[1]}"
     return items.dropLast(1).joinToString(", ") + ", and " + items.last()
 }
 
-private fun numberText(number: Double, locale: Locale): String {
+private fun numberText(
+    number: Double,
+    locale: Locale,
+): String {
     val format = NumberFormat.getNumberInstance(locale) as? DecimalFormat ?: return jsNumberString(number)
     format.maximumFractionDigits = Int.MAX_VALUE
     return format.format(BigDecimal(jsNumberString(number + 0.0)))
 }
 
-private fun localized(answer: RecallAnswer, type: String, locale: Locale): String? = when (answer) {
-    is RecallAnswer.Items -> andList(answer.items, locale)
-    is RecallAnswer.Number ->
-        if ((type in numberTypes || type == "group") && 'e' !in jsNumberString(answer.number)) numberText(answer.number, locale) else null
-    is RecallAnswer.Text ->
-        if (type in stampTypes && matchesFormat(type, answer.text)) stamp(type, answer.text)?.format(dateFormatter(type, locale)) else null
-}
+private fun localized(
+    answer: RecallAnswer,
+    type: String,
+    locale: Locale,
+): String? =
+    when (answer) {
+        is RecallAnswer.Items -> {
+            andList(answer.items, locale)
+        }
+
+        is RecallAnswer.Number -> {
+            if ((type in numberTypes || type == "group") &&
+                'e' !in jsNumberString(answer.number)
+            ) {
+                numberText(answer.number, locale)
+            } else {
+                null
+            }
+        }
+
+        is RecallAnswer.Text -> {
+            if (type in stampTypes &&
+                matchesFormat(type, answer.text)
+            ) {
+                stamp(type, answer.text)?.format(dateFormatter(type, locale))
+            } else {
+                null
+            }
+        }
+    }
 
 internal val defaultRecallFormat: RecallFormatFn = { answer, field, locale ->
     val collapsed = answer.collapsed

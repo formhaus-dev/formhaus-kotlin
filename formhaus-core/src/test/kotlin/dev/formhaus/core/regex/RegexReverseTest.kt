@@ -7,19 +7,42 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 
 class RegexReverseTest {
-    private val texts: List<String> = run {
-        var state = 5L
-        val alphabet = listOf("a", "b", "1", "x", " ", ",", "😀", "\n")
-        val random = (0 until 160).map { index ->
-            (0 until index % 14).joinToString("") {
-                state = state * 6_364_136_223_846_793_005L + 1_442_695_040_888_963_407L
-                alphabet[((state ushr 33) % alphabet.size).toInt()]
-            }
+    private val texts: List<String> =
+        run {
+            var state = 5L
+            val alphabet = listOf("a", "b", "1", "x", " ", ",", "😀", "\n")
+            val random =
+                (0 until 160).map { index ->
+                    (0 until index % 14).joinToString("") {
+                        state = state * 6_364_136_223_846_793_005L + 1_442_695_040_888_963_407L
+                        alphabet[((state ushr 33) % alphabet.size).toInt()]
+                    }
+                }
+            listOf(
+                "",
+                "a",
+                "b",
+                "1",
+                "ab",
+                "ba",
+                "a1",
+                "x1",
+                "aab",
+                "abc1",
+                "a😀",
+                "😀",
+                "foo",
+                " foo",
+                "afoo",
+                "xb1b1",
+            ) +
+                random
         }
-        listOf("", "a", "b", "1", "ab", "ba", "a1", "x1", "aab", "abc1", "a😀", "😀", "foo", " foo", "afoo", "xb1b1") + random
-    }
 
-    private fun forward(source: String, text: String): Boolean? = CompiledPattern("(?:$source)(?=)").test(text)
+    private fun forward(
+        source: String,
+        text: String,
+    ): Boolean? = CompiledPattern("(?:$source)(?=)").test(text)
 
     private fun assertMatchesForward(source: String) {
         val pattern = CompiledPattern(source)
@@ -52,7 +75,9 @@ class RegexReverseTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = ["^a$", "(?m:a$)", "a$(?=)", "(a)\\1$", "(a)\\1", "a|b$", "foo\\b", "(?i:a)", "a$|b", "^(?:a|b)1"])
+    @ValueSource(
+        strings = ["^a$", "(?m:a$)", "a$(?=)", "(a)\\1$", "(a)\\1", "a|b$", "foo\\b", "(?i:a)", "a$|b", "^(?:a|b)1"],
+    )
     fun `other patterns keep the forward search`(source: String) {
         assertEquals(SearchPlan.Forward, CompiledPattern(source).plan)
     }

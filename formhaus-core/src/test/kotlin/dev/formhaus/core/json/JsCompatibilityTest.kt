@@ -7,12 +7,24 @@ import org.junit.jupiter.api.Test
 class JsCompatibilityTest {
     @Test
     fun `numbers print like Number prototype toString`() {
-        val cases = listOf(
-            5.0 to "5", -0.0 to "0", 0.1 to "0.1", 123.456 to "123.456", 1e-7 to "1e-7", 0.000001 to "0.000001",
-            1e21 to "1e+21", 1e20 to "100000000000000000000", 1.5e300 to "1.5e+300", -2.5 to "-2.5",
-            Double.NaN to "NaN", Double.NEGATIVE_INFINITY to "-Infinity", 9007199254740993.0 to "9007199254740992",
-            1.7976931348623157e308 to "1.7976931348623157e+308", 2.2250738585072014e-308 to "2.2250738585072014e-308",
-        )
+        val cases =
+            listOf(
+                5.0 to "5",
+                -0.0 to "0",
+                0.1 to "0.1",
+                123.456 to "123.456",
+                1e-7 to "1e-7",
+                0.000001 to "0.000001",
+                1e21 to "1e+21",
+                1e20 to "100000000000000000000",
+                1.5e300 to "1.5e+300",
+                -2.5 to "-2.5",
+                Double.NaN to "NaN",
+                Double.NEGATIVE_INFINITY to "-Infinity",
+                9007199254740993.0 to "9007199254740992",
+                1.7976931348623157e308 to "1.7976931348623157e+308",
+                2.2250738585072014e-308 to "2.2250738585072014e-308",
+            )
         for ((value, text) in cases) assertEquals(text, jsNumberString(value), "$value")
     }
 
@@ -26,7 +38,18 @@ class JsCompatibilityTest {
         assertEquals(5.0, jsNumber("0B101"))
         assertEquals(0.0, jsNumber("  "))
         assertEquals(Double.NEGATIVE_INFINITY, jsNumber("-Infinity"))
-        for (text in listOf("1_000", "-0x10", "abc", "1e", "0x", "NaN", "1d", "0x1g")) assertTrue(jsNumber(text).isNaN(), text)
+        for (text in listOf(
+            "1_000",
+            "-0x10",
+            "abc",
+            "1e",
+            "0x",
+            "NaN",
+            "1d",
+            "0x1g",
+        )) {
+            assertTrue(jsNumber(text).isNaN(), text)
+        }
     }
 
     @Test

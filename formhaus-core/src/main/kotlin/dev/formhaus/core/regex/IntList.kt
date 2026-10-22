@@ -1,13 +1,18 @@
 package dev.formhaus.core.regex
 
-internal class IntList(capacity: Int = 16) {
+internal class IntList(
+    capacity: Int = 16,
+) {
     private var values = IntArray(maxOf(capacity, 4))
     var size: Int = 0
         private set
 
     operator fun get(index: Int): Int = values[index]
 
-    operator fun set(index: Int, value: Int) {
+    operator fun set(
+        index: Int,
+        value: Int,
+    ) {
         values[index] = value
     }
 
@@ -16,7 +21,10 @@ internal class IntList(capacity: Int = 16) {
         values[size++] = value
     }
 
-    fun addRange(lower: Int, upper: Int) {
+    fun addRange(
+        lower: Int,
+        upper: Int,
+    ) {
         add(lower)
         add(upper)
     }

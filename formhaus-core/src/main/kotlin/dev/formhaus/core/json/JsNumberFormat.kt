@@ -16,16 +16,26 @@ internal fun jsNumberString(value: Double): String {
     val sign = if (value < 0) "-" else ""
     val (digits, exponent) = shortestDigits(abs(value))
     val count = digits.length
-    return sign + when {
-        exponent in count..MAX_FIXED_EXPONENT -> digits + "0".repeat(exponent - count)
-        exponent in 1..MAX_FIXED_EXPONENT -> digits.substring(0, exponent) + "." + digits.substring(exponent)
-        exponent in -5..0 -> "0." + "0".repeat(-exponent) + digits
-        else -> {
-            val power = exponent - 1
-            val mantissa = if (count == 1) digits else digits.substring(0, 1) + "." + digits.substring(1)
-            mantissa + "e" + (if (power < 0) "-" else "+") + abs(power)
+    return sign +
+        when {
+            exponent in count..MAX_FIXED_EXPONENT -> {
+                digits + "0".repeat(exponent - count)
+            }
+
+            exponent in 1..MAX_FIXED_EXPONENT -> {
+                digits.substring(0, exponent) + "." + digits.substring(exponent)
+            }
+
+            exponent in -5..0 -> {
+                "0." + "0".repeat(-exponent) + digits
+            }
+
+            else -> {
+                val power = exponent - 1
+                val mantissa = if (count == 1) digits else digits.substring(0, 1) + "." + digits.substring(1)
+                mantissa + "e" + (if (power < 0) "-" else "+") + abs(power)
+            }
         }
-    }
 }
 
 private fun shortestDigits(value: Double): Pair<String, Int> {

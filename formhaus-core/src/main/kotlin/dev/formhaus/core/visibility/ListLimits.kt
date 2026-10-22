@@ -13,7 +13,9 @@ private fun exemptLength(field: FormField): Int? {
     return field.options?.size?.takeIf { it > MAX_LIST_ITEMS }
 }
 
-internal class ListLimits private constructor(private val lengths: StringMap<Int>) {
+internal class ListLimits private constructor(
+    private val lengths: StringMap<Int>,
+) {
     fun trimmed(fields: List<FormField>): ListLimits {
         val next = lengths.toMutableStringMap()
         for (field in fields.flatMap { listOf(it) + it.items }) next.assign(field.key, exemptLength(field))
@@ -22,7 +24,11 @@ internal class ListLimits private constructor(private val lengths: StringMap<Int
 
     fun length(key: String): Int? = lengths[key]
 
-    fun contains(key: String, value: JsonValue?, operand: JsonValue?): Boolean {
+    fun contains(
+        key: String,
+        value: JsonValue?,
+        operand: JsonValue?,
+    ): Boolean {
         val items = value?.arrayValue ?: return false
         if (items.size > MAX_LIST_ITEMS && items.size > (lengths[key] ?: 0)) return false
         return items.any { sameValueZero(it, operand) }

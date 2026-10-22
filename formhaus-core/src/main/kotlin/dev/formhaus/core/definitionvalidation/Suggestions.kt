@@ -11,7 +11,10 @@ internal fun oneOf(values: List<String>): String {
     return if (values.size > SHOWN_CHOICES) "Use one of: $shown, ..." else "Use one of: $shown"
 }
 
-private fun distance(a: String, b: String): Int {
+private fun distance(
+    a: String,
+    b: String,
+): Int {
     var row = IntArray(b.length + 1) { it }
     for (i in 1..a.length) {
         val next = IntArray(b.length + 1)
@@ -24,14 +27,20 @@ private fun distance(a: String, b: String): Int {
     return row[b.length]
 }
 
-internal fun closest(value: String, candidates: List<String>): String? {
+internal fun closest(
+    value: String,
+    candidates: List<String>,
+): String? {
     val lower = value.lowercase()
     return candidates.firstOrNull { candidate ->
         candidate != value && distance(lower, candidate.lowercase()) <= if (candidate.length > SHORT_NAME) 2 else 1
     }
 }
 
-internal fun suggest(value: String, candidates: List<String>): String? {
+internal fun suggest(
+    value: String,
+    candidates: List<String>,
+): String? {
     closest(value, candidates)?.let { return "Use ${quoteJson(it)}" }
     return if (candidates.isEmpty()) null else oneOf(candidates)
 }

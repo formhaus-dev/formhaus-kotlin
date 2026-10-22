@@ -22,26 +22,63 @@ internal val debugChecks: Boolean = FormEngine::class.java.desiredAssertionStatu
 private val warningLog = System.getLogger("dev.formhaus.definition")
 private val reportedTexts = ConcurrentHashMap.newKeySet<String>()
 
-internal fun deliver(issue: DefinitionIssue, options: FormEngineOptions) {
+internal fun deliver(
+    issue: DefinitionIssue,
+    options: FormEngineOptions,
+) {
     val onWarning = options.onWarning
-    if (onWarning != null) onWarning(issue) else warningLog.log(System.Logger.Level.WARNING, "[formhaus] ${issue.message}")
+    if (onWarning !=
+        null
+    ) {
+        onWarning(issue)
+    } else {
+        warningLog.log(System.Logger.Level.WARNING, "[formhaus] ${issue.message}")
+    }
 }
 
-internal fun reportWarnings(definition: FormDefinition, options: FormEngineOptions) {
+internal fun reportWarnings(
+    definition: FormDefinition,
+    options: FormEngineOptions,
+) {
     val issues = checkDefinition(JsonValue.Object(definition.json), CheckDefinitionOptions(options.validators.keys))
-    for (issue in issues + if (debugChecks) unorderedWarning(definition, options) else emptyList()) deliver(issue, options)
+    for (
+    issue in issues +
+        if (debugChecks) {
+            unorderedWarning(
+                definition,
+                options,
+            )
+        } else {
+            emptyList()
+        }
+    ) {
+        deliver(issue, options)
+    }
 }
 
-private fun reportMissing(code: IssueCode, key: String, catalog: String, options: FormEngineOptions) {
+private fun reportMissing(
+    code: IssueCode,
+    key: String,
+    catalog: String,
+    options: FormEngineOptions,
+) {
     if (!reportedTexts.add("${code.rawValue}:$key")) return
-    deliver(warning(code, "", "The $catalog catalog has no \"$key\" text", "Add \"$key\" to the $catalog catalog"), options)
+    deliver(
+        warning(code, "", "The $catalog catalog has no \"$key\" text", "Add \"$key\" to the $catalog catalog"),
+        options,
+    )
 }
 
 private val LabelSource?.catalog: JsonValue? get() = (this as? LabelSource.Catalog)?.catalog
 
 private val MessageSource?.catalog: JsonValue? get() = (this as? MessageSource.Catalog)?.catalog
 
-internal fun reportMissingLabel(key: String, source: LabelSource?, definition: FormDefinition, options: FormEngineOptions) {
+internal fun reportMissingLabel(
+    key: String,
+    source: LabelSource?,
+    definition: FormDefinition,
+    options: FormEngineOptions,
+) {
     val catalog = source.catalog ?: return
     if (hasText(catalog, key) || definition.labels?.let { hasText(it, key) } == true) return
     reportMissing(IssueCode.MISSING_LABEL_KEY, key, "labels", options)
@@ -52,7 +89,11 @@ internal fun missingMessageReporter(options: FormEngineOptions): MissingMessageF
     return { key -> reportMissing(IssueCode.MISSING_MESSAGE_KEY, key.rawValue, "messages", options) }
 }
 
-internal fun watchedResolver(source: MessageSource?, definition: FormDefinition, missing: MissingMessageFn?): ResolveMessage {
+internal fun watchedResolver(
+    source: MessageSource?,
+    definition: FormDefinition,
+    missing: MissingMessageFn?,
+): ResolveMessage {
     val resolve = messageResolver(source, MessageSource.Catalog(definition.messages ?: JsonValue.Null))
     val catalog = source.catalog
     if (missing == null || catalog == null) return resolve

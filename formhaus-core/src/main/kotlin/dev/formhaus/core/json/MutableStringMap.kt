@@ -1,17 +1,28 @@
 package dev.formhaus.core.json
 
-public class MutableStringMap<V : Any> internal constructor(insertionOrder: Boolean) : StringMap<V>(insertionOrder) {
+public class MutableStringMap<V : Any> internal constructor(
+    insertionOrder: Boolean,
+) : StringMap<V>(insertionOrder) {
     public constructor() : this(false)
 
-    public operator fun set(key: String, value: V) {
+    public operator fun set(
+        key: String,
+        value: V,
+    ) {
         write(key, value)
     }
 
     public fun remove(key: String): V? = delete(key)
 
-    internal fun getOrPut(key: String, fallback: () -> V): V = get(key) ?: fallback().also { write(key, it) }
+    internal fun getOrPut(
+        key: String,
+        fallback: () -> V,
+    ): V = get(key) ?: fallback().also { write(key, it) }
 
-    internal fun assign(key: String, value: V?) {
+    internal fun assign(
+        key: String,
+        value: V?,
+    ) {
         if (value == null) delete(key) else write(key, value)
     }
 

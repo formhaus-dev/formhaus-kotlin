@@ -4,10 +4,28 @@ import dev.formhaus.core.model.scaleTypes
 import dev.formhaus.core.regex.JsRegex
 
 internal val booleanTypes = listOf("checkbox", "switch")
-internal val builtInTypes = listOf(
-    "text", "email", "phone", "number", "password", "select", "autocomplete", "multiselect", "checkbox", "radio", "switch",
-    "file", "date", "datetime", "time", "textarea", "hidden", "scale", "rating",
-)
+internal val builtInTypes =
+    listOf(
+        "text",
+        "email",
+        "phone",
+        "number",
+        "password",
+        "select",
+        "autocomplete",
+        "multiselect",
+        "checkbox",
+        "radio",
+        "switch",
+        "file",
+        "date",
+        "datetime",
+        "time",
+        "textarea",
+        "hidden",
+        "scale",
+        "rating",
+    )
 internal val numberTypes = listOf("number") + scaleTypes
 internal val listTypes = listOf("multiselect")
 internal val randomizedTypes = listOf("radio", "multiselect", "select")
@@ -32,23 +50,30 @@ private fun isCalendarDate(value: String): Boolean {
     return day <= if (month == 2 && leap) 29 else monthDays[month - 1]
 }
 
-internal enum class ValueFormat(val key: MessageKey, val max: Int) {
+internal enum class ValueFormat(
+    val key: MessageKey,
+    val max: Int,
+) {
     EMAIL(MessageKey.EMAIL, MAX_EMAIL_LENGTH),
     DATE(MessageKey.DATE, MAX_STRING_LENGTH),
     DATETIME(MessageKey.DATETIME, MAX_STRING_LENGTH),
     TIME(MessageKey.TIME, MAX_STRING_LENGTH),
     ;
 
-    fun matches(value: String): Boolean = when (this) {
-        EMAIL -> emailPattern.test(value) == true
-        DATE -> dateOnly.test(value) == true && isCalendarDate(value)
-        DATETIME -> dateTime.test(value) == true && isCalendarDate(value)
-        TIME -> timePattern.test(value) == true
-    }
+    fun matches(value: String): Boolean =
+        when (this) {
+            EMAIL -> emailPattern.test(value) == true
+            DATE -> dateOnly.test(value) == true && isCalendarDate(value)
+            DATETIME -> dateTime.test(value) == true && isCalendarDate(value)
+            TIME -> timePattern.test(value) == true
+        }
 
     companion object {
         fun of(type: String): ValueFormat? = entries.firstOrNull { it.key.rawValue == type }
     }
 }
 
-internal fun matchesFormat(type: String, value: String): Boolean = ValueFormat.of(type)?.matches(value) == true
+internal fun matchesFormat(
+    type: String,
+    value: String,
+): Boolean = ValueFormat.of(type)?.matches(value) == true

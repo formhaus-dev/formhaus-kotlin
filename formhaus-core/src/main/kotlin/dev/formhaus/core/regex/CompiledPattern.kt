@@ -2,7 +2,9 @@ package dev.formhaus.core.regex
 
 import dev.formhaus.core.validation.MAX_STRING_LENGTH
 
-internal class CompiledPattern(source: String) {
+internal class CompiledPattern(
+    source: String,
+) {
     val program: RegexProgram
     val prefilter: Prefilter
     val plan: SearchPlan
@@ -25,10 +27,24 @@ internal class CompiledPattern(source: String) {
         } else {
             val pool = MemoryPool.current.value
             automaton = if (program.automaton) AutomatonCache(main(pool)) else null
-            unanchored = if (plan.backward) lazy { AutomatonCache(AutomatonPlan(program, false, backward = true, pool = pool)) } else null
-            scanners = program.scans.zip(program.looks) { scan, body ->
-                scan?.let { AutomatonCache(AutomatonPlan(it, false, backward = !body.look.behind, scanning = true, pool = pool)) }
-            }
+            unanchored =
+                if (plan.backward) {
+                    lazy {
+                        AutomatonCache(
+                            AutomatonPlan(program, false, backward = true, pool = pool),
+                        )
+                    }
+                } else {
+                    null
+                }
+            scanners =
+                program.scans.zip(program.looks) { scan, body ->
+                    scan?.let {
+                        AutomatonCache(
+                            AutomatonPlan(it, false, backward = !body.look.behind, scanning = true, pool = pool),
+                        )
+                    }
+                }
         }
     }
 
@@ -56,11 +72,15 @@ internal class CompiledPattern(source: String) {
         }
     }
 
-    private fun match(units: CharArray, context: MatchContext): Boolean? {
-        val automaton = automaton ?: run {
-            context.limit(StepBudget.backtrackingLimit.value)
-            return budgeted { Backtracker(program, context).search(prefilter) }
-        }
+    private fun match(
+        units: CharArray,
+        context: MatchContext,
+    ): Boolean? {
+        val automaton =
+            automaton ?: run {
+                context.limit(StepBudget.backtrackingLimit.value)
+                return budgeted { Backtracker(program, context).search(prefilter) }
+            }
         context.limit(16 * (units.size + 64))
         if (program.size >= PROBE_SIZE) probe(units, context)?.let { return it }
         context.limit(StepBudget.linear(units.size, program.size))
@@ -68,24 +88,38 @@ internal class CompiledPattern(source: String) {
         return budgeted { reverse(automaton, units, context) }
     }
 
-    private fun probe(units: CharArray, context: MatchContext): Boolean? = budgeted {
-        val probe = Backtracker(program, context)
-        if (!plan.backward) return@budgeted probe.search(prefilter)
-        var end = plan.end(units, null)
-        while (end != null) {
-            if (probe.run(0, end)) return@budgeted true
-            end = plan.end(units, end)
+    private fun probe(
+        units: CharArray,
+        context: MatchContext,
+    ): Boolean? =
+        budgeted {
+            val probe = Backtracker(program, context)
+            if (!plan.backward) return@budgeted probe.search(prefilter)
+            var end = plan.end(units, null)
+            while (end != null) {
+                if (probe.run(0, end)) return@budgeted true
+                end = plan.end(units, end)
+            }
+            false
         }
-        false
-    }
 
-    private fun reverse(automaton: AutomatonCache, units: CharArray, context: MatchContext): Boolean {
+    private fun reverse(
+        automaton: AutomatonCache,
+        units: CharArray,
+        context: MatchContext,
+    ): Boolean {
         var floor = 0
         var end = plan.end(units, null)
         while (end != null) {
             when (automaton.reverse(units, end, floor, context)) {
-                Verdict.MATCH -> return true
-                Verdict.MISS -> floor = end
+                Verdict.MATCH -> {
+                    return true
+                }
+
+                Verdict.MISS -> {
+                    floor = end
+                }
+
                 Verdict.UNDECIDED -> {
                     val fallback = unanchored ?: throw BudgetExceeded
                     return fallback.value.reverse(units, units.size, 0, context) == Verdict.MATCH

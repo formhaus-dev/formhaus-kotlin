@@ -1,6 +1,8 @@
 package dev.formhaus.core.regex
 
-internal class CaptureScan(units: CharArray) {
+internal class CaptureScan(
+    units: CharArray,
+) {
     val names: List<String?>
 
     init {
@@ -29,16 +31,29 @@ internal class CaptureScan(units: CharArray) {
 
     fun indices(name: String): List<Int> = names.indices.filter { names[it] == name }.map { it + 1 }
 
-    private class Start(val name: String?)
+    private class Start(
+        val name: String?,
+    )
 
-    private fun groupStart(units: CharArray, index: Int): Start? {
+    private fun groupStart(
+        units: CharArray,
+        index: Int,
+    ): Start? {
         if (index >= units.size || units[index] != '?') return Start(null)
-        if (index + 2 >= units.size || units[index + 1] != '<' || units[index + 2] == '=' || units[index + 2] == '!') return null
+        if (index + 2 >= units.size || units[index + 1] != '<' || units[index + 2] == '=' ||
+            units[index + 2] == '!'
+        ) {
+            return null
+        }
         return Start(parseGroupName(units, index + 2)?.name ?: "")
     }
 }
 
-internal class NameScope private constructor(private val start: Int, private val lower: Int, private val upper: Int) {
+internal class NameScope private constructor(
+    private val start: Int,
+    private val lower: Int,
+    private val upper: Int,
+) {
     constructor(start: Int) : this(start, 0, 0)
 
     fun opening(start: Int): NameScope = NameScope(start, lower, upper)
@@ -48,9 +63,15 @@ internal class NameScope private constructor(private val start: Int, private val
     fun admitsDuplicate(index: Int): Boolean = index in lower..upper
 }
 
-internal class GroupName(val name: String, val end: Int)
+internal class GroupName(
+    val name: String,
+    val end: Int,
+)
 
-internal fun parseGroupName(units: CharArray, start: Int): GroupName? {
+internal fun parseGroupName(
+    units: CharArray,
+    start: Int,
+): GroupName? {
     var index = start
     val name = StringBuilder()
     while (index < units.size) {
@@ -63,7 +84,11 @@ internal fun parseGroupName(units: CharArray, start: Int): GroupName? {
     return null
 }
 
-internal fun hexValue(units: CharArray, index: Int, count: Int): Int? {
+internal fun hexValue(
+    units: CharArray,
+    index: Int,
+    count: Int,
+): Int? {
     if (index + count > units.size) return null
     var value = 0
     for (offset in 0 until count) {
@@ -74,9 +99,15 @@ internal fun hexValue(units: CharArray, index: Int, count: Int): Int? {
     return value
 }
 
-private class Scalar(val value: Int, val end: Int)
+private class Scalar(
+    val value: Int,
+    val end: Int,
+)
 
-private fun isNameScalar(scalar: Int, start: Boolean): Boolean {
+private fun isNameScalar(
+    scalar: Int,
+    start: Boolean,
+): Boolean {
     if (scalar == '$'.code || scalar == '_'.code) return true
     if (start) return Character.isUnicodeIdentifierStart(scalar)
     return scalar == 0x200C || scalar == 0x200D ||
@@ -89,9 +120,15 @@ private fun isTrail(unit: Int): Boolean = unit in 0xDC00..0xDFFF
 
 private fun isScalar(value: Int): Boolean = value in 0..0x10FFFF && !isLead(value) && !isTrail(value)
 
-private fun combine(lead: Int, trail: Int): Int = 0x10000 + ((lead - 0xD800) shl 10) + (trail - 0xDC00)
+private fun combine(
+    lead: Int,
+    trail: Int,
+): Int = 0x10000 + ((lead - 0xD800) shl 10) + (trail - 0xDC00)
 
-private fun nameScalar(units: CharArray, index: Int): Scalar? {
+private fun nameScalar(
+    units: CharArray,
+    index: Int,
+): Scalar? {
     val unit = units[index].code
     if (unit == '\\'.code) return escapedScalar(units, index + 1)
     if (isLead(unit) && index + 1 < units.size && isTrail(units[index + 1].code)) {
@@ -100,7 +137,10 @@ private fun nameScalar(units: CharArray, index: Int): Scalar? {
     return if (isScalar(unit)) Scalar(unit, index + 1) else null
 }
 
-private fun escapedScalar(units: CharArray, index: Int): Scalar? {
+private fun escapedScalar(
+    units: CharArray,
+    index: Int,
+): Scalar? {
     if (index >= units.size || units[index] != 'u') return null
     if (index + 1 < units.size && units[index + 1] == '{') return bracedScalar(units, index + 2)
     val lead = hexValue(units, index + 1, 4) ?: return null
@@ -112,7 +152,10 @@ private fun escapedScalar(units: CharArray, index: Int): Scalar? {
     return if (isScalar(lead)) Scalar(lead, rest) else null
 }
 
-private fun bracedScalar(units: CharArray, start: Int): Scalar? {
+private fun bracedScalar(
+    units: CharArray,
+    start: Int,
+): Scalar? {
     var index = start
     var value = 0
     while (index < units.size) {

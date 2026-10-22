@@ -6,7 +6,11 @@ import java.text.Normalizer
 private val closingPunctuation = setOf('?'.code, '!'.code, ':'.code, '.'.code, '。'.code)
 
 @ConsistentCopyVisibility
-public data class ErrorEntry internal constructor(public val key: String, public val label: String, public val message: String) {
+public data class ErrorEntry internal constructor(
+    public val key: String,
+    public val label: String,
+    public val message: String,
+) {
     public val id: String get() = key
 
     public val text: String
@@ -18,7 +22,11 @@ public data class ErrorEntry internal constructor(public val key: String, public
 }
 
 @ConsistentCopyVisibility
-public data class ErrorGroup internal constructor(public val id: String, public val title: String, public val entries: List<ErrorEntry>)
+public data class ErrorGroup internal constructor(
+    public val id: String,
+    public val title: String,
+    public val entries: List<ErrorEntry>,
+)
 
 @ConsistentCopyVisibility
 public data class FormActionsState internal constructor(

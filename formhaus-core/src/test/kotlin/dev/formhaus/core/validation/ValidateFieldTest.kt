@@ -12,8 +12,11 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
 
 class ValidateFieldTest {
-    private fun error(fieldJson: String, value: String, values: String = "{}"): String? =
-        validateFieldValue(field(fieldJson), JsonValue.parse(value), jsonObject(values))
+    private fun error(
+        fieldJson: String,
+        value: String,
+        values: String = "{}",
+    ): String? = validateFieldValue(field(fieldJson), JsonValue.parse(value), jsonObject(values))
 
     @Test
     fun `message keys are an open string set compared by code units`() {
@@ -22,7 +25,13 @@ class ValidateFieldTest {
         assertEquals("Must be at least 2", getDefaultMessage(MessageKey.MIN, stringMapOf("min" to JsonValue.Number(2))))
         assertEquals(
             "At most 3 words",
-            getDefaultMessage(MessageKey.MAX_LENGTH, stringMapOf("max" to JsonValue.Number(3), "unit" to JsonValue.String("words"))),
+            getDefaultMessage(
+                MessageKey.MAX_LENGTH,
+                stringMapOf(
+                    "max" to JsonValue.Number(3),
+                    "unit" to JsonValue.String("words"),
+                ),
+            ),
         )
         assertEquals("Invalid value", getDefaultMessage(MessageKey("unknown")))
     }
@@ -48,18 +57,37 @@ class ValidateFieldTest {
             "select|\"a\"|",
         ],
     )
-    fun `built-in types check their formats`(type: String, value: String, expected: String?) {
-        assertEquals(expected, error("""{"key":"a","type":"$type","label":"A","options":[{"value":"a","label":"A"}]}""", value))
+    fun `built-in types check their formats`(
+        type: String,
+        value: String,
+        expected: String?,
+    ) {
+        assertEquals(
+            expected,
+            error("""{"key":"a","type":"$type","label":"A","options":[{"value":"a","label":"A"}]}""", value),
+        )
     }
 
     @Test
     fun `required, bounds, pattern and matchField resolve their messages`() {
         val required = """{"key":"a","type":"text","label":"A","validation":{"required":"Fill it"}}"""
         assertEquals("Fill it", error(required, "\"  \""))
-        assertEquals("This field is required", error("""{"key":"a","type":"checkbox","label":"A","validation":{"required":true}}""", "false"))
-        assertEquals("Minimum length is 3", error("""{"key":"a","type":"text","label":"A","validation":{"minLength":3}}""", "\"ab\""))
-        assertEquals("Must be at most 5", error("""{"key":"a","type":"number","label":"A","validation":{"max":5}}""", "6"))
-        assertEquals("Invalid format", error("""{"key":"a","type":"text","label":"A","validation":{"pattern":"^\\d+$"}}""", "\"x1\""))
+        assertEquals(
+            "This field is required",
+            error("""{"key":"a","type":"checkbox","label":"A","validation":{"required":true}}""", "false"),
+        )
+        assertEquals(
+            "Minimum length is 3",
+            error("""{"key":"a","type":"text","label":"A","validation":{"minLength":3}}""", "\"ab\""),
+        )
+        assertEquals(
+            "Must be at most 5",
+            error("""{"key":"a","type":"number","label":"A","validation":{"max":5}}""", "6"),
+        )
+        assertEquals(
+            "Invalid format",
+            error("""{"key":"a","type":"text","label":"A","validation":{"pattern":"^\\d+$"}}""", "\"x1\""),
+        )
         assertNull(error("""{"key":"a","type":"number","label":"A","validation":{"pattern":"^\\d+$"}}""", "15"))
         val match = """{"key":"b","type":"text","label":"B","validation":{"matchField":"a"}}"""
         assertEquals("Fields must match", error(match, "\"x\"", """{"a":"y"}"""))
@@ -88,16 +116,37 @@ class ValidateFieldTest {
     @Test
     fun `message sources resolve before the defaults`() {
         val required = field("""{"key":"a","type":"text","label":"A","validation":{"required":true}}""")
-        val byFunction = ValidateOptions(messages = MessageSource.Function { key, _, field -> if (key == MessageKey.REQUIRED) "Need ${field.key}" else null })
+        val byFunction =
+            ValidateOptions(
+                messages =
+                    MessageSource.Function { key, _, field ->
+                        if (key ==
+                            MessageKey.REQUIRED
+                        ) {
+                            "Need ${field.key}"
+                        } else {
+                            null
+                        }
+                    },
+            )
         assertEquals("Need a", validateFieldValue(required, null, stringMapOf(), byFunction))
         val catalog = MessageSource.Catalog(JsonValue.parse("""{"required":"Pflichtfeld {x}"}"""))
-        assertEquals("Pflichtfeld {x}", validateFieldValue(required, null, stringMapOf(), ValidateOptions(messages = catalog)))
+        assertEquals(
+            "Pflichtfeld {x}",
+            validateFieldValue(required, null, stringMapOf(), ValidateOptions(messages = catalog)),
+        )
     }
 
     @Test
     fun `custom validators run last and skip empty values`() {
         val custom = field("""{"key":"a","type":"text","label":"A","validation":{"validator":"even"}}""")
-        val options = ValidateOptions(validators = stringMapOf<ValidatorFn>("even" to { value, _ -> if (value.stringValue!!.length % 2 == 0) null else "Odd" }))
+        val options =
+            ValidateOptions(
+                validators =
+                    stringMapOf<ValidatorFn>(
+                        "even" to { value, _ -> if (value.stringValue!!.length % 2 == 0) null else "Odd" },
+                    ),
+            )
         assertEquals("Odd", validateFieldValue(custom, JsonValue.String("abc"), stringMapOf(), options))
         assertNull(validateFieldValue(custom, JsonValue.String("ab"), stringMapOf(), options))
         assertNull(validateFieldValue(custom, null, stringMapOf(), options))

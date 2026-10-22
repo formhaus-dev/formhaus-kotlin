@@ -1,6 +1,8 @@
 package dev.formhaus.core.regex
 
-internal class JsRegex private constructor(private val pattern: CompiledPattern?) {
+internal class JsRegex private constructor(
+    private val pattern: CompiledPattern?,
+) {
     fun test(text: String): Boolean? = pattern?.test(text)
 
     companion object {

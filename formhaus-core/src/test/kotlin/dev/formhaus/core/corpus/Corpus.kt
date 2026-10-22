@@ -9,29 +9,42 @@ import dev.formhaus.core.json.MutableJsonObject
 import dev.formhaus.core.model.FormDefinition
 import dev.formhaus.core.support.Fixtures
 
-class CorpusCase(json: JsonValue) {
+class CorpusCase(
+    json: JsonValue,
+) {
     val name: String = json["name"]?.stringValue.orEmpty()
     val values: JsonValue = json["input"]?.get("values") ?: JsonValue.Object(MutableJsonObject())
     val skippedSteps: JsonValue = json["input"]?.get("skippedSteps") ?: JsonValue.Array(emptyList())
-    val hiddenValues: HiddenValues = HiddenValues.of(json["input"]?.get("hiddenValues")?.stringValue) ?: HiddenValues.CLEAR
+    val hiddenValues: HiddenValues =
+        HiddenValues.of(json["input"]?.get("hiddenValues")?.stringValue) ?: HiddenValues.CLEAR
     val expectedValues: JsonValue = json["expected"]?.get("values") ?: JsonValue.Object(MutableJsonObject())
     val expectedErrors: JsonValue = json["expected"]?.get("errors") ?: JsonValue.Object(MutableJsonObject())
     val canSubmit: Boolean = json["canSubmit"]?.boolValue ?: false
     val serverValues: JsonValue? = json["serverValues"]
 }
 
-class RecallEntry(val address: String, val item: RecallItem?, val text: String)
+class RecallEntry(
+    val address: String,
+    val item: RecallItem?,
+    val text: String,
+)
 
-class RecallCase(json: JsonValue) {
+class RecallCase(
+    json: JsonValue,
+) {
     val name: String = json["name"]?.stringValue.orEmpty()
     val values: JsonObject = json["values"]?.objectValue ?: MutableJsonObject()
-    val texts: List<RecallEntry> = json["texts"]?.arrayValue.orEmpty().map { entry ->
-        val item = entry["group"]?.stringValue?.let { RecallItem(it, (entry["item"]?.numberValue ?: 0.0).toInt()) }
-        RecallEntry(entry["address"]?.stringValue.orEmpty(), item, entry["text"]?.stringValue.orEmpty())
-    }
+    val texts: List<RecallEntry> =
+        json["texts"]?.arrayValue.orEmpty().map { entry ->
+            val item = entry["group"]?.stringValue?.let { RecallItem(it, (entry["item"]?.numberValue ?: 0.0).toInt()) }
+            RecallEntry(entry["address"]?.stringValue.orEmpty(), item, entry["text"]?.stringValue.orEmpty())
+        }
 }
 
-data class IssueEntry(val code: String, val path: String) : Comparable<IssueEntry> {
+data class IssueEntry(
+    val code: String,
+    val path: String,
+) : Comparable<IssueEntry> {
     override fun compareTo(other: IssueEntry): Int = compareValuesBy(this, other, { it.path }, { it.code })
 
     override fun toString(): String = "$path $code"
@@ -42,7 +55,10 @@ data class IssueEntry(val code: String, val path: String) : Comparable<IssueEntr
     }
 }
 
-class CorpusFixture(val name: String, json: JsonValue) {
+class CorpusFixture(
+    val name: String,
+    json: JsonValue,
+) {
     val issues: List<IssueEntry> = IssueEntry.list(json["issues"]).orEmpty()
     val warnings: List<IssueEntry>? = IssueEntry.list(json["warnings"])
     val definition: JsonValue = json["definition"] ?: JsonValue.Null
@@ -53,7 +69,9 @@ class CorpusFixture(val name: String, json: JsonValue) {
     fun runtime(): FormDefinition = overlay?.let { localize(definition, it).definition } ?: FormDefinition(definition)
 
     companion object {
-        val all: List<CorpusFixture> by lazy { Fixtures.conformanceNames.map { CorpusFixture(it, Fixtures.conformanceFile(it)) } }
+        val all: List<CorpusFixture> by lazy {
+            Fixtures.conformanceNames.map { CorpusFixture(it, Fixtures.conformanceFile(it)) }
+        }
 
         val valid: List<CorpusFixture> by lazy { all.filter { it.issues.isEmpty() } }
     }

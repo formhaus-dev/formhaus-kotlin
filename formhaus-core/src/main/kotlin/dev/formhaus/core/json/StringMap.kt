@@ -17,7 +17,9 @@ internal fun arrayIndex(key: String): Long? {
 
 private const val MAX_ARRAY_INDEX = 4_294_967_295L
 
-public open class StringMap<V : Any> internal constructor(private val insertionOrder: Boolean) : Iterable<Pair<String, V>> {
+public open class StringMap<V : Any> internal constructor(
+    private val insertionOrder: Boolean,
+) : Iterable<Pair<String, V>> {
     private val order = ArrayList<String>()
     private val storage = HashMap<String, V>()
     private var indexCount = 0
@@ -39,7 +41,10 @@ public open class StringMap<V : Any> internal constructor(private val insertionO
 
     internal fun merging(other: StringMap<V>): MutableStringMap<V> = toMutableStringMap().also { it.merge(other) }
 
-    internal fun write(key: String, value: V) {
+    internal fun write(
+        key: String,
+        value: V,
+    ) {
         if (storage.put(key, value) == null) insertKey(key)
     }
 
@@ -50,7 +55,10 @@ public open class StringMap<V : Any> internal constructor(private val insertionO
         return value
     }
 
-    internal fun appendParsed(key: String, value: V) {
+    internal fun appendParsed(
+        key: String,
+        value: V,
+    ) {
         if (storage.put(key, value) == null) order.add(key)
     }
 

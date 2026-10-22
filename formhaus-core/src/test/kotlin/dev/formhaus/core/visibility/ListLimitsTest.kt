@@ -16,11 +16,12 @@ class ListLimitsTest {
 
     @Test
     fun `contains stops at 1000 items unless the field owns more static options`() {
-        val form = definition(
-            """{"id":"f","submit":{"label":"S","disabled":[{"field":"big","contains":"o5"}]},"fields":[
+        val form =
+            definition(
+                """{"id":"f","submit":{"label":"S","disabled":[{"field":"big","contains":"o5"}]},"fields":[
               {"key":"big","type":"multiselect","label":"B","options":[${options(1500)}]},
               {"key":"from","type":"multiselect","label":"F","optionsFrom":"api","options":[${options(1500)}]}]}""",
-        )
+            )
         val condition = requireNotNull(form.submit.disabled).first()
         val values = stringMapOf("big" to picks(1200))
         assertFalse(evaluateCondition(condition, values))

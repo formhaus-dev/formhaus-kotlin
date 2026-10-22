@@ -12,7 +12,9 @@ import dev.formhaus.core.model.FormField
 import dev.formhaus.core.validation.MessageSource
 import dev.formhaus.core.validation.Validators
 
-public enum class StepChangeReason(public val rawValue: String) {
+public enum class StepChangeReason(
+    public val rawValue: String,
+) {
     NEXT("next"),
     BACK("back"),
     AUTO_ADVANCE("autoAdvance"),
@@ -41,7 +43,8 @@ public sealed class SubmitResult {
             val errors = MutableStringMap<String>()
             for ((key, value) in result["errors"]?.objectValue ?: stringMapOf()) {
                 val items = value.arrayValue
-                val message = items?.joinToString(" ") { if (it.isNull) "" else jsString(it) } ?: value.stringValue ?: continue
+                val message =
+                    items?.joinToString(" ") { if (it.isNull) "" else jsString(it) } ?: value.stringValue ?: continue
                 errors[key] = message
             }
             return Rejected(errors, result["formErrors"]?.arrayValue?.mapNotNull { it.stringValue }.orEmpty())
@@ -49,18 +52,28 @@ public sealed class SubmitResult {
     }
 }
 
-public data class StepProgress(public val current: Int, public val total: Int)
+public data class StepProgress(
+    public val current: Int,
+    public val total: Int,
+)
 
-public class GroupItem internal constructor(public val id: String, public val fields: List<FormField>) {
+public class GroupItem internal constructor(
+    public val id: String,
+    public val fields: List<FormField>,
+) {
     override fun equals(other: Any?): Boolean =
         other is GroupItem && id == other.id && fields.map { it.ordinal } == other.fields.map { it.ordinal }
 
     override fun hashCode(): Int = 31 * id.hashCode() + fields.map { it.ordinal }.hashCode()
 }
 
-public class FormLifecycleError internal constructor(public val phase: Phase, cause: Throwable) :
-    Exception("The action completed, but ${phase.rawValue} failed: ${errorMessage(cause)}", cause) {
-    public enum class Phase(public val rawValue: String) {
+public class FormLifecycleError internal constructor(
+    public val phase: Phase,
+    cause: Throwable,
+) : Exception("The action completed, but ${phase.rawValue} failed: ${errorMessage(cause)}", cause) {
+    public enum class Phase(
+        public val rawValue: String,
+    ) {
         AFTER_STEP_CHANGE("afterStepChange"),
         AFTER_SUBMIT("afterSubmit"),
     }
@@ -82,10 +95,16 @@ public typealias WarningFn = (DefinitionIssue) -> Unit
 public interface FormResearch {
     public fun seed(): String
 
-    public fun order(seed: String, key: String, options: List<FieldOption>): List<FieldOption>
+    public fun order(
+        seed: String,
+        key: String,
+        options: List<FieldOption>,
+    ): List<FieldOption>
 }
 
-public enum class HiddenValues(public val rawValue: String) {
+public enum class HiddenValues(
+    public val rawValue: String,
+) {
     CLEAR("clear"),
     KEEP("keep"),
     ;

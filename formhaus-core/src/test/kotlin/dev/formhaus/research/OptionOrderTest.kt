@@ -18,18 +18,24 @@ import org.junit.jupiter.api.TestFactory
 
 class OptionOrderTest {
     @TestFactory
-    fun vectors(): List<DynamicTest> = Fixtures.conformanceNames.flatMap { name ->
-        Fixtures.orders(name).mapIndexed { index, vector ->
-            DynamicTest.dynamicTest("$name: $index") {
-                val pinned = vector["pinned"]?.items.orEmpty().mapNotNull { it.number?.toInt() }.toSet()
-                val count = vector["count"]?.number?.toInt() ?: 0
-                val expected = vector["order"]?.items.orEmpty().mapNotNull { it.number?.toInt() }
-                val seed = requireNotNull(vector["seed"]?.units)
-                val key = requireNotNull(vector["key"]?.units)
-                assertEquals(expected, optionOrder(seed, key, (0 until count).map { it in pinned }))
+    fun vectors(): List<DynamicTest> =
+        Fixtures.conformanceNames.flatMap { name ->
+            Fixtures.orders(name).mapIndexed { index, vector ->
+                DynamicTest.dynamicTest("$name: $index") {
+                    val pinned =
+                        vector["pinned"]
+                            ?.items
+                            .orEmpty()
+                            .mapNotNull { it.number?.toInt() }
+                            .toSet()
+                    val count = vector["count"]?.number?.toInt() ?: 0
+                    val expected = vector["order"]?.items.orEmpty().mapNotNull { it.number?.toInt() }
+                    val seed = requireNotNull(vector["seed"]?.units)
+                    val key = requireNotNull(vector["key"]?.units)
+                    assertEquals(expected, optionOrder(seed, key, (0 until count).map { it in pinned }))
+                }
             }
         }
-    }
 
     @Test
     fun `the vectors keep the code units of a lone surrogate seed`() {
@@ -38,10 +44,11 @@ class OptionOrderTest {
 
     @Test
     fun `option warnings come in option order`() {
-        val definition = JsonValue.parse(
-            """{"formatVersion":"1.6","id":"f","title":"F","submit":{"label":"S"},"fields":[{"key":"plan","type":"radio","label":"Plan",
+        val definition =
+            JsonValue.parse(
+                """{"formatVersion":"1.6","id":"f","title":"F","submit":{"label":"S"},"fields":[{"key":"plan","type":"radio","label":"Plan",
                 "options":[{"value":"a","label":"A","pinned":true},{"value":"b","label":"B","image":"http://example.com/b.png"}]}]}""",
-        )
+            )
         val codes = listOf(IssueCode.RANDOMIZE_NOT_APPLICABLE, IssueCode.UNSAFE_IMAGE_URL)
         val paths = checkDefinition(definition).filter { it.code in codes }.map { it.path }
         assertEquals(listOf("/fields/0/options/0/pinned", "/fields/0/options/1/image"), paths)
@@ -49,12 +56,17 @@ class OptionOrderTest {
 
     @Test
     fun `the research order keeps pinned and exclusive options in place`() {
-        val options = (0 until 6).map { index ->
-            val json = mutableStringMapOf<JsonValue>("value" to JsonValue.String("o$index"), "label" to JsonValue.String("O"))
-            if (index == 0) json["pinned"] = JsonValue.Bool(true)
-            if (index == 5) json["exclusive"] = JsonValue.Bool(true)
-            FieldOption(json)
-        }
+        val options =
+            (0 until 6).map { index ->
+                val json =
+                    mutableStringMapOf<JsonValue>(
+                        "value" to JsonValue.String("o$index"),
+                        "label" to JsonValue.String("O"),
+                    )
+                if (index == 0) json["pinned"] = JsonValue.Bool(true)
+                if (index == 5) json["exclusive"] = JsonValue.Bool(true)
+                FieldOption(json)
+            }
         val order = Research().order("seed", "plan", options).mapNotNull { it.value }
         val pinned = listOf(true, false, false, false, false, true)
         assertEquals(optionOrder("seed", "plan", pinned).map { "o$it" }, order)
@@ -67,10 +79,11 @@ class OptionOrderTest {
     @Test
     fun `the engine takes its seed from the option, then from research, and keeps written order without research`() {
         val options = (0 until 8).joinToString(",") { """{"value":"p$it","label":"P"}""" }
-        val form = definition(
-            """{"formatVersion":"1.6","id":"f","submit":{"label":"S"},
+        val form =
+            definition(
+                """{"formatVersion":"1.6","id":"f","submit":{"label":"S"},
                "fields":[{"key":"plan","type":"radio","label":"Plan","randomize":true,"options":[$options]}]}""",
-        )
+            )
         val written = (0 until 8).map { "p$it" }
         val plain = FormEngine(form, options = FormEngineOptions(onWarning = {}, seed = "fixed"))
         assertEquals("fixed", plain.seed)

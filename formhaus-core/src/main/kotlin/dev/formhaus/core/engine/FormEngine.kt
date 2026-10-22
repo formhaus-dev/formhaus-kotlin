@@ -53,10 +53,15 @@ public class FormEngine(
 
     init {
         reportWarnings(definition, options)
-        core = EngineCore(
-            definition, values, options.validators, options.messages, options.hiddenValues == HiddenValues.KEEP,
-            missingMessageReporter(options),
-        )
+        core =
+            EngineCore(
+                definition,
+                values,
+                options.validators,
+                options.messages,
+                options.hiddenValues == HiddenValues.KEEP,
+                missingMessageReporter(options),
+            )
         core.emitEvent = options.onFormEvent
         core.onChange = listeners::fire
     }
@@ -82,11 +87,14 @@ public class FormEngine(
             val errors = core.errors
             if (errors.isEmpty()) return core.topLevelErrors
             val visibility = core.visibility
-            val hidden = visibility.allFields.mapNotNull { field ->
-                val message = errors[field.key]?.takeIf { field.type == "hidden" && it.isNotEmpty() } ?: return@mapNotNull null
-                val active = visibility.activeField(field.key, core.values.json) ?: field
-                if (active.ordinal == field.ordinal) message else null
-            }
+            val hidden =
+                visibility.allFields.mapNotNull { field ->
+                    val message =
+                        errors[field.key]?.takeIf { field.type == "hidden" && it.isNotEmpty() }
+                            ?: return@mapNotNull null
+                    val active = visibility.activeField(field.key, core.values.json) ?: field
+                    if (active.ordinal == field.ordinal) message else null
+                }
             return core.topLevelErrors + hidden
         }
 
@@ -111,19 +119,33 @@ public class FormEngine(
         return { listeners.remove(id) }
     }
 
-    public fun setValue(key: String, value: JsonValue?): Unit = core.setValue(key, value)
+    public fun setValue(
+        key: String,
+        value: JsonValue?,
+    ): Unit = core.setValue(key, value)
 
     public fun items(key: String): List<GroupItem> = core.items(key)
 
     public fun addItem(key: String): Boolean = core.addItem(key)
 
-    public fun removeItem(key: String, index: Int): Boolean = core.removeItem(key, index)
+    public fun removeItem(
+        key: String,
+        index: Int,
+    ): Boolean = core.removeItem(key, index)
 
-    public fun setItemValue(key: String, index: Int, field: String, value: JsonValue?): Unit = core.setItemValue(key, index, field, value)
+    public fun setItemValue(
+        key: String,
+        index: Int,
+        field: String,
+        value: JsonValue?,
+    ): Unit = core.setItemValue(key, index, field, value)
 
     public fun setErrors(errors: FieldErrors): Unit = core.applyValidationErrors(errors, server = true)
 
-    public fun setFieldLoading(key: String, loading: Boolean) {
+    public fun setFieldLoading(
+        key: String,
+        loading: Boolean,
+    ) {
         core.fieldLoading.assign(key, if (loading) true else null)
         core.notify()
     }
@@ -152,7 +174,11 @@ public class FormEngine(
     public fun goToStepWithField(key: String) {
         if (!core.isMultiStep) return
         val target = core.visibility.findStepIndex(key, core.values.json, core.currentStepIndex)
-        if (target == core.currentStepIndex) core.notify() else if (target != null) moveTo(target)
+        if (target == core.currentStepIndex) {
+            core.notify()
+        } else if (target != null) {
+            moveTo(target)
+        }
     }
 
     public fun goToStep(stepId: String): GoToStepResult = redirectTo(stepId)
@@ -174,10 +200,15 @@ public class FormEngine(
         core.replaceDefinition(definition)
     }
 
-    public fun orderOptions(key: String, options: List<FieldOption>? = null): List<FieldOption> = orderedOptions(key, options)
+    public fun orderOptions(
+        key: String,
+        options: List<FieldOption>? = null,
+    ): List<FieldOption> = orderedOptions(key, options)
 
-    public fun recallText(text: String, options: RecallOptions = RecallOptions()): String =
-        substitute(definition, text) { recallScope().resolver(options) }
+    public fun recallText(
+        text: String,
+        options: RecallOptions = RecallOptions(),
+    ): String = substitute(definition, text) { recallScope().resolver(options) }
 
     internal fun moveTo(index: Int) {
         core.validationEpoch += 1

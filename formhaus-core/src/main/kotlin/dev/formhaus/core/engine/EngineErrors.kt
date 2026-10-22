@@ -17,12 +17,19 @@ import dev.formhaus.core.visibility.itemPath
 import dev.formhaus.core.visibility.itemScope
 import dev.formhaus.core.visibility.itemsOf
 
-internal fun errorKeys(nodes: List<FormNode>, errors: FieldErrors, values: JsonObject): List<String> {
+internal fun errorKeys(
+    nodes: List<FormNode>,
+    errors: FieldErrors,
+    values: JsonObject,
+): List<String> {
     if (errors.isEmpty()) return emptyList()
     return valueFields(nodes).flatMap { field ->
         val own = if (field.type != "hidden" && errors[field.key] != null) listOf(field.key) else emptyList()
         if (!field.isGroup) return@flatMap own
-        val paths = itemsOf(values[field.key]).indices.flatMap { index -> field.items.map { itemPath(field.key, index, it.key) } }
+        val paths =
+            itemsOf(values[field.key]).indices.flatMap { index ->
+                field.items.map { itemPath(field.key, index, it.key) }
+            }
         own + paths.filter { errors[it] != null }
     }
 }
@@ -36,14 +43,21 @@ private inline fun <T> EngineCore.unsettleOnWrite(run: () -> T): T {
 
 internal val EngineCore.messageSource: MessageSource get() = MessageSource.Function(messages)
 
-internal fun EngineCore.fieldsErrors(nodes: List<FormNode>, submitValues: JsonObject? = null): FieldErrors {
+internal fun EngineCore.fieldsErrors(
+    nodes: List<FormNode>,
+    submitValues: JsonObject? = null,
+): FieldErrors {
     val values = submitValues ?: getSubmitValues()
     val scope = visibility.conditionValues(this.values.json)
     val checks = ShownChecks(validators, messageSource, visibility.limits(this.values.json))
     return CallBudget.run { unsettleOnWrite { validateShown(nodes, values, scope, checks) } }
 }
 
-internal fun EngineCore.fieldError(field: FormField, value: JsonValue?, allValues: JsonObject? = null): String? {
+internal fun EngineCore.fieldError(
+    field: FormField,
+    value: JsonValue?,
+    allValues: JsonObject? = null,
+): String? {
     val all = allValues ?: getSubmitValues()
     return CallBudget.run { unsettleOnWrite { fieldValueError(field, value, all, validators, messageSource) } }
 }
@@ -55,12 +69,21 @@ internal fun EngineCore.itemError(item: ItemField): String? {
     return fieldError(item.field, scope[item.field.key], scope)
 }
 
-internal fun EngineCore.applyValidationErrors(found: FieldErrors, server: Boolean = false, formErrors: List<String> = emptyList()) {
+internal fun EngineCore.applyValidationErrors(
+    found: FieldErrors,
+    server: Boolean = false,
+    formErrors: List<String> = emptyList(),
+) {
     val bound = MutableStringMap<String>()
     val general = formErrors.toMutableList()
     for ((key, message) in found) {
-        if (visibility.activeField(key, values.json) != null || visibility.activeItem(key, values.json) != null) bound[key] = message
-        else general.add(message)
+        if (visibility.activeField(key, values.json) != null ||
+            visibility.activeItem(key, values.json) != null
+        ) {
+            bound[key] = message
+        } else {
+            general.add(message)
+        }
     }
     if (server) {
         replaceServerErrors(bound)
@@ -78,7 +101,10 @@ internal fun EngineCore.moveToFirstError(found: FieldErrors): Boolean {
     return true
 }
 
-internal fun EngineCore.clearError(key: String, server: Boolean = false) {
+internal fun EngineCore.clearError(
+    key: String,
+    server: Boolean = false,
+) {
     if (server) serverErrors.remove(key)
     errors.assign(key, serverErrors[key])
 }
@@ -88,25 +114,41 @@ internal fun EngineCore.dropServerErrors(keys: Iterable<String>) {
     for (key in serverErrors.keys) if (key in dropped || visibility.owner(key) in dropped) serverErrors.remove(key)
 }
 
-internal fun EngineCore.clearResolvedMatchErrors(key: String, item: ItemField? = null): List<String> {
+internal fun EngineCore.clearResolvedMatchErrors(
+    key: String,
+    item: ItemField? = null,
+): List<String> {
+    if (item != null) {
+        return clearResolvedMatches(key, item.group.items.map { itemPath(item.group.key, item.index, it.key) to it }) {
+            itemError(ItemField(item.group, item.index, it))
+        }
+    }
+    val fieldCleared = clearResolvedMatches(key, visibility.allFields.map { it.key to it }) { fieldError(it, values[it.key]) }
+    return fieldCleared + visibility.groups.flatMap { clearResolvedGroupMatches(key, it) }
+}
+
+private fun EngineCore.clearResolvedMatches(
+    key: String,
+    fields: List<Pair<String, FormField>>,
+    errorOf: (FormField) -> String?,
+): List<String> {
     val cleared = ArrayList<String>()
-    val fields = item?.let { owner -> owner.group.items.map { itemPath(owner.group.key, owner.index, it.key) to it } }
-        ?: visibility.allFields.map { it.key to it }
     for ((path, field) in fields) {
-        if (field.validation?.matchField != key || errors[path] == null) continue
-        val error = if (item != null) itemError(ItemField(item.group, item.index, field)) else fieldError(field, values[field.key])
-        if (error != null) continue
+        if (field.validation?.matchField != key || errors[path] == null || errorOf(field) != null) continue
         clearError(path)
         cleared.add(path)
     }
-    if (item != null) return cleared
-    for (group in visibility.groups) {
-        if (visibility.activeField(group.key, values.json)?.ordinal != group.ordinal) continue
-        if (group.items.none { it.validation?.matchField == key }) continue
-        val first = group.items.firstOrNull() ?: continue
-        for (index in itemsOf(values[group.key]).indices) cleared.addAll(clearResolvedMatchErrors(key, ItemField(group, index, first)))
-    }
     return cleared
+}
+
+private fun EngineCore.clearResolvedGroupMatches(
+    key: String,
+    group: FormField,
+): List<String> {
+    if (visibility.activeField(group.key, values.json)?.ordinal != group.ordinal) return emptyList()
+    if (group.items.none { it.validation?.matchField == key }) return emptyList()
+    val first = group.items.firstOrNull() ?: return emptyList()
+    return itemsOf(values[group.key]).indices.flatMap { clearResolvedMatchErrors(key, ItemField(group, it, first)) }
 }
 
 internal fun EngineCore.pruneOffPathErrors(): List<String> {

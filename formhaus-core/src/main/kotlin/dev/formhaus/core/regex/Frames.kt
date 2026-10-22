@@ -1,13 +1,24 @@
 package dev.formhaus.core.regex
 
 internal class Frames {
-    class Scan(val pc: Int, val position: Int, val stop: Int, val step: Int)
+    class Scan(
+        val pc: Int,
+        val position: Int,
+        val stop: Int,
+        val step: Int,
+    )
 
     private val values = IntList(STRIDE * 64)
 
     val size: Int get() = values.size
 
-    fun push(kind: Int, a: Int, b: Int = 0, c: Int = 0, d: Int = 0) {
+    fun push(
+        kind: Int,
+        a: Int,
+        b: Int = 0,
+        c: Int = 0,
+        d: Int = 0,
+    ) {
         values.add(kind)
         values.add(a)
         values.add(b)
@@ -15,7 +26,10 @@ internal class Frames {
         values.add(d)
     }
 
-    fun push(kind: Int, scan: Scan) {
+    fun push(
+        kind: Int,
+        scan: Scan,
+    ) {
         push(kind, scan.pc, scan.position, scan.stop, scan.step)
     }
 

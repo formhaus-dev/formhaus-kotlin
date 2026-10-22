@@ -1,6 +1,8 @@
 package dev.formhaus.core.support
 
-class RawReader private constructor(private val bytes: ByteArray) {
+class RawReader private constructor(
+    private val bytes: ByteArray,
+) {
     private var index = 0
 
     companion object {
@@ -11,9 +13,17 @@ class RawReader private constructor(private val bytes: ByteArray) {
             return if (reader.index == bytes.size) value else null
         }
 
-        private val simpleEscapes = mapOf(
-            '"' to '"', '\\' to '\\', '/' to '/', 'b' to '\b', 'f' to '\u000C', 'n' to '\n', 'r' to '\r', 't' to '\t',
-        )
+        private val simpleEscapes =
+            mapOf(
+                '"' to '"',
+                '\\' to '\\',
+                '/' to '/',
+                'b' to '\b',
+                'f' to '\u000C',
+                'n' to '\n',
+                'r' to '\r',
+                't' to '\t',
+            )
     }
 
     private fun current(): Char = bytes[index].toInt().toChar()
@@ -66,8 +76,15 @@ class RawReader private constructor(private val bytes: ByteArray) {
         return if (take(']')) RawJson.Array(items) else null
     }
 
-    private fun word(text: String, result: RawJson): RawJson? {
-        if (index + text.length > bytes.size || text.indices.any { bytes[index + it].toInt().toChar() != text[it] }) return null
+    private fun word(
+        text: String,
+        result: RawJson,
+    ): RawJson? {
+        if (index + text.length > bytes.size ||
+            text.indices.any { bytes[index + it].toInt().toChar() != text[it] }
+        ) {
+            return null
+        }
         index += text.length
         return result
     }

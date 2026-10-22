@@ -16,12 +16,16 @@ class SubmissionBudgetTest {
     @Test
     fun `a submission fails closed on every field once its budget runs out`() {
         val pattern = JsonValue.String(heavy).toString()
-        val fields = (0 until 3).joinToString(",") { """{"key":"f$it","type":"text","label":"F","validation":{"pattern":$pattern}}""" }
+        val fields =
+            (0 until 3).joinToString(",") {
+                """{"key":"f$it","type":"text","label":"F","validation":{"pattern":$pattern}}"""
+            }
         val form = definition("""{"id":"p","submit":{"label":"S"},"fields":[$fields]}""")
         val values = JsonValue.parse("""{"f0":"$heavyText","f1":"abc","f2":"abc"}""")
-        val result = StepBudget.backtrackingLimit.withValue(if (Load.heavy) StepBudget.backtrackingLimit.value else 4_000_000) {
-            validateSubmission(form, values)
-        }
+        val result =
+            StepBudget.backtrackingLimit.withValue(if (Load.heavy) StepBudget.backtrackingLimit.value else 4_000_000) {
+                validateSubmission(form, values)
+            }
         assertNotNull(result.errors["f0"])
         assertNull(result.errors["f1"])
         val exhausted = CallBudget.current.withValue(CallBudget(0)) { validateSubmission(form, values) }

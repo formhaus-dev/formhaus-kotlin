@@ -10,28 +10,46 @@ import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.TestFactory
 
 class CorpusRecallTest {
-    private fun check(fixture: CorpusFixture, case: RecallCase, hiddenValues: HiddenValues) {
+    private fun check(
+        fixture: CorpusFixture,
+        case: RecallCase,
+        hiddenValues: HiddenValues,
+    ) {
         val definition = fixture.runtime()
         val slots = textSlots(definition)
         val engine = FormEngine(definition, case.values, FormEngineOptions(onWarning = {}, hiddenValues = hiddenValues))
         for (entry in case.texts) {
             val slot = requireNotNull(slots.firstOrNull { it.address == entry.address }) { entry.address }
-            val text = engine.recallText(slot.text, RecallOptions(entry.item, format = { answer, _, _ -> answer.stored }))
+            val text =
+                engine.recallText(
+                    slot.text,
+                    RecallOptions(entry.item, format = {
+                        answer,
+                        _,
+                        _,
+                        ->
+                        answer.stored
+                    }),
+                )
             assertEquals(entry.text, text, "${entry.address} ${entry.item?.index ?: ""}")
         }
     }
 
-    private fun recalls(hiddenValues: HiddenValues): List<DynamicTest> = CorpusFixture.all.flatMap { fixture ->
-        fixture.recall.map { case -> DynamicTest.dynamicTest("${fixture.name}: ${case.name}") { check(fixture, case, hiddenValues) } }
-    }
+    private fun recalls(hiddenValues: HiddenValues): List<DynamicTest> =
+        CorpusFixture.all.flatMap { fixture ->
+            fixture.recall.map { case ->
+                DynamicTest.dynamicTest("${fixture.name}: ${case.name}") { check(fixture, case, hiddenValues) }
+            }
+        }
 
     @TestFactory
-    fun `recall case names are unique in every fixture`(): List<DynamicTest> = CorpusFixture.all.map { fixture ->
-        DynamicTest.dynamicTest(fixture.name) {
-            val names = fixture.recall.map { it.name }
-            assertEquals(names.size, names.toSet().size)
+    fun `recall case names are unique in every fixture`(): List<DynamicTest> =
+        CorpusFixture.all.map { fixture ->
+            DynamicTest.dynamicTest(fixture.name) {
+                val names = fixture.recall.map { it.name }
+                assertEquals(names.size, names.toSet().size)
+            }
         }
-    }
 
     @TestFactory
     fun recall(): List<DynamicTest> = recalls(HiddenValues.CLEAR)

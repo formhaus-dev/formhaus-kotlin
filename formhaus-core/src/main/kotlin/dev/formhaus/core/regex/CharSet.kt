@@ -1,6 +1,8 @@
 package dev.formhaus.core.regex
 
-internal class CharSet private constructor(private val bounds: IntArray) {
+internal class CharSet private constructor(
+    private val bounds: IntArray,
+) {
     private val low: Long
     private val high: Long
 
@@ -78,13 +80,25 @@ internal class CharSet private constructor(private val bounds: IntArray) {
         val dot: CharSet = lineTerminator.inverted
         val notDigit: CharSet = digit.inverted
         val notWord: CharSet = word.inverted
-        val space: CharSet = of(
-            '\u0009'..'\u000D', ' '..' ', ' '..' ', ' '..' ', ' '..' ', ' '..' ',
-            ' '..' ', ' '..' ', '　'..'　', '﻿'..'﻿',
-        )
+        val space: CharSet =
+            of(
+                '\u0009'..'\u000D',
+                ' '..' ',
+                ' '..' ',
+                ' '..' ',
+                ' '..' ',
+                ' '..' ',
+                ' '..' ',
+                ' '..' ',
+                '　'..'　',
+                '\uFEFF'..'\uFEFF',
+            )
         val notSpace: CharSet = space.inverted
 
-        private fun mask(lower: Int, upper: Int): Long {
+        private fun mask(
+            lower: Int,
+            upper: Int,
+        ): Long {
             val width = upper - lower + 1
             return (if (width == 64) -1L else (1L shl width) - 1) shl lower
         }

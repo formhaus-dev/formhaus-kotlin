@@ -29,8 +29,10 @@ internal class Slot(
 
 private val bounds = mapOf("minLength" to "min", "maxLength" to "max", "min" to "min", "max" to "max")
 
-private fun ruleKey(field: FormField, rule: String): String =
-    if ((field.type in listTypes || field.isGroup) && rule.endsWith("Length")) rule.replace("Length", "Items") else rule
+private fun ruleKey(
+    field: FormField,
+    rule: String,
+): String = if ((field.type in listTypes || field.isGroup) && rule.endsWith("Length")) rule.replace("Length", "Items") else rule
 
 private fun catalogKeys(value: JsonValue?): List<String> = value?.objectValue?.keys.orEmpty()
 
@@ -48,15 +50,31 @@ private fun usedMessages(definition: FormDefinition): Set<String> {
     return keys
 }
 
-private fun textSlot(text: TextNode, slot: String, keys: JsonObject): Slot? {
+private fun textSlot(
+    text: TextNode,
+    slot: String,
+    keys: JsonObject,
+): Slot? {
     val source = text.node[slot]?.stringValue ?: return null
     return Slot(
-        SlotKind.TEXT, slotAddress(text.kind, text.address, slot), keys[slot]?.stringValue, source, source, noParams, true,
-        text.location, slot,
+        SlotKind.TEXT,
+        slotAddress(text.kind, text.address, slot),
+        keys[slot]?.stringValue,
+        source,
+        source,
+        noParams,
+        true,
+        text.location,
+        slot,
     )
 }
 
-private fun ruleSlot(definition: FormDefinition, text: TextNode, slot: String, keys: JsonObject): Slot? {
+private fun ruleSlot(
+    definition: FormDefinition,
+    text: TextNode,
+    slot: String,
+    keys: JsonObject,
+): Slot? {
     val field = text.field
     if (!hasRule(text.node, slot) || field == null) return null
     val literalName = literalName(slot)
@@ -66,19 +84,33 @@ private fun ruleSlot(definition: FormDefinition, text: TextNode, slot: String, k
     val message = ruleKey(field, slot)
     val template = definition.messages?.get(message)?.stringValue ?: defaultMessages[MessageKey(message)].orEmpty()
     return Slot(
-        SlotKind.RULE, text.address + slot, keys[slot]?.stringValue, literal, literal ?: formatText(template, params), params,
-        literal != null || keys[slot]?.isTruthy == true, text.location, literalName,
+        SlotKind.RULE,
+        text.address + slot,
+        keys[slot]?.stringValue,
+        literal,
+        literal ?: formatText(template, params),
+        params,
+        literal != null || keys[slot]?.isTruthy == true,
+        text.location,
+        literalName,
     )
 }
 
-private fun nodeSlots(definition: FormDefinition, text: TextNode): List<Slot> {
+private fun nodeSlots(
+    definition: FormDefinition,
+    text: TextNode,
+): List<Slot> {
     val keys = text.node["i18n"]?.objectValue ?: noParams
     return text.kind.slots.mapNotNull { slot ->
         if (text.kind == NodeKind.VALIDATION) ruleSlot(definition, text, slot, keys) else textSlot(text, slot, keys)
     }
 }
 
-private fun catalogSlots(definition: FormDefinition, name: String, used: Set<String>): List<Slot> {
+private fun catalogSlots(
+    definition: FormDefinition,
+    name: String,
+    used: Set<String>,
+): List<Slot> {
     val isMessages = name == "messages"
     val order = if (isMessages) defaultMessageKeys.map { it.rawValue } else defaultLabelKeys
     val keys = definition.i18n?.get(name)?.objectValue ?: noParams
@@ -86,25 +118,48 @@ private fun catalogSlots(definition: FormDefinition, name: String, used: Set<Str
         val fallback = if (isMessages) defaultMessages[MessageKey(item)] else defaultLabels[item]
         val source = definition.json[name]?.get(item)?.stringValue ?: fallback ?: return@mapNotNull null
         Slot(
-            if (isMessages) SlotKind.MESSAGE else SlotKind.LABEL, listOf(name, item), keys[item]?.stringValue, source, source,
-            noParams, item in used, listOf(name), item,
+            if (isMessages) SlotKind.MESSAGE else SlotKind.LABEL,
+            listOf(name, item),
+            keys[item]?.stringValue,
+            source,
+            source,
+            noParams,
+            item in used,
+            listOf(name),
+            item,
         )
     }
 }
 
-private val groupLabels = listOf(
-    "addItem", "removeItem", "itemLabel", "itemAdded", "itemRemoved", "removeItemNamed", "removeItemPrompt", "removeItemBody", "cancel",
-)
+private val groupLabels =
+    listOf(
+        "addItem",
+        "removeItem",
+        "itemLabel",
+        "itemAdded",
+        "itemRemoved",
+        "removeItemNamed",
+        "removeItemPrompt",
+        "removeItemBody",
+        "cancel",
+    )
 private val pickerTypes = listOf("date", "time", "datetime")
 
-private fun unlabeled(value: JsonValue?, key: String): Boolean = value?.get(key)?.isTruthy != true
+private fun unlabeled(
+    value: JsonValue?,
+    key: String,
+): Boolean = value?.get(key)?.isTruthy != true
 
 private fun usedLabels(definition: FormDefinition): Set<String> {
     val steps = definition.steps.orEmpty()
     val nodes = definition.allFields
     val fields = nodes.flatMap { if (it.isGroup) it.items else listOf(it) }
     val labels = hashSetOf("errorSummary")
-    fun add(present: Boolean, keys: List<String>) {
+
+    fun add(
+        present: Boolean,
+        keys: List<String>,
+    ) {
         if (present) labels.addAll(keys)
     }
     add(steps.isNotEmpty(), listOf("continue", "back", "stepOf", "stepErrors"))
@@ -113,7 +168,12 @@ private fun usedLabels(definition: FormDefinition): Set<String> {
     add(unlabeled(definition.json["submit"], "label"), listOf("submit"))
     add(nodes.any { it.isGroup }, groupLabels)
     add(fields.any { it.hasPictures }, listOf("enlargeImage", "close"))
-    add(fields.any { field -> field.type == "multiselect" && field.options.orEmpty().any { it.exclusive } }, listOf("or"))
+    add(
+        fields.any { field ->
+            field.type == "multiselect" && field.options.orEmpty().any { it.exclusive }
+        },
+        listOf("or"),
+    )
     add(fields.any { it.type == "select" }, listOf("select"))
     add(fields.any { it.validation?.required?.isTruthy == true }, listOf("required"))
     add(fields.any { it.type in pickerTypes || it.type == "file" }, listOf("clear"))

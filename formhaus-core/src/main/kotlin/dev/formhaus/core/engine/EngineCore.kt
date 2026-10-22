@@ -10,7 +10,10 @@ import dev.formhaus.core.validation.MessageSource
 import dev.formhaus.core.validation.ResolveMessage
 import dev.formhaus.core.validation.Validators
 
-internal class SkippedKeys(val id: String, var keys: List<String>)
+internal class SkippedKeys(
+    val id: String,
+    var keys: List<String>,
+)
 
 internal class EngineCore(
     definition: FormDefinition,
@@ -59,7 +62,10 @@ internal class EngineCore(
     var emitEvent: ((FormEvent) -> Unit)? = null
     var onChange: (() -> Unit)? = null
 
-    fun load(next: FormDefinition, initialValues: Values) {
+    fun load(
+        next: FormDefinition,
+        initialValues: Values,
+    ) {
         definition = next
         definitionGeneration += 1
         messages = watchedResolver(messageSource, next, missingMessage)
@@ -82,8 +88,10 @@ internal class EngineCore(
         serverErrorsGeneration += 1
     }
 
-    fun reconcileHidden(initial: Boolean = false, written: String? = null): Set<String> =
-        visibility.reconcileHidden(values, errors, initial, written)
+    fun reconcileHidden(
+        initial: Boolean = false,
+        written: String? = null,
+    ): Set<String> = visibility.reconcileHidden(values, errors, initial, written)
 
     val isMultiStep: Boolean get() = definition.isMultiStep
     val view: VisibilityView get() = visibility.state(values.json, currentStepIndex)
@@ -96,7 +104,10 @@ internal class EngineCore(
 
     fun isStepSkipped(stepId: String): Boolean = skipped.any { it.id == stepId }
 
-    fun markSkipped(stepId: String, keys: List<String>) {
+    fun markSkipped(
+        stepId: String,
+        keys: List<String>,
+    ) {
         val entry = skipped.firstOrNull { it.id == stepId }
         if (entry != null) entry.keys = keys else skipped.add(SkippedKeys(stepId, keys))
     }
@@ -105,7 +116,10 @@ internal class EngineCore(
         skipped.removeAll { it.id == stepId }
     }
 
-    fun notify(structureChanged: Boolean = false, valuesChanged: Boolean = false) {
+    fun notify(
+        structureChanged: Boolean = false,
+        valuesChanged: Boolean = false,
+    ) {
         visibility.markChanged(structureChanged, valuesChanged)
         version += 1
         onChange?.invoke()
@@ -145,12 +159,21 @@ internal class EngineCore(
     private fun trackFields() {
         val tracked = visibility.trackShown(values, shownFields)
         shownFields = tracked.state
-        for (flip in tracked.flips) emit(if (flip.shown) FormEvent.FieldShown(flip.key) else FormEvent.FieldHidden(flip.key))
+        for (flip in tracked.flips) {
+            emit(
+                if (flip.shown) FormEvent.FieldShown(flip.key) else FormEvent.FieldHidden(flip.key),
+            )
+        }
     }
 
     private companion object {
-        fun startValues(visibility: VisibilityState, initialValues: Values, errors: MutableStringMap<String>): Values {
-            val values = createValues(visibility.allFields, initialValues) { key, json -> visibility.activeField(key, json) }
+        fun startValues(
+            visibility: VisibilityState,
+            initialValues: Values,
+            errors: MutableStringMap<String>,
+        ): Values {
+            val values =
+                createValues(visibility.allFields, initialValues) { key, json -> visibility.activeField(key, json) }
             visibility.reconcileHidden(values, errors, initial = true)
             return values
         }

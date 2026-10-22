@@ -49,7 +49,12 @@ internal fun EngineCore.reset(initialValues: JsonObject?) {
     validationEpoch += 1
     operationEpoch += 1
     val visibility = visibility
-    replaceValues(createValues(visibility.allFields, initialValues?.let(::Values)) { key, json -> visibility.activeField(key, json) })
+    replaceValues(
+        createValues(
+            visibility.allFields,
+            initialValues?.let(::Values),
+        ) { key, json -> visibility.activeField(key, json) },
+    )
     replaceErrors(MutableStringMap())
     replaceServerErrors(MutableStringMap())
     topLevelErrors = emptyList()

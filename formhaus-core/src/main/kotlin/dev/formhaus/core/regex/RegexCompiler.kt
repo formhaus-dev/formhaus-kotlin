@@ -1,7 +1,13 @@
 package dev.formhaus.core.regex
 
-internal class PatternAnalysis(parsed: ParsedPattern) {
-    class LookInfo(val body: RegexNode, val look: Look, val pure: Boolean)
+internal class PatternAnalysis(
+    parsed: ParsedPattern,
+) {
+    class LookInfo(
+        val body: RegexNode,
+        val look: Look,
+        val pure: Boolean,
+    )
 
     val captureCount: Int = parsed.captureCount
     val automaton: Boolean
@@ -16,15 +22,19 @@ internal class PatternAnalysis(parsed: ParsedPattern) {
             false
         }
         automaton = referenced.isEmpty()
-        looks = bodies.map { node ->
-            val captures = node.body.captureRange
-            val impure = node.body.contains { it is RegexNode.Backreference }
-            LookInfo(node.body, node.look, pure = !impure && referenced.none { captures?.contains(it) == true })
-        }
+        looks =
+            bodies.map { node ->
+                val captures = node.body.captureRange
+                val impure = node.body.contains { it is RegexNode.Backreference }
+                LookInfo(node.body, node.look, pure = !impure && referenced.none { captures?.contains(it) == true })
+            }
     }
 }
 
-internal class RegexCompiler private constructor(val analysis: PatternAnalysis, val automaton: Boolean) {
+internal class RegexCompiler private constructor(
+    val analysis: PatternAnalysis,
+    val automaton: Boolean,
+) {
     val code: ArrayList<Instruction> = ArrayList()
     var registers: Int = analysis.captureCount + 1
     var dependentEnd: Int = 0
@@ -42,7 +52,11 @@ internal class RegexCompiler private constructor(val analysis: PatternAnalysis, 
     companion object {
         const val INSTRUCTION_LIMIT: Int = 1 shl 18
 
-        fun compile(parsed: ParsedPattern, analysis: PatternAnalysis, backward: Boolean): RegexProgram {
+        fun compile(
+            parsed: ParsedPattern,
+            analysis: PatternAnalysis,
+            backward: Boolean,
+        ): RegexProgram {
             val compiler = RegexCompiler(analysis, analysis.automaton)
             compiler.emit(parsed.root, backward)
             val mainEnd = compiler.code.size
@@ -51,18 +65,22 @@ internal class RegexCompiler private constructor(val analysis: PatternAnalysis, 
             compiler.emitInlineLooks()
             var size = compiler.code.size
             var clamped = compiler.clamped
-            val scans = analysis.looks.map { info ->
-                if (!info.pure || size > INSTRUCTION_LIMIT) return@map null
-                val scan = scanner(info, analysis)
-                size += scan.size
-                clamped = clamped || scan.clamped
-                scan
-            }
+            val scans =
+                analysis.looks.map { info ->
+                    if (!info.pure || size > INSTRUCTION_LIMIT) return@map null
+                    val scan = scanner(info, analysis)
+                    size += scan.size
+                    clamped = clamped || scan.clamped
+                    scan
+                }
             compiler.clamped = clamped
             return compiler.program(mainEnd, scans, size)
         }
 
-        private fun scanner(info: PatternAnalysis.LookInfo, analysis: PatternAnalysis): RegexProgram {
+        private fun scanner(
+            info: PatternAnalysis.LookInfo,
+            analysis: PatternAnalysis,
+        ): RegexProgram {
             val compiler = RegexCompiler(analysis, automaton = true)
             compiler.inMain = false
             compiler.emit(info.body, !info.look.behind)
@@ -72,29 +90,68 @@ internal class RegexCompiler private constructor(val analysis: PatternAnalysis, 
         }
     }
 
-    private fun program(mainEnd: Int, scans: List<RegexProgram?>, size: Int): RegexProgram = RegexProgram(
-        instructions = code, sets = sets, looks = analysis.looks.map { LookBody(it.look, inline[it.look.index]) },
-        scans = scans, size = size, clamped = clamped, references = references, captureCount = analysis.captureCount,
-        registerCount = registers, mainEnd = mainEnd, memoFrom = dependentEnd, automaton = automaton,
-    )
+    private fun program(
+        mainEnd: Int,
+        scans: List<RegexProgram?>,
+        size: Int,
+    ): RegexProgram =
+        RegexProgram(
+            instructions = code,
+            sets = sets,
+            looks = analysis.looks.map { LookBody(it.look, inline[it.look.index]) },
+            scans = scans,
+            size = size,
+            clamped = clamped,
+            references = references,
+            captureCount = analysis.captureCount,
+            registerCount = registers,
+            mainEnd = mainEnd,
+            memoFrom = dependentEnd,
+            automaton = automaton,
+        )
 
     fun newRegister(): Int = registers++
 
-    fun emit(node: RegexNode, backward: Boolean) {
+    fun emit(
+        node: RegexNode,
+        backward: Boolean,
+    ) {
         when (node) {
-            is RegexNode.Unit -> code.add(Instruction.Unit(node.unit, backward))
-            is RegexNode.Set -> code.add(Instruction.Set(intern(node.set), backward))
-            is RegexNode.Sequence -> for (child in if (backward) node.nodes.asReversed() else node.nodes) emit(child, backward)
-            is RegexNode.Alternation -> emitAlternation(node.branches, backward)
+            is RegexNode.Unit -> {
+                code.add(Instruction.Unit(node.unit, backward))
+            }
+
+            is RegexNode.Set -> {
+                code.add(Instruction.Set(intern(node.set), backward))
+            }
+
+            is RegexNode.Sequence -> {
+                for (child in if (backward) node.nodes.asReversed() else node.nodes) emit(child, backward)
+            }
+
+            is RegexNode.Alternation -> {
+                emitAlternation(node.branches, backward)
+            }
+
             is RegexNode.Group -> {
                 val recorded = if (automaton) null else node.capture
                 if (recorded != null) code.add(Instruction.State(StateChange.GroupStart(recorded)))
                 emit(node.body, backward)
                 if (recorded != null) code.add(Instruction.State(StateChange.GroupEnd(recorded)))
             }
-            is RegexNode.Quantified -> emitQuantified(node.body, node.quantifier, backward)
-            is RegexNode.Assertion -> code.add(Instruction.Assertion(node.assertion))
-            is RegexNode.Lookaround -> emitLook(node.look)
+
+            is RegexNode.Quantified -> {
+                emitQuantified(node.body, node.quantifier, backward)
+            }
+
+            is RegexNode.Assertion -> {
+                code.add(Instruction.Assertion(node.assertion))
+            }
+
+            is RegexNode.Lookaround -> {
+                emitLook(node.look)
+            }
+
             is RegexNode.Backreference -> {
                 references.add(Backreference(node.groups, backward, node.ignoreCase))
                 code.add(Instruction.Backreference(references.size - 1))
@@ -115,7 +172,10 @@ internal class RegexCompiler private constructor(val analysis: PatternAnalysis, 
         }
     }
 
-    private fun emitAlternation(branches: List<RegexNode>, backward: Boolean) {
+    private fun emitAlternation(
+        branches: List<RegexNode>,
+        backward: Boolean,
+    ) {
         val exits = ArrayList<Int>()
         for (branch in branches.dropLast(1)) {
             val split = code.size

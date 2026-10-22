@@ -5,17 +5,29 @@ import dev.formhaus.core.model.FieldOption
 import java.security.SecureRandom
 
 public class Research : FormResearch {
-    override fun seed(): String = (0 until 2).joinToString("") { java.lang.Long.toHexString(random.nextLong()).padStart(16, '0') }
+    override fun seed(): String =
+        (0 until 2).joinToString("") {
+            java.lang.Long
+                .toHexString(random.nextLong())
+                .padStart(16, '0')
+        }
 
-    override fun order(seed: String, key: String, options: List<FieldOption>): List<FieldOption> =
-        optionOrder(seed, key, options.map { it.pinned || it.exclusive }).map(options::get)
+    override fun order(
+        seed: String,
+        key: String,
+        options: List<FieldOption>,
+    ): List<FieldOption> = optionOrder(seed, key, options.map { it.pinned || it.exclusive }).map(options::get)
 
     private companion object {
         val random = SecureRandom()
     }
 }
 
-internal fun optionOrder(seed: String, key: String, pinned: List<Boolean>): List<Int> {
+internal fun optionOrder(
+    seed: String,
+    key: String,
+    pinned: List<Boolean>,
+): List<Int> {
     var state = 0x811C9DC5.toInt()
     val mix = { unit: Char -> state = (state xor unit.code) * 0x01000193 }
     seed.forEach(mix)

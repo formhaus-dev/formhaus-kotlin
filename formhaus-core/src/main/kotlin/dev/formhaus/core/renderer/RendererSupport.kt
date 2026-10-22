@@ -10,7 +10,11 @@ import dev.formhaus.core.model.FormNode
 import dev.formhaus.core.model.FormStep
 import kotlin.math.floor
 
-public fun FieldOption(value: String, label: String, image: String? = null): FieldOption {
+public fun FieldOption(
+    value: String,
+    label: String,
+    image: String? = null,
+): FieldOption {
     val json = mutableStringMapOf<JsonValue>("value" to JsonValue.String(value), "label" to JsonValue.String(label))
     if (image != null) json["image"] = JsonValue.String(image)
     return FieldOption(json)
@@ -41,10 +45,17 @@ public val FormField.hasPictureOptions: Boolean get() = hasPictures
 public val FormDefinition.source: JsonObject get() = json
 
 @ConsistentCopyVisibility
-public data class ItemPath internal constructor(public val group: String, public val index: Int, public val field: String)
+public data class ItemPath internal constructor(
+    public val group: String,
+    public val index: Int,
+    public val field: String,
+)
 
 @ConsistentCopyVisibility
-public data class RecallDependency internal constructor(public val key: String, public val isGroup: Boolean)
+public data class RecallDependency internal constructor(
+    public val key: String,
+    public val isGroup: Boolean,
+)
 
 @ConsistentCopyVisibility
 public data class RecalledTexts internal constructor(
@@ -55,13 +66,19 @@ public data class RecalledTexts internal constructor(
     public val placeholder: String?,
 ) {
     internal constructor(json: JsonObject) : this(
-        json["title"]?.stringValue, json["description"]?.stringValue, json["label"]?.stringValue,
-        json["helperText"]?.stringValue, json["placeholder"]?.stringValue,
+        json["title"]?.stringValue,
+        json["description"]?.stringValue,
+        json["label"]?.stringValue,
+        json["helperText"]?.stringValue,
+        json["placeholder"]?.stringValue,
     )
 }
 
 @RendererApi
-public fun clampedInt(value: Double?, range: IntRange): Int? {
+public fun clampedInt(
+    value: Double?,
+    range: IntRange,
+): Int? {
     if (value == null || !value.isFinite()) return null
     val down = floor(value)
     return when {

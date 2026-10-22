@@ -13,14 +13,24 @@ internal class AutomatonPlan(
     fun stepper(): ThreadStep = ThreadStep(program, anchored, backward, scanning)
 }
 
-internal class LazyDFA(private val plan: AutomatonPlan, private val memory: AutomatonMemory) {
-    class Key(val pcs: IntArray, val context: UnitContext) {
+internal class LazyDFA(
+    private val plan: AutomatonPlan,
+    private val memory: AutomatonMemory,
+) {
+    class Key(
+        val pcs: IntArray,
+        val context: UnitContext,
+    ) {
         override fun equals(other: Any?): Boolean = other is Key && context == other.context && pcs.contentEquals(other.pcs)
 
         override fun hashCode(): Int = 31 * pcs.contentHashCode() + context.hashCode()
     }
 
-    private class Move(val accepts: Boolean, val state: Int, val threads: Key? = null)
+    private class Move(
+        val accepts: Boolean,
+        val state: Int,
+        val threads: Key? = null,
+    )
 
     private val classes = plan.classes
     private val width = classes.count + 1
@@ -32,6 +42,7 @@ internal class LazyDFA(private val plan: AutomatonPlan, private val memory: Auto
     private var accepting = BooleanArray(0)
     private var resets = 0
     private var mayReset = true
+    private var walkState = 0
 
     init {
         append(start)
@@ -41,23 +52,21 @@ internal class LazyDFA(private val plan: AutomatonPlan, private val memory: Auto
         memory.release()
     }
 
-    fun matches(text: CharArray, context: MatchContext): Boolean {
+    fun matches(
+        text: CharArray,
+        context: MatchContext,
+    ): Boolean {
         mayReset = true
         var state = 0
         var position = 0
         val first = plan.first
         val skipping = first != null && !stepper.anchored
         while (position < text.size) {
-            while (position < text.size && (!skipping || !idle[state])) {
-                val next = table[state * width + classes.index(text[position])]
-                if (next < 0) break
-                state = next
-                position++
-            }
+            position = walk(text, state, position, skipping)
+            state = walkState
             if (position >= text.size) break
             if (first != null && idle[state]) {
-                var next = position
-                while (next < text.size && text[next] !in first) next++
+                val next = firstCandidate(text, position, first)
                 if (next == text.size) return false
                 if (next != position) {
                     position = next
@@ -75,7 +84,38 @@ internal class LazyDFA(private val plan: AutomatonPlan, private val memory: Auto
         return step(state, -1, position, context).accepts
     }
 
-    fun acceptance(text: CharArray, context: MatchContext): BooleanArray {
+    private fun walk(
+        text: CharArray,
+        from: Int,
+        origin: Int,
+        skipping: Boolean,
+    ): Int {
+        var state = from
+        var position = origin
+        while (position < text.size && (!skipping || !idle[state])) {
+            val next = table[state * width + classes.index(text[position])]
+            if (next < 0) break
+            state = next
+            position++
+        }
+        walkState = state
+        return position
+    }
+
+    private fun firstCandidate(
+        text: CharArray,
+        from: Int,
+        first: CharSet,
+    ): Int {
+        var next = from
+        while (next < text.size && text[next] !in first) next++
+        return next
+    }
+
+    fun acceptance(
+        text: CharArray,
+        context: MatchContext,
+    ): BooleanArray {
         mayReset = true
         val accepted = BooleanArray(text.size + 1)
         var state = 0
@@ -93,7 +133,12 @@ internal class LazyDFA(private val plan: AutomatonPlan, private val memory: Auto
         return accepted
     }
 
-    fun reverse(text: CharArray, end: Int, floor: Int, context: MatchContext): Verdict {
+    fun reverse(
+        text: CharArray,
+        end: Int,
+        floor: Int,
+        context: MatchContext,
+    ): Verdict {
         mayReset = true
         val key = entry(text, end)
         var state = intern(key) ?: return stepper.run(key, text, end, floor, context)
@@ -115,7 +160,12 @@ internal class LazyDFA(private val plan: AutomatonPlan, private val memory: Auto
         }
     }
 
-    private fun step(state: Int, unit: Int, position: Int, context: MatchContext): Move {
+    private fun step(
+        state: Int,
+        unit: Int,
+        position: Int,
+        context: MatchContext,
+    ): Move {
         val slot = state * width + (if (unit < 0) classes.count else classes.index(unit.toChar()))
         val target = table[slot]
         if (target >= 0 || target == STOP) return Move(accepting[slot], target)
@@ -134,7 +184,11 @@ internal class LazyDFA(private val plan: AutomatonPlan, private val memory: Auto
         return Move(advance.accepts, id)
     }
 
-    private fun record(slot: Int, target: Int, advance: ThreadStep.Advance) {
+    private fun record(
+        slot: Int,
+        target: Int,
+        advance: ThreadStep.Advance,
+    ) {
         table[slot] = if (advance.volatile) VOLATILE else target
         accepting[slot] = advance.accepts
     }
@@ -179,7 +233,9 @@ internal class LazyDFA(private val plan: AutomatonPlan, private val memory: Auto
         private const val STOP = -2
         private const val VOLATILE = -3
 
-        fun entry(text: CharArray, end: Int): Key =
-            Key(intArrayOf(0), if (end < text.size) UnitContext.of(text[end].code) else UnitContext.EDGE)
+        fun entry(
+            text: CharArray,
+            end: Int,
+        ): Key = Key(intArrayOf(0), if (end < text.size) UnitContext.of(text[end].code) else UnitContext.EDGE)
     }
 }

@@ -6,7 +6,9 @@ public data class TestIdTarget(
     public val key: String? = null,
     public val value: String? = null,
 ) {
-    public enum class Kind(public val rawValue: String) {
+    public enum class Kind(
+        public val rawValue: String,
+    ) {
         FORM("form"),
         FIELD("field"),
         OPTION("option"),

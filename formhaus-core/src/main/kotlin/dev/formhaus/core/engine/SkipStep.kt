@@ -41,13 +41,25 @@ internal suspend fun FormEngine.skipStep(submit: SubmitHandler?): Boolean {
         }
     } finally {
         val writes = core.visibility.starts.endWatch(watch)
-        if (outcome.value != false && operationBox.value == core.latestOperation && core.valuesGeneration == skippedGeneration) {
-            restoreSkipped(skipped, outcome.value, LinkedHashSet(skippedValues.changedKeys(core.values)) + writes, writes)
+        if (outcome.value != false && operationBox.value == core.latestOperation &&
+            core.valuesGeneration == skippedGeneration
+        ) {
+            restoreSkipped(
+                skipped,
+                outcome.value,
+                LinkedHashSet(skippedValues.changedKeys(core.values)) + writes,
+                writes,
+            )
         }
     }
 }
 
-private fun FormEngine.restoreSkipped(saved: SkippedStep, outcome: Boolean?, kept: Set<String>, writes: Set<String>) {
+private fun FormEngine.restoreSkipped(
+    saved: SkippedStep,
+    outcome: Boolean?,
+    kept: Set<String>,
+    writes: Set<String>,
+) {
     val core = core
     val visibility = core.visibility
     val errors = saved.errors

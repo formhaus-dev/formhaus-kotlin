@@ -10,7 +10,17 @@ public class FormField private constructor(
     public val fields: List<FormNode>?,
 ) : FormNode() {
     internal constructor(json: JsonObject, ordinals: Ordinals) :
-        this(json, ordinals.take(), if (json["type"]?.stringValue == "group") formNodes(json["fields"], ordinals) else null)
+        this(
+            json,
+            ordinals.take(),
+            if (json["type"]?.stringValue ==
+                "group"
+            ) {
+                formNodes(json["fields"], ordinals)
+            } else {
+                null
+            },
+        )
 
     override val key: String = json["key"]?.stringValue ?: ""
     override val type: String = json["type"]?.stringValue ?: ""
@@ -65,5 +75,4 @@ public class FormField private constructor(
 
 private val pictureTypes = listOf("radio", "multiselect")
 
-private fun exactInt(value: Double): Int? =
-    if (value.isInteger && value >= Int.MIN_VALUE && value <= Int.MAX_VALUE) value.toInt() else null
+private fun exactInt(value: Double): Int? = if (value.isInteger && value >= Int.MIN_VALUE && value <= Int.MAX_VALUE) value.toInt() else null

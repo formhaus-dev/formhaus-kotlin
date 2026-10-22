@@ -11,21 +11,36 @@ internal fun cut(text: String): String {
 internal sealed class TemplateToken {
     data object Escape : TemplateToken()
 
-    data class Param(val name: String) : TemplateToken()
+    data class Param(
+        val name: String,
+    ) : TemplateToken()
 
-    data class Recall(val key: String?) : TemplateToken()
+    data class Recall(
+        val key: String?,
+    ) : TemplateToken()
 }
 
-private class FoundToken(val end: Int, val token: TemplateToken)
+private class FoundToken(
+    val end: Int,
+    val token: TemplateToken,
+)
 
-private fun isWordChar(char: Char): Boolean =
-    char in '0'..'9' || char in 'A'..'Z' || char in 'a'..'z' || char == '_'
+private fun isWordChar(char: Char): Boolean = char in '0'..'9' || char in 'A'..'Z' || char in 'a'..'z' || char == '_'
 
-private val keyCategories = setOf(
-    Character.UPPERCASE_LETTER, Character.LOWERCASE_LETTER, Character.TITLECASE_LETTER, Character.MODIFIER_LETTER,
-    Character.OTHER_LETTER, Character.NON_SPACING_MARK, Character.COMBINING_SPACING_MARK, Character.ENCLOSING_MARK,
-    Character.DECIMAL_DIGIT_NUMBER, Character.LETTER_NUMBER, Character.OTHER_NUMBER,
-).map(Byte::toInt).toSet()
+private val keyCategories =
+    setOf(
+        Character.UPPERCASE_LETTER,
+        Character.LOWERCASE_LETTER,
+        Character.TITLECASE_LETTER,
+        Character.MODIFIER_LETTER,
+        Character.OTHER_LETTER,
+        Character.NON_SPACING_MARK,
+        Character.COMBINING_SPACING_MARK,
+        Character.ENCLOSING_MARK,
+        Character.DECIMAL_DIGIT_NUMBER,
+        Character.LETTER_NUMBER,
+        Character.OTHER_NUMBER,
+    ).map(Byte::toInt).toSet()
 
 private fun isKeyCodePoint(point: Int): Boolean =
     Character.getType(point) in keyCategories || point == '_'.code || point == '.'.code || point == '-'.code
@@ -37,14 +52,27 @@ internal fun recallKey(content: String): String? {
 
 internal fun hasRecallBraces(text: String): Boolean = "{{" in text
 
-private fun tokenAt(text: String, start: Int): FoundToken? {
+private fun tokenAt(
+    text: String,
+    start: Int,
+): FoundToken? {
     val next = start + 1
-    if (text[start] == '\\') return if (text.startsWith("{{", next)) FoundToken(next + 2, TemplateToken.Escape) else null
+    if (text[start] ==
+        '\\'
+    ) {
+        return if (text.startsWith("{{", next)) FoundToken(next + 2, TemplateToken.Escape) else null
+    }
     if (next < text.length && text[next] == '{') {
         val body = next + 1
         var stop = body
         while (stop < text.length && text[stop] != '{' && text[stop] != '}') stop++
-        if (text.startsWith("}}", stop)) return FoundToken(stop + 2, TemplateToken.Recall(recallKey(text.substring(body, stop))))
+        if (text.startsWith(
+                "}}",
+                stop,
+            )
+        ) {
+            return FoundToken(stop + 2, TemplateToken.Recall(recallKey(text.substring(body, stop))))
+        }
     }
     var stop = next
     while (stop < text.length && isWordChar(text[stop])) stop++
@@ -52,7 +80,10 @@ private fun tokenAt(text: String, start: Int): FoundToken? {
     return FoundToken(stop + 1, TemplateToken.Param(text.substring(next, stop)))
 }
 
-internal fun forEachToken(text: String, body: (start: Int, end: Int, token: TemplateToken) -> Boolean) {
+internal fun forEachToken(
+    text: String,
+    body: (start: Int, end: Int, token: TemplateToken) -> Boolean,
+) {
     var index = 0
     while (index < text.length) {
         val start = (index until text.length).firstOrNull { text[it] == '{' || text[it] == '\\' } ?: return
@@ -66,7 +97,10 @@ internal fun forEachToken(text: String, body: (start: Int, end: Int, token: Temp
     }
 }
 
-internal fun fillTemplate(text: String, replace: (raw: String, token: TemplateToken) -> String): String {
+internal fun fillTemplate(
+    text: String,
+    replace: (raw: String, token: TemplateToken) -> String,
+): String {
     val result = StringBuilder()
     var last = 0
     forEachToken(text) { start, end, token ->

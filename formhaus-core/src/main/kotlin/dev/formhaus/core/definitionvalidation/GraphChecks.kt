@@ -7,7 +7,9 @@ import dev.formhaus.core.model.valueFields
 
 private fun nodeId(entry: FieldEntry): String = entry.group?.let { "${it.key}.${entry.field.key}" } ?: entry.field.key
 
-private class DependencyGraph(private val context: CheckContext) {
+private class DependencyGraph(
+    private val context: CheckContext,
+) {
     val keys = ArrayList<String>()
     val edges = HashMap<String, MutableList<String>>()
 
@@ -20,14 +22,21 @@ private class DependencyGraph(private val context: CheckContext) {
         for (step in context.definition.steps.orEmpty()) link(valueFields(step.fields).map { it.key }, step)
     }
 
-    private fun link(owners: List<String>, source: Conditional, group: String? = null) {
+    private fun link(
+        owners: List<String>,
+        source: Conditional,
+        group: String? = null,
+    ) {
         val known = source.conditionFields.mapNotNull { key -> context.target(key, group)?.let(::nodeId) }
         if (known.isEmpty()) return
         for (owner in owners) edges.getOrPut(owner) { ArrayList<String>().also { keys.add(owner) } }.addAll(known)
     }
 }
 
-private class Frame(val node: String, var next: Int = 0)
+private class Frame(
+    val node: String,
+    var next: Int = 0,
+)
 
 private fun findCycles(graph: DependencyGraph): List<List<String>> {
     val visiting = HashMap<String, Boolean>()
@@ -52,11 +61,13 @@ private fun findCycles(graph: DependencyGraph): List<List<String>> {
                     val entry = nodes.indexOf(neighbor)
                     if (entry >= 0) cycles.add(nodes.subList(entry, nodes.size) + neighbor)
                 }
+
                 null -> {
                     visiting[neighbor] = true
                     stack.add(Frame(neighbor))
                 }
-                false -> Unit
+
+                false -> {}
             }
         }
     }
@@ -68,6 +79,11 @@ internal fun graphIssues(context: CheckContext): List<DefinitionIssue> {
     for (entry in context.entries) paths[nodeId(entry)] = entry.path
     return findCycles(DependencyGraph(context)).map { cycle ->
         val problem = "show conditions form a cycle: ${cycle.joinToString(" -> ")}"
-        error(IssueCode.CONDITION_CYCLE, paths[cycle[0]].orEmpty(), problem, "Remove one of the conditions in the cycle")
+        error(
+            IssueCode.CONDITION_CYCLE,
+            paths[cycle[0]].orEmpty(),
+            problem,
+            "Remove one of the conditions in the cycle",
+        )
     }
 }

@@ -1,13 +1,28 @@
 package dev.formhaus.core.regex
 
-internal class ParsedPattern(val root: RegexNode, val captureCount: Int)
+internal class ParsedPattern(
+    val root: RegexNode,
+    val captureCount: Int,
+)
 
-internal class RegexParser private constructor(val units: CharArray) {
-    class Atom(val node: RegexNode, val quantifiable: Boolean)
+internal class RegexParser private constructor(
+    val units: CharArray,
+) {
+    class Atom(
+        val node: RegexNode,
+        val quantifiable: Boolean,
+    )
 
-    class NamedGroup(val name: String, val index: Int)
+    class NamedGroup(
+        val name: String,
+        val index: Int,
+    )
 
-    private class Bounds(val min: Int, val max: Int?, val end: Int)
+    private class Bounds(
+        val min: Int,
+        val max: Int?,
+        val end: Int,
+    )
 
     val groups: CaptureScan = CaptureScan(units)
     var index: Int = 0
@@ -32,7 +47,10 @@ internal class RegexParser private constructor(val units: CharArray) {
 
     fun peek(offset: Int = 0): Char? = units.getOrNull(index + offset)
 
-    fun at(char: Char, offset: Int = 0): Boolean = peek(offset) == char
+    fun at(
+        char: Char,
+        offset: Int = 0,
+    ): Boolean = peek(offset) == char
 
     fun consume(char: Char): Boolean {
         if (!at(char)) return false
@@ -69,13 +87,14 @@ internal class RegexParser private constructor(val units: CharArray) {
     }
 
     private fun parseQuantifier(): Quantifier? {
-        val bounds = when (peek()) {
-            '*' -> Bounds(0, null, index + 1)
-            '+' -> Bounds(1, null, index + 1)
-            '?' -> Bounds(0, 1, index + 1)
-            '{' -> bracedBounds(index) ?: return null
-            else -> return null
-        }
+        val bounds =
+            when (peek()) {
+                '*' -> Bounds(0, null, index + 1)
+                '+' -> Bounds(1, null, index + 1)
+                '?' -> Bounds(0, 1, index + 1)
+                '{' -> bracedBounds(index) ?: return null
+                else -> return null
+            }
         if (bounds.max != null && bounds.max < bounds.min) throw RegexSyntaxError
         index = bounds.end
         return Quantifier(bounds.min, bounds.max, greedy = !consume('?'))
@@ -98,7 +117,10 @@ internal class RegexParser private constructor(val units: CharArray) {
         return Bounds(min.value, max.takeIf { it != INFINITY }, cursor + 1)
     }
 
-    private class Number(val value: Int, val end: Int)
+    private class Number(
+        val value: Int,
+        val end: Int,
+    )
 
     private fun number(start: Int): Number? {
         var cursor = start

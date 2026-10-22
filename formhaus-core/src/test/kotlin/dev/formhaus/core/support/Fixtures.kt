@@ -27,8 +27,11 @@ object Fixtures {
     val scenarioNames: List<String> by lazy { jsonFiles(scenarios).filter { it != "scenario.schema" } }
 
     fun jsonFiles(directory: Path): List<String> =
-        directory.listDirectoryEntries().filter { Files.isRegularFile(it) && it.extension == "json" }
-            .map { it.nameWithoutExtension }.sorted()
+        directory
+            .listDirectoryEntries()
+            .filter { Files.isRegularFile(it) && it.extension == "json" }
+            .map { it.nameWithoutExtension }
+            .sorted()
 
     fun load(path: Path): JsonValue {
         val bytes = path.readBytes()
@@ -45,7 +48,8 @@ object Fixtures {
     fun scenarioFile(name: String): JsonValue = load(scenarios.resolve("$name.json"))
 
     fun orders(name: String): List<RawJson> {
-        val raw = requireNotNull(RawReader.parse(conformance.resolve("$name.json").readBytes())) { "cannot read $name.json" }
+        val raw =
+            requireNotNull(RawReader.parse(conformance.resolve("$name.json").readBytes())) { "cannot read $name.json" }
         return raw["orders"]?.items.orEmpty()
     }
 }
@@ -53,5 +57,8 @@ object Fixtures {
 object Load {
     val heavy: Boolean = System.getenv("FORMHAUS_HEAVY_TESTS") == "1"
 
-    fun <Size> sizes(fast: Size, heavy: Size): List<Size> = if (this.heavy) listOf(fast, heavy) else listOf(fast)
+    fun <Size> sizes(
+        fast: Size,
+        heavy: Size,
+    ): List<Size> = if (this.heavy) listOf(fast, heavy) else listOf(fast)
 }

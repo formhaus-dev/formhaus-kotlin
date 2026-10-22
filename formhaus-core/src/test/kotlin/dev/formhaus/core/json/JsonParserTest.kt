@@ -28,26 +28,28 @@ class JsonParserTest {
     @MethodSource("depths")
     fun `deeply nested arrays fail cleanly on a background thread`(depth: Int) {
         val text = nested(depth)
-        val outcome = onSmallStack {
-            try {
-                JsonValue.parse(text)
-                "parsed"
-            } catch (error: JsonParseException) {
-                error.reason
+        val outcome =
+            onSmallStack {
+                try {
+                    JsonValue.parse(text)
+                    "parsed"
+                } catch (error: JsonParseException) {
+                    error.reason
+                }
             }
-        }
         assertEquals("nesting deeper than 512 levels", outcome)
     }
 
     @Test
     fun `the deepest accepted document parses, compares and prints on a background thread`() {
         val text = nested(JsonValue.MAX_NESTING_DEPTH)
-        val outcome = onSmallStack {
-            val value = JsonValue.parse(text)
-            val copy = JsonValue.parse(text)
-            val same = value == copy && value.hashCode() == copy.hashCode()
-            if (same && jsonStringify(value) == text) "ok" else "mismatch"
-        }
+        val outcome =
+            onSmallStack {
+                val value = JsonValue.parse(text)
+                val copy = JsonValue.parse(text)
+                val same = value == copy && value.hashCode() == copy.hashCode()
+                if (same && jsonStringify(value) == text) "ok" else "mismatch"
+            }
         assertEquals("ok", outcome)
         assertThrows<JsonParseException> { JsonValue.parse("{\"a\":${nested(JsonValue.MAX_NESTING_DEPTH)}}") }
     }
@@ -76,7 +78,10 @@ class JsonParserTest {
         for (text in listOf("{\"a\":01}", "[1,]", "{\"a\":1,}", "[1] x")) {
             assertThrows<JsonParseException> { JsonValue.parse(text) }
         }
-        val expected = JsonValue.Array(listOf(JsonValue.Object(MutableJsonObject()), JsonValue.Array(emptyList()), JsonValue.Number(-5)))
+        val expected =
+            JsonValue.Array(
+                listOf(JsonValue.Object(MutableJsonObject()), JsonValue.Array(emptyList()), JsonValue.Number(-5)),
+            )
         assertEquals(expected, JsonValue.parse(" [ { } , [ ] , -0.5e1 ] "))
     }
 

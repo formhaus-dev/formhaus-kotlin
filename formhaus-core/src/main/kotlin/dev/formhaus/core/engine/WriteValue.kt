@@ -14,7 +14,11 @@ import dev.formhaus.core.visibility.itemScope
 import dev.formhaus.core.visibility.itemsOf
 import dev.formhaus.core.visibility.splitPath
 
-internal fun exclusiveWrite(field: FormField?, previous: JsonValue?, next: JsonValue?): JsonValue? {
+internal fun exclusiveWrite(
+    field: FormField?,
+    previous: JsonValue?,
+    next: JsonValue?,
+): JsonValue? {
     val items = next?.arrayValue
     if (field == null || items == null) return next
     val exclusive = exclusiveValues(field)
@@ -27,11 +31,21 @@ internal fun exclusiveWrite(field: FormField?, previous: JsonValue?, next: JsonV
     return if (added.isNotEmpty() && rest.size < items.size) JsonValue.Array(rest) else next
 }
 
-internal fun EngineCore.writeValue(key: String, slot: ValueSlot, own: Boolean = true, after: () -> Unit = {}) {
+internal fun EngineCore.writeValue(
+    key: String,
+    slot: ValueSlot,
+    own: Boolean = true,
+    after: () -> Unit = {},
+) {
     CallBudget.run { storeValue(key, slot, own, after) }
 }
 
-private fun EngineCore.storeValue(key: String, slot: ValueSlot, own: Boolean, after: () -> Unit) {
+private fun EngineCore.storeValue(
+    key: String,
+    slot: ValueSlot,
+    own: Boolean,
+    after: () -> Unit,
+) {
     baselineFields()
     val previousSteps = if (isMultiStep) visibleSteps else null
     val valueChanged = !values.slot(key).isSame(slot)
@@ -53,7 +67,10 @@ private fun EngineCore.storeValue(key: String, slot: ValueSlot, own: Boolean, af
     notify(structureChanged, valuesChanged)
 }
 
-internal fun EngineCore.setValue(key: String, value: JsonValue?) {
+internal fun EngineCore.setValue(
+    key: String,
+    value: JsonValue?,
+) {
     val path = visibility.parse(key)
     if (path != null) return setItemValue(path.group, path.index, path.field, value)
     writeValue(key, ValueSlot.fresh(exclusiveWrite(visibility.fieldOf(key, values.json), values[key], value)))
@@ -67,10 +84,17 @@ internal fun EngineCore.loadSubmitted(submitted: JsonObject) {
     visibility.unsettle()
 }
 
-private fun EngineCore.activeGroup(key: String): FormField? = visibility.activeField(key, values.json)?.takeIf { it.isGroup }
+private fun EngineCore.activeGroup(key: String): FormField? =
+    visibility.activeField(key, values.json)?.takeIf {
+        it.isGroup
+    }
 
-internal fun itemId(values: Values, key: String, index: Int, item: JsonValue): String =
-    if (item.objectValue != null) values.itemId(key, index)?.let { "i$it" } ?: "$index" else "$index"
+internal fun itemId(
+    values: Values,
+    key: String,
+    index: Int,
+    item: JsonValue,
+): String = if (item.objectValue != null) values.itemId(key, index)?.let { "i$it" } ?: "$index" else "$index"
 
 internal fun EngineCore.items(key: String): List<GroupItem> {
     val group = activeGroup(key) ?: return emptyList()
@@ -79,11 +103,12 @@ internal fun EngineCore.items(key: String): List<GroupItem> {
     val limits = visibility.limits(values.json)
     val listed = visibility.listed
     val context = listed.context(group, scope, limits)
-    return listed.map(group, itemsOf(values[key]), values.itemIds(key), context, sharing = true) { index, item ->
-        val inner = itemScope(fields, item, scope)
-        val shown = fields.filter { isVisible(it, inner, limits) }
-        Mapped(GroupItem(itemId(values, key, index, item), if (shown.size == fields.size) fields else shown), true)
-    }.items
+    return listed
+        .map(group, itemsOf(values[key]), values.itemIds(key), context, sharing = true) { index, item ->
+            val inner = itemScope(fields, item, scope)
+            val shown = fields.filter { isVisible(it, inner, limits) }
+            Mapped(GroupItem(itemId(values, key, index, item), if (shown.size == fields.size) fields else shown), true)
+        }.items
 }
 
 internal fun EngineCore.addItem(key: String): Boolean {
@@ -97,7 +122,11 @@ internal fun EngineCore.addItem(key: String): Boolean {
     return true
 }
 
-private fun <V : Any> shift(map: MutableStringMap<V>, key: String, removed: Int) {
+private fun <V : Any> shift(
+    map: MutableStringMap<V>,
+    key: String,
+    removed: Int,
+) {
     val moved = MutableStringMap<V>()
     for (errorKey in map.keys) {
         val (index, field) = splitPath(key, errorKey) ?: continue
@@ -108,7 +137,10 @@ private fun <V : Any> shift(map: MutableStringMap<V>, key: String, removed: Int)
     map.merge(moved)
 }
 
-internal fun EngineCore.removeItem(key: String, index: Int): Boolean {
+internal fun EngineCore.removeItem(
+    key: String,
+    index: Int,
+): Boolean {
     val items = itemsOf(values[key])
     val group = activeGroup(key) ?: return false
     if (index !in items.indices || items.size.toDouble() <= group.itemLimits.min) return false
@@ -118,11 +150,29 @@ internal fun EngineCore.removeItem(key: String, index: Int): Boolean {
     shift(serverErrors, key, index)
     shift(fieldLoading, key, index)
     if (index < ids.size) ids.removeAt(index)
-    writeValue(key, ValueSlot(JsonValue.Array(items.filterIndexed { position, _ -> position != index }), Ref(freshToken(), ids)))
+    writeValue(
+        key,
+        ValueSlot(
+            JsonValue.Array(
+                items.filterIndexed {
+                    position,
+                    _,
+                    ->
+                    position != index
+                },
+            ),
+            Ref(freshToken(), ids),
+        ),
+    )
     return true
 }
 
-internal fun EngineCore.setItemValue(key: String, index: Int, fieldKey: String, input: JsonValue?) {
+internal fun EngineCore.setItemValue(
+    key: String,
+    index: Int,
+    fieldKey: String,
+    input: JsonValue?,
+) {
     val items = itemsOf(values[key])
     val group = activeGroup(key) ?: return
     val field = group.items.firstOrNull { it.key == fieldKey } ?: return
@@ -131,7 +181,11 @@ internal fun EngineCore.setItemValue(key: String, index: Int, fieldKey: String, 
     val value = exclusiveWrite(field, item[fieldKey], input)
     val changed = !samePrimitive(item[fieldKey], value)
     var slot = values.slot(key)
-    if (value != null && current.objectValue != null) visibility.starts.rememberItem(values.itemId(key, index), fieldKey, value)
+    if (value != null &&
+        current.objectValue != null
+    ) {
+        visibility.starts.rememberItem(values.itemId(key, index), fieldKey, value)
+    }
     if (changed) {
         val updated = item.toMutableStringMap().also { it.assign(fieldKey, value) }
         val next = items.toMutableList().also { it[index] = JsonValue.Object(updated) }

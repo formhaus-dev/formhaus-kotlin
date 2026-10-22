@@ -20,47 +20,52 @@ import java.util.concurrent.atomic.AtomicBoolean
 class RegexTest {
     companion object {
         @JvmStatic
-        fun matches(): List<Arguments> = listOf(
-            Arguments.of("", "x", true),
-            Arguments.of("^[\\w-.]+$", "a.b-c", true),
-            Arguments.of("(?<=a+)b", "aab", true),
-            Arguments.of("^\\1$", "\u0001", true),
-            Arguments.of("^\\8$", "8", true),
-            Arguments.of("^\\101$", "A", true),
-            Arguments.of("^\\k$", "k", true),
-            Arguments.of("^\\01$", "\u0001", true),
-            Arguments.of("^[\u093E\u093F\u0940\u0941]+$", "\u093E\u093F", true),
-            Arguments.of("^[\u093E\u093F\u0940\u0941]+$", "\u093E\u0915", false),
-            Arguments.of("^.{1,3}$", "😀😀", false),
-            Arguments.of("^.{1,3}$", "😀", true),
-            Arguments.of("^[:digit:]$", "5", false),
-            Arguments.of("^[:digit:]$", ":", true),
-            Arguments.of("a++", "a", null),
-            Arguments.of("(?i)abc", "ABC", null),
-            Arguments.of("[😀-😂]", "😁", null),
-            Arguments.of("(?=a)*a", "a", true),
-            Arguments.of("^\\d+$", "123", true),
-            Arguments.of("^\\d+$", "123\n", false),
-            Arguments.of("^\\d$", "\u0663", false),
-            Arguments.of("^\\w$", "é", false),
-            Arguments.of("^a{$", "a{", true),
-            Arguments.of("^[^]$", "\n", true),
-            Arguments.of("^.$", "\n", false),
-            Arguments.of("^\\a$", "a", true),
-            Arguments.of("[(a+)]+", "+", true),
-            Arguments.of("[invalid(", "x", null),
-            Arguments.of("(a", "a", null),
-            Arguments.of("(?i:b|[ab])", "A", true),
-            Arguments.of("(?i:x|[a-c])", "A", true),
-            Arguments.of("^(?i:\\u0178)$", "\u00FF", true),
-            Arguments.of("(?i:((3|([a]))))", "A", true),
-            Arguments.of("(?i:(?=\\W{2}|(W))(A|(?<![a])))", "A\uD83D\uDE00", false),
-        )
+        fun matches(): List<Arguments> =
+            listOf(
+                Arguments.of("", "x", true),
+                Arguments.of("^[\\w-.]+$", "a.b-c", true),
+                Arguments.of("(?<=a+)b", "aab", true),
+                Arguments.of("^\\1$", "\u0001", true),
+                Arguments.of("^\\8$", "8", true),
+                Arguments.of("^\\101$", "A", true),
+                Arguments.of("^\\k$", "k", true),
+                Arguments.of("^\\01$", "\u0001", true),
+                Arguments.of("^[\u093E\u093F\u0940\u0941]+$", "\u093E\u093F", true),
+                Arguments.of("^[\u093E\u093F\u0940\u0941]+$", "\u093E\u0915", false),
+                Arguments.of("^.{1,3}$", "😀😀", false),
+                Arguments.of("^.{1,3}$", "😀", true),
+                Arguments.of("^[:digit:]$", "5", false),
+                Arguments.of("^[:digit:]$", ":", true),
+                Arguments.of("a++", "a", null),
+                Arguments.of("(?i)abc", "ABC", null),
+                Arguments.of("[😀-😂]", "😁", null),
+                Arguments.of("(?=a)*a", "a", true),
+                Arguments.of("^\\d+$", "123", true),
+                Arguments.of("^\\d+$", "123\n", false),
+                Arguments.of("^\\d$", "\u0663", false),
+                Arguments.of("^\\w$", "é", false),
+                Arguments.of("^a{$", "a{", true),
+                Arguments.of("^[^]$", "\n", true),
+                Arguments.of("^.$", "\n", false),
+                Arguments.of("^\\a$", "a", true),
+                Arguments.of("[(a+)]+", "+", true),
+                Arguments.of("[invalid(", "x", null),
+                Arguments.of("(a", "a", null),
+                Arguments.of("(?i:b|[ab])", "A", true),
+                Arguments.of("(?i:x|[a-c])", "A", true),
+                Arguments.of("^(?i:\\u0178)$", "\u00FF", true),
+                Arguments.of("(?i:((3|([a]))))", "A", true),
+                Arguments.of("(?i:(?=\\W{2}|(W))(A|(?<![a])))", "A\uD83D\uDE00", false),
+            )
     }
 
     @ParameterizedTest
     @MethodSource("matches")
-    fun `pattern test results`(source: String, text: String, expected: Boolean?) {
+    fun `pattern test results`(
+        source: String,
+        text: String,
+        expected: Boolean?,
+    ) {
         val pattern = JsRegex.compile(source)
         if (expected == null) {
             assertNull(pattern, "$source compiles")
@@ -106,9 +111,10 @@ class RegexTest {
     fun `patterns compile and match from many threads`() {
         val executor = Executors.newFixedThreadPool(8)
         try {
-            val tasks = (0 until 64).map { index ->
-                Callable { JsRegex.compile("^x${index % 300}$")?.test("x${index % 300}") == true }
-            }
+            val tasks =
+                (0 until 64).map { index ->
+                    Callable { JsRegex.compile("^x${index % 300}$")?.test("x${index % 300}") == true }
+                }
             for (result in executor.invokeAll(tasks)) assertTrue(result.get())
         } finally {
             executor.shutdownNow()

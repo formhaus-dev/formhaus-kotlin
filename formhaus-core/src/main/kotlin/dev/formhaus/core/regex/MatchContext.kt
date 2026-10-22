@@ -1,6 +1,10 @@
 package dev.formhaus.core.regex
 
-internal class MatchContext(val text: CharArray, private val scanners: List<AutomatonCache?>, private val allowance: Int) {
+internal class MatchContext(
+    val text: CharArray,
+    private val scanners: List<AutomatonCache?>,
+    private val allowance: Int,
+) {
     var spent: Int = 0
         private set
     private var budget = StepBudget(0)
@@ -15,7 +19,10 @@ internal class MatchContext(val text: CharArray, private val scanners: List<Auto
         budget.spend(steps)
     }
 
-    fun holds(index: Int, position: Int): Boolean {
+    fun holds(
+        index: Int,
+        position: Int,
+    ): Boolean {
         tables[index]?.let { return it[position] }
         val scanner = checkNotNull(scanners[index]) { "look $index runs inline" }
         val table = scanner.acceptance(text, this)

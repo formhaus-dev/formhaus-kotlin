@@ -6,9 +6,16 @@ import dev.formhaus.core.json.MutableJsonObject
 import dev.formhaus.core.model.FormField
 import dev.formhaus.core.visibility.itemsOf
 
-internal class Restore(val keys: List<String>, val seeds: List<ValueSlot>, val memory: List<ValueSlot?>)
+internal class Restore(
+    val keys: List<String>,
+    val seeds: List<ValueSlot>,
+    val memory: List<ValueSlot?>,
+)
 
-private class WriteWatch(val id: Int, val keys: MutableSet<String> = HashSet())
+private class WriteWatch(
+    val id: Int,
+    val keys: MutableSet<String> = HashSet(),
+)
 
 internal class StartValues {
     private var seeds = Values()
@@ -35,7 +42,10 @@ internal class StartValues {
         }
     }
 
-    fun resetStarts(values: Values, groups: List<FormField>) {
+    fun resetStarts(
+        values: Values,
+        groups: List<FormField>,
+    ) {
         seeds = values.copy()
         memory.clear()
         forgetItems()
@@ -48,7 +58,11 @@ internal class StartValues {
         for (key in seeds.keys) memory[key] = ValueSlot.EMPTY
     }
 
-    fun remember(key: String, slot: ValueSlot, written: Boolean = false) {
+    fun remember(
+        key: String,
+        slot: ValueSlot,
+        written: Boolean = false,
+    ) {
         if (!remembering) return
         memory[key] = slot
         if (written) writeWatch?.keys?.add(key)
@@ -62,7 +76,11 @@ internal class StartValues {
         return watch.keys
     }
 
-    fun rememberItem(id: Int?, key: String, value: JsonValue) {
+    fun rememberItem(
+        id: Int?,
+        key: String,
+        value: JsonValue,
+    ) {
         if (!remembering || id == null) return
         itemMemory.getOrPut(id) { MutableJsonObject() }[key] = value
     }
@@ -73,7 +91,10 @@ internal class StartValues {
         itemMemory.remove(id)
     }
 
-    fun reseed(keys: List<String>, values: Values): Restore {
+    fun reseed(
+        keys: List<String>,
+        values: Values,
+    ): Restore {
         val previous = Restore(keys, keys.map(seeds::slot), keys.map(memory::get))
         for (key in keys) {
             memory.remove(key)
@@ -83,7 +104,10 @@ internal class StartValues {
         return previous
     }
 
-    fun restore(previous: Restore, kept: Set<String>) {
+    fun restore(
+        previous: Restore,
+        kept: Set<String>,
+    ) {
         previous.keys.forEachIndexed { index, key ->
             seeds.set(key, previous.seeds[index])
             if (key in kept) return@forEachIndexed
@@ -97,7 +121,10 @@ internal class StartValues {
         return seeds.slot(field.key)
     }
 
-    fun itemStartValue(id: Int?, key: String): JsonValue? {
+    fun itemStartValue(
+        id: Int?,
+        key: String,
+    ): JsonValue? {
         if (id == null) return null
         itemMemory[id]?.let { remembered -> if (key in remembered) return remembered[key] }
         return itemSeeds[id]?.get(key)

@@ -11,7 +11,17 @@ import org.junit.jupiter.api.Test
 import kotlin.io.path.readBytes
 
 class RegexCaseTest {
-    private fun describe(text: String): String = text.map { if (it.code in 0x20..0x7E) "$it" else "\\u%04X".format(it.code) }.joinToString("")
+    private fun describe(text: String): String =
+        text
+            .map {
+                if (it.code in
+                    0x20..0x7E
+                ) {
+                    "$it"
+                } else {
+                    "\\u%04X".format(it.code)
+                }
+            }.joinToString("")
 
     @Test
     fun `every generated case matches the recorded node result`() {
@@ -36,7 +46,9 @@ class RegexCaseTest {
         }
         assertTrue(
             failures.isEmpty(),
-            "${failures.size} of ${cases.size} cases differ from node ${file["node"]?.units}:\n${failures.take(40).joinToString("\n")}",
+            "${failures.size} of ${cases.size} cases differ from node ${file["node"]?.units}:\n${failures.take(
+                40,
+            ).joinToString("\n")}",
         )
     }
 }

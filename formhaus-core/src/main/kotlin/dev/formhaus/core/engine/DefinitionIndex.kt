@@ -7,7 +7,9 @@ import dev.formhaus.core.model.FormStep
 import dev.formhaus.core.model.conditionFields
 import dev.formhaus.core.model.valueFields
 
-internal class OrderedIndex<V>(private val ordinal: (V) -> Int) {
+internal class OrderedIndex<V>(
+    private val ordinal: (V) -> Int,
+) {
     private val storage = LinkedHashMap<String, MutableList<V>>()
 
     val keys: List<String> get() = storage.keys.toList()
@@ -16,13 +18,18 @@ internal class OrderedIndex<V>(private val ordinal: (V) -> Int) {
 
     fun has(key: String): Boolean = key in storage
 
-    fun insert(value: V, key: String) {
+    fun insert(
+        value: V,
+        key: String,
+    ) {
         val list = storage.getOrPut(key) { ArrayList() }
         if (list.none { ordinal(it) == ordinal(value) }) list.add(value)
     }
 }
 
-internal class DefinitionIndex(definition: FormDefinition) {
+internal class DefinitionIndex(
+    definition: FormDefinition,
+) {
     val allFields: List<FormField> = definition.allFields
     val fieldsByKey = OrderedIndex<FormField> { it.ordinal }
     val routeFields = HashSet<String>()
@@ -41,7 +48,9 @@ internal class DefinitionIndex(definition: FormDefinition) {
 
     private fun indexField(field: FormField) {
         fieldsByKey.insert(field, field.key)
-        val sources = field.conditionFields + section(field)?.conditionFields.orEmpty() + field.items.flatMap { it.conditionFields }
+        val sources =
+            field.conditionFields + section(field)?.conditionFields.orEmpty() +
+                field.items.flatMap { it.conditionFields }
         for (key in sources) fieldDependents.insert(field, key)
     }
 

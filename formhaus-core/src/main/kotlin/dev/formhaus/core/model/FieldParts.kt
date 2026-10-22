@@ -4,7 +4,9 @@ import dev.formhaus.core.json.JsonObject
 import dev.formhaus.core.json.JsonValue
 
 @ConsistentCopyVisibility
-public data class FieldOption internal constructor(internal val json: JsonObject) {
+public data class FieldOption internal constructor(
+    internal val json: JsonObject,
+) {
     public val value: String? get() = json["value"]?.stringValue
     public val label: String? get() = json["label"]?.stringValue
     public val image: String? get() = json["image"]?.stringValue
@@ -13,7 +15,9 @@ public data class FieldOption internal constructor(internal val json: JsonObject
 }
 
 @ConsistentCopyVisibility
-public data class FieldValidation internal constructor(internal val json: JsonObject) {
+public data class FieldValidation internal constructor(
+    internal val json: JsonObject,
+) {
     public val required: JsonValue? get() = json["required"]
     public val minLength: Double? get() = json["minLength"]?.numberValue
     public val maxLength: Double? get() = json["maxLength"]?.numberValue
@@ -26,7 +30,10 @@ public data class FieldValidation internal constructor(internal val json: JsonOb
     internal fun message(name: String): String? = json[name]?.stringValue
 }
 
-public data class ScaleRange(public val min: Double, public val max: Double)
+public data class ScaleRange(
+    public val min: Double,
+    public val max: Double,
+)
 
 internal val scaleTypes = listOf("scale", "rating")
 

@@ -17,7 +17,13 @@ class HiddenValuesTest {
 
     @Test
     fun `a write that drops a kept value before any read reports one change`() {
-        val engine = engine(definition, """{"type":"personal","company":"Acme"}""", FormEngineOptions(onWarning = {}, hiddenValues = HiddenValues.KEEP))
+        val engine =
+            engine(
+                definition,
+                """{"type":"personal","company":"Acme"}""",
+                FormEngineOptions(onWarning = {
+                }, hiddenValues = HiddenValues.KEEP),
+            )
         var changes = 0
         engine.subscribe { changes += 1 }
         engine.setValue("company", null)

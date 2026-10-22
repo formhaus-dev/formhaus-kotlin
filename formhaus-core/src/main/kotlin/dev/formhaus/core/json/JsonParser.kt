@@ -3,16 +3,20 @@ package dev.formhaus.core.json
 import java.nio.CharBuffer
 import java.nio.charset.CodingErrorAction
 
-public class JsonParseException(public val offset: Int, public val reason: String) :
-    Exception("Invalid JSON at byte $offset: $reason")
+public class JsonParseException(
+    public val offset: Int,
+    public val reason: String,
+) : Exception("Invalid JSON at byte $offset: $reason")
 
 private val replacementBytes = byteArrayOf(0xEF.toByte(), 0xBF.toByte(), 0xBD.toByte())
 
 internal fun utf8Bytes(text: String): ByteArray {
-    val encoder = Charsets.UTF_8.newEncoder()
-        .onMalformedInput(CodingErrorAction.REPLACE)
-        .onUnmappableCharacter(CodingErrorAction.REPLACE)
-        .replaceWith(replacementBytes)
+    val encoder =
+        Charsets.UTF_8
+            .newEncoder()
+            .onMalformedInput(CodingErrorAction.REPLACE)
+            .onUnmappableCharacter(CodingErrorAction.REPLACE)
+            .replaceWith(replacementBytes)
     val buffer = encoder.encode(CharBuffer.wrap(text))
     return ByteArray(buffer.remaining()).also { buffer.get(it) }
 }
@@ -56,7 +60,9 @@ private const val RETURN: Byte = 0x0D
 private const val QUOTE = '"'.code.toByte()
 private const val BACKSLASH = '\\'.code.toByte()
 
-internal class JsonParser(private val bytes: ByteArray) {
+internal class JsonParser(
+    private val bytes: ByteArray,
+) {
     private var index = 0
 
     fun parseDocument(): JsonValue {
@@ -115,6 +121,7 @@ internal class JsonParser(private val bytes: ByteArray) {
                     null
                 }
             }
+
             '{' -> {
                 index++
                 skipWhitespace()
@@ -126,11 +133,26 @@ internal class JsonParser(private val bytes: ByteArray) {
                     null
                 }
             }
-            '"' -> JsonValue.String(parseString())
-            't' -> literal("true", JsonValue.Bool(true))
-            'f' -> literal("false", JsonValue.Bool(false))
-            'n' -> literal("null", JsonValue.Null)
-            else -> JsonValue.Number(parseNumber())
+
+            '"' -> {
+                JsonValue.String(parseString())
+            }
+
+            't' -> {
+                literal("true", JsonValue.Bool(true))
+            }
+
+            'f' -> {
+                literal("false", JsonValue.Bool(false))
+            }
+
+            'n' -> {
+                literal("null", JsonValue.Null)
+            }
+
+            else -> {
+                JsonValue.Number(parseNumber())
+            }
         }
     }
 
@@ -144,7 +166,10 @@ internal class JsonParser(private val bytes: ByteArray) {
         return key
     }
 
-    private fun literal(word: String, value: JsonValue): JsonValue {
+    private fun literal(
+        word: String,
+        value: JsonValue,
+    ): JsonValue {
         if (index + word.length > bytes.size || word.indices.any { bytes[index + it] != word[it].code.toByte() }) {
             throw fail("unexpected token")
         }
@@ -168,7 +193,11 @@ internal class JsonParser(private val bytes: ByteArray) {
                 continue
             }
             val start = index
-            while (index < bytes.size && bytes[index] != QUOTE && bytes[index] != BACKSLASH && bytes[index] !in 0..0x1F) index++
+            while (index < bytes.size && bytes[index] != QUOTE && bytes[index] != BACKSLASH &&
+                bytes[index] !in 0..0x1F
+            ) {
+                index++
+            }
             units.append(String(bytes, start, index - start, Charsets.UTF_8))
         }
     }

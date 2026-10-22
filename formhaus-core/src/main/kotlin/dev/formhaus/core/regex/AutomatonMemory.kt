@@ -5,17 +5,20 @@ import java.lang.ref.WeakReference
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicBoolean
 
-internal class MemoryPool(val limit: Int = AutomatonMemory.GLOBAL_LIMIT) {
+internal class MemoryPool(
+    val limit: Int = AutomatonMemory.GLOBAL_LIMIT,
+) {
     private var total = 0
     private val registry: MutableSet<WeakReference<AutomatonShard>> = ConcurrentHashMap.newKeySet()
 
     val reserved: Int get() = synchronized(this) { total }
 
-    fun take(bytes: Int): Boolean = synchronized(this) {
-        if (total + bytes > limit) return false
-        total += bytes
-        true
-    }
+    fun take(bytes: Int): Boolean =
+        synchronized(this) {
+            if (total + bytes > limit) return false
+            total += bytes
+            true
+        }
 
     fun give(bytes: Int) {
         synchronized(this) { total -= bytes }
@@ -40,7 +43,9 @@ internal class MemoryPool(val limit: Int = AutomatonMemory.GLOBAL_LIMIT) {
     }
 }
 
-internal class AutomatonMemory(val pool: MemoryPool) {
+internal class AutomatonMemory(
+    val pool: MemoryPool,
+) {
     @Volatile
     var used: Int = 0
         private set
@@ -72,8 +77,12 @@ internal class AutomatonMemory(val pool: MemoryPool) {
     }
 }
 
-internal class AutomatonShard(private val plan: AutomatonPlan) {
-    class Ran<Value>(val value: Value)
+internal class AutomatonShard(
+    private val plan: AutomatonPlan,
+) {
+    class Ran<Value>(
+        val value: Value,
+    )
 
     private val memory = AutomatonMemory(plan.pool)
     private val lock = AtomicBoolean(false)
@@ -117,9 +126,14 @@ internal class AutomatonShard(private val plan: AutomatonPlan) {
     private companion object {
         val cleaner: Cleaner = Cleaner.create()
 
-        fun release(pool: MemoryPool, reference: WeakReference<AutomatonShard>, memory: AutomatonMemory): Runnable = Runnable {
-            pool.unregister(reference)
-            memory.release()
-        }
+        fun release(
+            pool: MemoryPool,
+            reference: WeakReference<AutomatonShard>,
+            memory: AutomatonMemory,
+        ): Runnable =
+            Runnable {
+                pool.unregister(reference)
+                memory.release()
+            }
     }
 }

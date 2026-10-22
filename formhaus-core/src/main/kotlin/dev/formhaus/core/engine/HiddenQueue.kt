@@ -36,7 +36,11 @@ private class HiddenPass(
         mark(key)
     }
 
-    fun update(field: FormField, shown: Boolean, dry: Boolean): Boolean {
+    fun update(
+        field: FormField,
+        shown: Boolean,
+        dry: Boolean,
+    ): Boolean {
         val key = field.key
         if (dry) {
             visibility.waiting.remove(key)
@@ -45,13 +49,28 @@ private class HiddenPass(
         val shared = index.isShared(key)
         val active = if (shared) visibility.activeField(key, values.json) else null
         if (active != null && active.ordinal != field.ordinal) return false
-        if (!shown) {
-            val hidden = held(key)
-            if (hidden && !dry) clear(key)
-            return hidden
-        }
-        val eligible = if (shared) active != null else visibility.onPath(field, values.json) && visibility.visible(field, values.json)
-        if (held(key) || !eligible) return false
+        if (!shown) return release(key, dry)
+        val eligible = if (shared) active != null else onVisiblePath(field)
+        return eligible && seed(field, dry)
+    }
+
+    fun onVisiblePath(field: FormField): Boolean = visibility.onPath(field, values.json) && visibility.visible(field, values.json)
+
+    fun release(
+        key: String,
+        dry: Boolean,
+    ): Boolean {
+        val hidden = held(key)
+        if (hidden && !dry) clear(key)
+        return hidden
+    }
+
+    fun seed(
+        field: FormField,
+        dry: Boolean,
+    ): Boolean {
+        val key = field.key
+        if (held(key)) return false
         val start = visibility.starts.startValue(field)
         if (start.value == null) return false
         if (dry) return true
@@ -63,7 +82,10 @@ private class HiddenPass(
 
     fun included(field: FormField): Boolean = fields?.contains(field.ordinal) ?: true
 
-    fun visit(key: String, dry: Boolean): Boolean {
+    fun visit(
+        key: String,
+        dry: Boolean,
+    ): Boolean {
         var acted = false
         for (field in index.fieldDependents[key].orEmpty()) {
             if (!included(field) || !visibility.onPath(field, values.json)) continue

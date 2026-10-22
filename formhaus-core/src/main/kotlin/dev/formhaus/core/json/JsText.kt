@@ -1,12 +1,29 @@
 package dev.formhaus.core.json
 
-private val wideWhitespace = setOf(
-    ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
-    ' ', ' ', ' ', ' ', ' ', ' ', '　', '﻿',
-)
+private val wideWhitespace =
+    setOf(
+        ' ',
+        ' ',
+        ' ',
+        ' ',
+        ' ',
+        ' ',
+        ' ',
+        ' ',
+        ' ',
+        ' ',
+        ' ',
+        ' ',
+        ' ',
+        ' ',
+        ' ',
+        ' ',
+        ' ',
+        '　',
+        '\uFEFF',
+    )
 
-internal fun isJsWhitespace(char: Char): Boolean =
-    char == ' ' || char in '\u0009'..'\u000D' || (char >= ' ' && char in wideWhitespace)
+internal fun isJsWhitespace(char: Char): Boolean = char == ' ' || char in '\u0009'..'\u000D' || (char >= ' ' && char in wideWhitespace)
 
 internal val String.jsTrimmed: String get() = trim(::isJsWhitespace)
 
@@ -35,13 +52,17 @@ private fun String.isSettled(): Boolean {
     return true
 }
 
-internal fun asciiDigit(char: Char, radix: Int): Int {
-    val digit = when (char) {
-        in '0'..'9' -> char - '0'
-        in 'a'..'z' -> char - 'a' + 10
-        in 'A'..'Z' -> char - 'A' + 10
-        else -> return -1
-    }
+internal fun asciiDigit(
+    char: Char,
+    radix: Int,
+): Int {
+    val digit =
+        when (char) {
+            in '0'..'9' -> char - '0'
+            in 'a'..'z' -> char - 'a' + 10
+            in 'A'..'Z' -> char - 'A' + 10
+            else -> return -1
+        }
     return if (digit < radix) digit else -1
 }
 
@@ -63,23 +84,30 @@ internal fun jsNumber(text: String): Double {
     return if (isDecimalLiteral(trimmed)) trimmed.toDouble() else Double.NaN
 }
 
+private fun skipDigits(
+    text: String,
+    from: Int,
+): Int {
+    var index = from
+    while (index < text.length && text[index] in '0'..'9') index++
+    return index
+}
+
+private fun skipExponent(
+    text: String,
+    from: Int,
+): Int {
+    if (from >= text.length || text[from] !in "eE") return from
+    val signed = if (from + 1 < text.length && text[from + 1] in "+-") from + 2 else from + 1
+    val end = skipDigits(text, signed)
+    return if (end == signed) -1 else end
+}
+
 private fun isDecimalLiteral(text: String): Boolean {
-    var index = if (text.startsWith('+') || text.startsWith('-')) 1 else 0
-    fun digits(): Int {
-        val from = index
-        while (index < text.length && text[index] in '0'..'9') index++
-        return index - from
-    }
-    var count = digits()
-    if (index < text.length && text[index] == '.') {
-        index++
-        count += digits()
-    }
-    if (count == 0) return false
-    if (index < text.length && (text[index] == 'e' || text[index] == 'E')) {
-        index++
-        if (index < text.length && (text[index] == '+' || text[index] == '-')) index++
-        if (digits() == 0) return false
-    }
-    return index == text.length
+    val start = if (text.startsWith('+') || text.startsWith('-')) 1 else 0
+    val whole = skipDigits(text, start)
+    val hasPoint = whole < text.length && text[whole] == '.'
+    val fraction = if (hasPoint) skipDigits(text, whole + 1) else whole
+    val digits = (whole - start) + (if (hasPoint) fraction - whole - 1 else 0)
+    return digits > 0 && skipExponent(text, fraction) == text.length
 }

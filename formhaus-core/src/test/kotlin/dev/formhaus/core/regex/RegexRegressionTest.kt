@@ -14,12 +14,18 @@ import java.util.concurrent.Executors
 
 class RegexRegressionTest {
     companion object {
-        fun randomText(count: Int, alphabet: String, seed: Long): String {
+        fun randomText(
+            count: Int,
+            alphabet: String,
+            seed: Long,
+        ): String {
             var state = seed
-            return String(CharArray(count) {
-                state = state * 6_364_136_223_846_793_005L + 1_442_695_040_888_963_407L
-                alphabet[((state ushr 33) % alphabet.length).toInt()]
-            })
+            return String(
+                CharArray(count) {
+                    state = state * 6_364_136_223_846_793_005L + 1_442_695_040_888_963_407L
+                    alphabet[((state ushr 33) % alphabet.length).toInt()]
+                },
+            )
         }
 
         @JvmStatic
@@ -39,29 +45,50 @@ class RegexRegressionTest {
 
         @JvmStatic
         fun pools(): List<Arguments> =
-            if (Load.heavy) (0 until 3).map { Arguments.of(it, 50, AutomatonMemory.GLOBAL_LIMIT) } else listOf(Arguments.of(0, 8, 4 shl 20))
+            if (Load.heavy) {
+                (0 until 3).map { Arguments.of(it, 50, AutomatonMemory.GLOBAL_LIMIT) }
+            } else {
+                listOf(
+                    Arguments.of(
+                        0,
+                        8,
+                        4 shl 20,
+                    ),
+                )
+            }
 
         @JvmStatic
-        fun duplicateNames(): List<Arguments> = listOf(
-            Arguments.of("(?<n>)(?:(x)|y)(?:z|(?<n>a))", false),
-            Arguments.of("(?<n>a)(?:b|(?<n>c))", true),
-            Arguments.of("(?:(?<n>a)|(?<n>b))", true),
-            Arguments.of("(?<n>a)|(?:b|(?<n>c))", true),
-            Arguments.of("((?<n>a)|(?<n>b))(?:c|(?<n>d))", false),
-            Arguments.of("(?<n>x)|(?:(?<n>y)(?:z|(?<n>w)))", true),
-        )
+        fun duplicateNames(): List<Arguments> =
+            listOf(
+                Arguments.of("(?<n>)(?:(x)|y)(?:z|(?<n>a))", false),
+                Arguments.of("(?<n>a)(?:b|(?<n>c))", true),
+                Arguments.of("(?:(?<n>a)|(?<n>b))", true),
+                Arguments.of("(?<n>a)|(?:b|(?<n>c))", true),
+                Arguments.of("((?<n>a)|(?<n>b))(?:c|(?<n>d))", false),
+                Arguments.of("(?<n>x)|(?:(?<n>y)(?:z|(?<n>w)))", true),
+            )
 
         @JvmStatic
-        fun literalTexts(): List<Arguments> = listOf(
-            Arguments.of("x\u0161abcab", true), Arguments.of("abcaabcab", true), Arguments.of("abcab", true),
-            Arguments.of("abca", false), Arguments.of("\u0161bcab", false), Arguments.of("abcxabcab!", true),
-        )
+        fun literalTexts(): List<Arguments> =
+            listOf(
+                Arguments.of("x\u0161abcab", true),
+                Arguments.of("abcaabcab", true),
+                Arguments.of("abcab", true),
+                Arguments.of("abca", false),
+                Arguments.of("\u0161bcab", false),
+                Arguments.of("abcxabcab!", true),
+            )
 
         @JvmStatic
-        fun largeRepeats(): List<Arguments> = listOf(
-            Arguments.of("^.{0,16384}$", true), Arguments.of("^[\\s\\S]{0,65535}$", true), Arguments.of("^[^<>]{0,20000}$", true),
-            Arguments.of("^.{1,50000}$", true), Arguments.of("^(?:[a-z]{2,8}-){0,4000}$", false), Arguments.of("^(\\w{1,200} ?){1,200}$", true),
-        )
+        fun largeRepeats(): List<Arguments> =
+            listOf(
+                Arguments.of("^.{0,16384}$", true),
+                Arguments.of("^[\\s\\S]{0,65535}$", true),
+                Arguments.of("^[^<>]{0,20000}$", true),
+                Arguments.of("^.{1,50000}$", true),
+                Arguments.of("^(?:[a-z]{2,8}-){0,4000}$", false),
+                Arguments.of("^(\\w{1,200} ?){1,200}$", true),
+            )
     }
 
     private fun regex(source: String): JsRegex = requireNotNull(JsRegex.compile(source)) { source }
@@ -94,7 +121,10 @@ class RegexRegressionTest {
 
     @ParameterizedTest
     @MethodSource("duplicateNames")
-    fun `duplicate group names follow V8 alternatives`(source: String, valid: Boolean) {
+    fun `duplicate group names follow V8 alternatives`(
+        source: String,
+        valid: Boolean,
+    ) {
         assertEquals(valid, JsRegex.compile(source) != null, source)
     }
 
@@ -149,7 +179,11 @@ class RegexRegressionTest {
 
     @ParameterizedTest
     @MethodSource("pools")
-    fun `a full memory pool reclaims states from automatons that sat idle`(round: Int, count: Int, limit: Int) {
+    fun `a full memory pool reclaims states from automatons that sat idle`(
+        round: Int,
+        count: Int,
+        limit: Int,
+    ) {
         val pool = MemoryPool(limit)
         MemoryPool.current.withValue(pool) {
             val letter = "cde"[round]
@@ -168,27 +202,39 @@ class RegexRegressionTest {
     @ParameterizedTest
     @MethodSource("passes")
     fun `threads share automatons without changing results`(passes: Int) {
-        val sources = listOf(
-            "[ab]*a[ab]{12}$", "[ab]*a[ab]{12}$(?=)", "[^]*a[^]{100}$", "(?=[ab]*a[ab]{10}$)[ab]+", "(?<=a[ab]{9})b$",
-            "^(?:a|b)*a(?:a|b){11}$",
-        )
+        val sources =
+            listOf(
+                "[ab]*a[ab]{12}$",
+                "[ab]*a[ab]{12}$(?=)",
+                "[^]*a[^]{100}$",
+                "(?=[ab]*a[ab]{10}$)[ab]+",
+                "(?<=a[ab]{9})b$",
+                "^(?:a|b)*a(?:a|b){11}$",
+            )
         val texts = (0 until 6).map { randomText(if (it % 2 == 0) 20 else 800, "ab", it + 11L) }
         val expected = sources.map { source -> texts.map { CompiledPattern(source).test(it) } }
         val patterns = sources.map(::regex)
         val executor = Executors.newFixedThreadPool(8)
         try {
-            val workers = (0 until 8).map { worker ->
-                Callable {
-                    var mismatches = 0
-                    for (round in 0 until passes) {
-                        for (index in patterns.indices) {
-                            val pattern = (index + worker + round) % patterns.size
-                            for ((text, result) in texts.zip(expected[pattern])) if (patterns[pattern].test(text) != result) mismatches++
+            val workers =
+                (0 until 8).map { worker ->
+                    Callable {
+                        var mismatches = 0
+                        for (round in 0 until passes) {
+                            for (index in patterns.indices) {
+                                val pattern = (index + worker + round) % patterns.size
+                                for ((text, result) in texts.zip(expected[pattern])) {
+                                    if (patterns[pattern].test(text) !=
+                                        result
+                                    ) {
+                                        mismatches++
+                                    }
+                                }
+                            }
                         }
+                        mismatches
                     }
-                    mismatches
                 }
-            }
             assertEquals(0, executor.invokeAll(workers).sumOf { it.get() })
         } finally {
             executor.shutdownNow()
@@ -197,14 +243,20 @@ class RegexRegressionTest {
 
     @ParameterizedTest
     @MethodSource("literalTexts")
-    fun `the required literal search finds every occurrence`(text: String, expected: Boolean) {
+    fun `the required literal search finds every occurrence`(
+        text: String,
+        expected: Boolean,
+    ) {
         assertEquals(expected, regex("abcab").test(text))
         assertEquals(expected, regex("[a-z]*abcab").test(text))
     }
 
     @ParameterizedTest
     @MethodSource("largeRepeats")
-    fun `counted repeats larger than any input still match`(source: String, expected: Boolean) {
+    fun `counted repeats larger than any input still match`(
+        source: String,
+        expected: Boolean,
+    ) {
         val pattern = regex(source)
         assertEquals(expected, pattern.test("hello world"))
         if (!source.startsWith("^(\\w")) assertNull(pattern.test("a".repeat(MAX_STRING_LENGTH + 1)))

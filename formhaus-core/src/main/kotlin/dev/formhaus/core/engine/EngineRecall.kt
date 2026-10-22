@@ -8,13 +8,18 @@ import dev.formhaus.core.validation.hasRecallBraces
 internal fun FormEngine.recallScope(): RecallScope {
     val visibility = core.visibility
     val values = core.values.json
-    return RecallScope(visibility, core.getSubmitValues(), options.lang, options.formatRecall) { visibility.activeField(it, values) }
+    return RecallScope(visibility, core.getSubmitValues(), options.lang, options.formatRecall) {
+        visibility.activeField(it, values)
+    }
 }
 
 private fun FormEngine.recalls(json: JsonObject): Boolean =
     definition.recallsAnswers && recallSlots.any { slot -> json[slot]?.stringValue?.let(::hasRecallBraces) == true }
 
-internal fun FormEngine.recalledSlots(json: JsonObject, item: RecallItem?): JsonObject {
+internal fun FormEngine.recalledSlots(
+    json: JsonObject,
+    item: RecallItem?,
+): JsonObject {
     if (!recalls(json)) return json
     val resolve = recallScope().resolver(RecallOptions(item))
     val result = json.toMutableStringMap()
@@ -25,14 +30,23 @@ internal fun FormEngine.recalledSlots(json: JsonObject, item: RecallItem?): Json
     return result
 }
 
-internal fun FormEngine.itemAt(key: String?): RecallItem? = key?.let(core.visibility::parse)?.let { RecallItem(it.group, it.index) }
+internal fun FormEngine.itemAt(key: String?): RecallItem? =
+    key?.let(core.visibility::parse)?.let {
+        RecallItem(it.group, it.index)
+    }
 
-internal fun FormEngine.recalled(field: FormField, key: String? = null): FormField {
+internal fun FormEngine.recalled(
+    field: FormField,
+    key: String? = null,
+): FormField {
     val json = recalledSlots(field.json, itemAt(key))
     return if (json === field.json) field else field.withJson(json)
 }
 
 internal fun FormEngine.recalledTitle(json: JsonObject): String? = recalledSlots(json, null)["title"]?.stringValue
 
-internal fun FormEngine.itemTemplate(template: String, item: RecallItem, params: JsonObject): String =
-    substitute(definition, template, params) { recallScope().resolver(RecallOptions(item)) }
+internal fun FormEngine.itemTemplate(
+    template: String,
+    item: RecallItem,
+    params: JsonObject,
+): String = substitute(definition, template, params) { recallScope().resolver(RecallOptions(item)) }

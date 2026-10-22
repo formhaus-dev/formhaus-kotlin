@@ -2,7 +2,9 @@ package dev.formhaus.core.model
 
 import dev.formhaus.core.json.JsonValue
 
-internal class OptionIndex(options: List<FieldOption>) {
+internal class OptionIndex(
+    options: List<FieldOption>,
+) {
     private val positions = HashMap<Any, Int>()
 
     init {
@@ -14,9 +16,10 @@ internal class OptionIndex(options: List<FieldOption>) {
     fun position(value: JsonValue): Int? = optionKey(value)?.let(positions::get)
 }
 
-private fun optionKey(value: JsonValue?): Any? = when (value) {
-    is JsonValue.String -> value.value
-    is JsonValue.Bool -> value.value
-    is JsonValue.Number -> value.value.takeUnless { it.isNaN() }?.let { if (it == 0.0) 0.0 else it }
-    else -> null
-}
+private fun optionKey(value: JsonValue?): Any? =
+    when (value) {
+        is JsonValue.String -> value.value
+        is JsonValue.Bool -> value.value
+        is JsonValue.Number -> value.value.takeUnless { it.isNaN() }?.let { if (it == 0.0) 0.0 else it }
+        else -> null
+    }
