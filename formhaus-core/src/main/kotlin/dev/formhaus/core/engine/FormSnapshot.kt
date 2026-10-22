@@ -144,13 +144,13 @@ private fun mismatchWarning() =
 
 internal fun EngineCore.restore(snapshot: FormSnapshot) {
     val steps = definition.steps.orEmpty()
-    val cleared = values.copy()
+    var reset = values
     for (id in snapshot.skipped) {
-        val keys = valueFields(steps.first { it.id == id }.fields).map { it.key }
-        keys.forEach(cleared::remove)
-        markSkipped(id, keys)
+        val step = steps.first { it.id == id }
+        reset = resetStepValues(step, reset)
+        markSkipped(id, valueFields(step.fields).map { it.key })
     }
-    if (snapshot.skipped.isNotEmpty()) replaceValues(cleared)
+    if (snapshot.skipped.isNotEmpty()) replaceValues(reset)
     val target = snapshot.step ?: return visibility.markChanged(structureChanged = true, valuesChanged = true)
     val order = steps.indexOfFirst { it.id == target }
     val visible = visibleSteps
