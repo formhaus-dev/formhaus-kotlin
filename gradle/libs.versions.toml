@@ -1,11 +1,22 @@
 [versions]
 kotlin = "2.4.20"
 junit = "5.13.4"
+kotlinx-coroutines = "1.11.0"
+ktlint-plugin = "14.2.0"
+ktlint-engine = "1.8.0"
+detekt = "2.0.0-alpha.6"
+animalsniffer = "2.0.1"
+android-signature = "8.0.0_r2"
 
 [libraries]
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
 junit-bom = { module = "org.junit:junit-bom", version.ref = "junit" }
 junit-jupiter = { module = "org.junit.jupiter:junit-jupiter" }
 junit-launcher = { module = "org.junit.platform:junit-platform-launcher" }
+android-signature = { module = "net.sf.androidscents.signature:android-api-level-26", version.ref = "android-signature" }
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint-plugin" }
+detekt = { id = "dev.detekt", version.ref = "detekt" }
+animalsniffer = { id = "ru.vyarus.animalsniffer", version.ref = "animalsniffer" }

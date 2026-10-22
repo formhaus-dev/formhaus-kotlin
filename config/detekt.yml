@@ -1,0 +1,69 @@
+config:
+  validation: true
+  warningsAsErrors: true
+
+complexity:
+  LongMethod:
+    active: true
+    allowedLines: 60
+  LargeClass:
+    active: true
+    allowedLines: 300
+  ComplexCondition:
+    active: true
+    allowedConditions: 4
+  NestedBlockDepth:
+    active: true
+    allowedDepth: 4
+  CyclomaticComplexMethod:
+    active: true
+    allowedComplexity: 15
+    ignoreSimpleWhenEntries: true
+  LongParameterList:
+    active: true
+  TooManyFunctions:
+    active: true
+    allowedFunctionsPerFile: 25
+    allowedFunctionsPerClass: 30
+    allowedFunctionsPerObject: 25
+
+style:
+  LoopWithTooManyJumpStatements:
+    active: true
+    maxJumpCount: 2
+  ThrowsCount:
+    active: true
+    max: 4
+  UnusedPrivateProperty:
+    active: true
+  UnusedPrivateFunction:
+    active: true
+  UnusedPrivateClass:
+    active: true
+  UnusedParameter:
+    active: true
+  UnusedImport:
+    active: true
+  MagicNumber:
+    active: false
+  MaxLineLength:
+    active: false
+  ReturnCount:
+    active: false
+
+exceptions:
+  TooGenericExceptionCaught:
+    active: true
+    exceptionNames:
+      - ArrayIndexOutOfBoundsException
+      - Error
+      - Exception
+      - IllegalMonitorStateException
+      - IndexOutOfBoundsException
+      - NullPointerException
+      - RuntimeException
+  SwallowedException:
+    active: true
+    ignoredExceptionTypes:
+      - CancellationException
+      - NumberFormatException

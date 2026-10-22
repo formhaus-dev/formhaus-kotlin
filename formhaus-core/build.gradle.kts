@@ -1,5 +1,8 @@
 plugins {
     alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.ktlint)
+    alias(libs.plugins.detekt)
+    alias(libs.plugins.animalsniffer)
 }
 
 kotlin {
@@ -11,12 +14,34 @@ kotlin {
 }
 
 dependencies {
+    implementation(libs.kotlinx.coroutines.core)
     testImplementation(platform(libs.junit.bom))
     testImplementation(libs.junit.jupiter)
     testRuntimeOnly(libs.junit.launcher)
+    signature(variantOf(libs.android.signature) { artifactType("signature") })
 }
 
 tasks.test {
     useJUnitPlatform()
     maxHeapSize = "1g"
 }
+
+animalsniffer {
+    sourceSets = listOf(project.sourceSets.main.get())
+}
+
+ktlint {
+    version.set(
+        libs.versions.ktlint.engine
+            .get(),
+    )
+}
+
+detekt {
+    config.setFrom(rootProject.file("config/detekt.yml"))
+    buildUponDefaultConfig = true
+    allRules = false
+    parallel = false
+}
+
+group = "dev.formhaus"

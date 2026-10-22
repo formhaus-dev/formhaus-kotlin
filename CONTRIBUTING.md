@@ -1,0 +1,76 @@
+# Contributing
+
+## Setup
+
+```sh
+git clone https://github.com/formhaus-dev/formhaus-kotlin.git
+cd formhaus-kotlin
+./gradlew build
+```
+
+Requires JDK 17. The duplicate check and the scripts that record data need Node 24.
+
+## Build and test
+
+```sh
+./gradlew check
+./scripts/lint.sh
+```
+
+`./gradlew check` compiles with warnings as errors, runs the tests, ktlint, detekt and the Android API 26 signature check. `./scripts/lint.sh` runs ktlint, detekt, the comment check and jscpd at the versions CI uses. `./scripts/lint.sh ktlint`, `detekt`, `comments` or `duplicates` runs one check.
+
+## Conformance
+
+Behaviour is defined by the conformance suite of the [TypeScript core](https://github.com/formhaus-dev/formhaus/tree/main/packages/core/fixtures/conformance). A behaviour change starts as a fixture in the formhaus repository. When the Kotlin engine disagrees with a fixture, fix the engine.
+
+The copy in `formhaus-core/src/test/resources/fixtures/conformance` is synced, never edited:
+
+```sh
+./scripts/sync-fixtures.sh <git-ref> [path-to-formhaus-repo]
+```
+
+`fixtures/VERSION` records the ref and the resolved sha. The definition corpus runs `checkDefinition`, overlays, text slots, value cases and recall cases. Every scenario in `fixtures/conformance/scenarios` runs through `FormEngine` as its own test.
+
+## Generated data
+
+The Unicode and CLDR tables in `formhaus-core/src/main/kotlin/dev/formhaus/core` come from the data of the Node release that runs the scripts. The committed tables are Unicode 17 and CLDR 48, which Node 24 ships. Run the scripts with Node 24 and commit the result:
+
+```sh
+node scripts/unicode-tables.mjs
+node scripts/cldr-tables.mjs
+```
+
+`unicode-tables.mjs` writes the `unicode/Unicode<N>Tables.kt` file. `cldr-tables.mjs` writes `cldr/Cldr<N>Tables.kt` and the recall format fixture in `src/test/resources/cldr`.
+
+`formhaus-core/src/test/resources/fixtures/regex/cases.json` holds the expected results of the regex engine, recorded with Node. To record them again:
+
+```sh
+node scripts/regex-cases.mjs
+```
+
+Node 24.15 folds case wrongly in some modifier groups, where the native engine follows the specification. The script leaves these cases out and checks every recorded case again in a new node process.
+
+## Heavy tests
+
+CI runs fast checks that count work and never measures time. The large cases run only when `FORMHAUS_HEAVY_TESTS=1` is set:
+
+```sh
+FORMHAUS_HEAVY_TESTS=1 ./gradlew :formhaus-core:test
+```
+
+Run them before a release and after changes to the regex engine or the engine core. Use `nice -n 15` on a busy machine.
+
+## Pull requests
+
+1. Fork the repo and create a branch from `main`.
+2. Keep the code free of comments.
+3. Make sure `./gradlew check` and `./scripts/lint.sh` pass. Run the heavy tests when the change needs them.
+4. Commit using [conventional commits](https://www.conventionalcommits.org/) (`feat:`, `fix:`, `docs:`, `chore:`).
+5. Open a pull request against `main`. The `test` and `lint` checks must pass.
+
+## Releases
+
+1. Sync the fixtures to a tagged `@formhaus/core` release with `./scripts/sync-fixtures.sh @formhaus/core@X.Y.Z`.
+2. Run the heavy tests.
+3. Add the release to `CHANGELOG.md` and update the compatibility table in `README.md`.
+4. Tag `main` with the plain version, such as `0.1.0`, and push the tag.
