@@ -44,6 +44,7 @@ kotlin {
     explicitApi()
     compilerOptions {
         allWarningsAsErrors.set(true)
+        optIn.add("dev.formhaus.core.renderer.RendererApi")
     }
 }
 
