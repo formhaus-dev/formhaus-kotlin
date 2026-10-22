@@ -2,8 +2,10 @@ plugins {
     `maven-publish`
 }
 
-group = "dev.formhaus"
-version = "0.2.0"
+val onJitPack = System.getenv("JITPACK") == "true"
+
+group = if (onJitPack) "${System.getenv("GROUP")}.${System.getenv("ARTIFACT")}" else "dev.formhaus"
+version = if (onJitPack) System.getenv("VERSION") else "0.2.0"
 
 publishing {
     publications.withType<MavenPublication>().configureEach {
