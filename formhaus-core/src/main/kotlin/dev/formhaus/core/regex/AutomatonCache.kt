@@ -1,15 +1,19 @@
 package dev.formhaus.core.regex
 
 internal class AutomatonCache(
-    private val plan: AutomatonPlan,
+    val plan: AutomatonPlan,
 ) {
     @Volatile
-    private var shards: List<AutomatonShard> = emptyList()
+    private var shards: Array<AutomatonShard> = emptyArray()
 
     val bytes: Int get() = shards.sumOf { it.bytes }
 
+    fun release() {
+        shards.forEach(AutomatonShard::release)
+    }
+
     fun matches(
-        text: CharArray,
+        text: String,
         context: MatchContext,
     ): Boolean =
         run(
@@ -18,7 +22,7 @@ internal class AutomatonCache(
         )
 
     fun reverse(
-        text: CharArray,
+        text: String,
         end: Int,
         floor: Int,
         context: MatchContext,
@@ -29,26 +33,31 @@ internal class AutomatonCache(
         )
 
     fun acceptance(
-        text: CharArray,
+        text: String,
         context: MatchContext,
     ): BooleanArray =
         run(
             { it.acceptance(text, context) },
             { stepper ->
-                BooleanArray(text.size + 1).also { stepper.acceptance(LazyDFA.start, text, 0, it, context) }
+                BooleanArray(text.length + 1).also { stepper.acceptance(LazyDFA.start, text, 0, it, context) }
             },
         )
 
-    private fun <Value> run(
+    private inline fun <Value : Any> run(
         cached: (LazyDFA) -> Value,
         uncached: (ThreadStep) -> Value,
     ): Value {
         val current = shards
-        val start = ((Thread.currentThread().id * SPREAD) ushr 61).toInt()
-        for (offset in current.indices) {
-            current[(start + offset) % current.size].run(cached)?.let { return it.value }
+        if (current.isNotEmpty()) {
+            var index = ((Thread.currentThread().id * SPREAD) ushr 61).toInt() % current.size
+            repeat(current.size) {
+                val shard = current[index]
+                shard.runLocked(cached)?.let { return it }
+                index = if (index + 1 == current.size) 0 else index + 1
+            }
         }
-        addShard()?.run(cached)?.let { return it.value }
+        val added = addShard()
+        added?.runLocked(cached)?.let { return it }
         return uncached(plan.stepper())
     }
 

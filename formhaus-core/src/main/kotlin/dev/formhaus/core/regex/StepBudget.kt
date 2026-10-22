@@ -12,16 +12,22 @@ internal object BudgetExceeded : Exception(null, null, false, false)
 internal class ScopedLocal<T>(
     initial: T,
 ) {
-    private val local = ThreadLocal.withInitial { initial }
+    class Cell<T>(
+        var value: T,
+    )
 
-    val value: T get() = local.get()
+    private val local = ThreadLocal.withInitial { Cell(initial) }
+
+    val value: T get() = local.get().value
+
+    fun cell(): Cell<T> = local.get()
 
     fun <R> withValue(
         value: T,
         body: () -> R,
     ): R {
         val saved = local.get()
-        local.set(value)
+        local.set(Cell(value))
         try {
             return body()
         } finally {
@@ -29,28 +35,16 @@ internal class ScopedLocal<T>(
         }
     }
 
-    fun contextElement(value: T): ThreadContextElement<T> = local.asContextElement(value)
+    fun contextElement(value: T): ThreadContextElement<Cell<T>> = local.asContextElement(Cell(value))
 }
 
-internal class StepBudget(
-    limit: Int,
-) {
-    var remaining: Int = limit
-        private set
+internal object StepBudget {
+    val backtrackingLimit: ScopedLocal<Int> = ScopedLocal(10_000_000)
 
-    fun spend(steps: Int) {
-        remaining -= steps
-        if (remaining < 0) throw BudgetExceeded
-    }
-
-    companion object {
-        val backtrackingLimit: ScopedLocal<Int> = ScopedLocal(10_000_000)
-
-        fun linear(
-            units: Int,
-            instructions: Int,
-        ): Int = minOf(8L * (units + 2) * (instructions + 2), backtrackingLimit.value.toLong()).toInt()
-    }
+    fun linear(
+        units: Int,
+        instructions: Int,
+    ): Int = minOf(8L * (units + 2) * (instructions + 2), backtrackingLimit.value.toLong()).toInt()
 }
 
 internal class CallBudget(
@@ -73,8 +67,14 @@ internal class CallBudget(
         val current: ScopedLocal<CallBudget?> = ScopedLocal(null)
 
         fun <Value> run(body: () -> Value): Value {
-            if (current.value != null) return body()
-            return current.withValue(CallBudget(), body)
+            val cell = current.cell()
+            if (cell.value != null) return body()
+            cell.value = CallBudget()
+            try {
+                return body()
+            } finally {
+                cell.value = null
+            }
         }
 
         suspend fun <Value> runSuspending(body: suspend () -> Value): Value {

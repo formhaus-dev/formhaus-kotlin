@@ -37,46 +37,52 @@ internal fun Backtracker.enterRepeat(
     if (count < repeated.min) return null
     if (repeated.greedy) {
         if (count > repeated.min) {
-            frames.push(Frames.SCAN, Frames.Scan(pc + 1, position, offset + step * repeated.min, -step))
+            frames.push(Frames.SCAN, pc + 1, position, offset + step * repeated.min, -step)
         }
     } else if (repeated.max?.let { it > repeated.min } != false) {
-        val stop = repeated.max?.let { offset + step * it } ?: if (repeated.backward) -1 else text.size + 1
-        frames.push(Frames.EXTEND, Frames.Scan(pc, position, stop, step))
+        val stop = repeated.max?.let { offset + step * it } ?: if (repeated.backward) -1 else text.length + 1
+        frames.push(Frames.EXTEND, pc, position, stop, step)
     }
     return position
 }
 
-internal fun Backtracker.resumeScan(scan: Frames.Scan) {
-    val next = gate(scan.pc)
-    var position = scan.position + scan.step
+internal fun Backtracker.resumeScan(frame: Int) {
+    val target = frames.a(frame)
+    val stop = frames.c(frame)
+    val step = frames.d(frame)
+    val next = gate(target)
+    var position = frames.b(frame) + step
     var skipped = 0
-    while (position != scan.stop && !admits(next, position)) {
-        position += scan.step
+    while (position != stop && !admits(next, position)) {
+        position += step
         skipped++
     }
     context.spend(skipped)
-    if (position != scan.stop) frames.push(Frames.SCAN, Frames.Scan(scan.pc, position, scan.stop, scan.step))
-    pc = scan.pc
+    if (position != stop) frames.push(Frames.SCAN, target, position, stop, step)
+    pc = target
     offset = position
 }
 
-internal fun Backtracker.resumeExtend(scan: Frames.Scan): Boolean {
-    val repeated = program.instructions[scan.pc] as? Instruction.RepeatSet ?: return false
+internal fun Backtracker.resumeExtend(frame: Int): Boolean {
+    val repeat = frames.a(frame)
+    val stop = frames.c(frame)
+    val step = frames.d(frame)
+    val repeated = program.instructions[repeat] as? Instruction.RepeatSet ?: return false
     val members = Gate.Members(program.sets[repeated.set], repeated.backward)
-    val next = gate(scan.pc + 1)
-    var position = scan.position
+    val next = gate(repeat + 1)
+    var position = frames.b(frame)
     var steps = 0
     do {
         if (!admits(members, position)) {
             context.spend(steps)
             return false
         }
-        position += scan.step
+        position += step
         steps++
-    } while (position != scan.stop && !admits(next, position))
+    } while (position != stop && !admits(next, position))
     context.spend(steps)
-    if (position != scan.stop) frames.push(Frames.EXTEND, Frames.Scan(scan.pc, position, scan.stop, scan.step))
-    pc = scan.pc + 1
+    if (position != stop) frames.push(Frames.EXTEND, repeat, position, stop, step)
+    pc = repeat + 1
     offset = position
     return true
 }

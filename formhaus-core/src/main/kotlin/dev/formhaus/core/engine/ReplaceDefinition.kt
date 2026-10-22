@@ -64,6 +64,7 @@ internal fun EngineCore.replaceDefinition(next: FormDefinition) {
     val previousValues = keptValues().copy()
     val steps = visibleSteps
     val stepIndex = currentStepIndex
+    restarts += 1
     baselineFields()
     load(next, carriedValues(previousValues, next.allFields, previous))
     validationEpoch += 1

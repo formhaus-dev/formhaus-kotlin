@@ -1,5 +1,9 @@
 package dev.formhaus.core.engine
 
+import dev.formhaus.core.json.ValueParts
+import dev.formhaus.core.json.describe
+import dev.formhaus.core.json.equalParts
+import dev.formhaus.core.json.partsHash
 import java.io.IOException
 
 public sealed class SubmitFailureReason(
@@ -9,9 +13,17 @@ public sealed class SubmitFailureReason(
 
     public data object Rejected : SubmitFailureReason("rejected")
 
-    public data class Error(
+    public class Error(
         public val status: Int?,
-    ) : SubmitFailureReason("error")
+    ) : SubmitFailureReason("error") {
+        override fun equals(other: Any?): Boolean = equalParts(other, Error::parts)
+
+        override fun hashCode(): Int = parts().partsHash()
+
+        override fun toString(): String = parts().describe("Error")
+
+        private fun parts(): ValueParts = listOf("status" to status)
+    }
 }
 
 public interface SubmitStatusError {
@@ -38,47 +50,119 @@ public sealed class FormEvent(
 ) {
     public data object FormViewed : FormEvent("form_viewed")
 
-    public data class StepViewed(
+    public class StepViewed(
         public val stepId: String,
         public val stepIndex: Int,
-    ) : FormEvent("step_viewed")
+    ) : FormEvent("step_viewed") {
+        override fun equals(other: Any?): Boolean = equalParts(other, StepViewed::parts)
 
-    public data class FieldError(
+        override fun hashCode(): Int = parts().partsHash()
+
+        override fun toString(): String = parts().describe("StepViewed")
+
+        private fun parts(): ValueParts = listOf("stepId" to stepId, "stepIndex" to stepIndex)
+    }
+
+    public class FieldError(
         public val fieldKey: String,
         public val error: String,
-    ) : FormEvent("field_error")
+    ) : FormEvent("field_error") {
+        override fun equals(other: Any?): Boolean = equalParts(other, FieldError::parts)
 
-    public data class FieldShown(
+        override fun hashCode(): Int = parts().partsHash()
+
+        override fun toString(): String = parts().describe("FieldError")
+
+        private fun parts(): ValueParts = listOf("fieldKey" to fieldKey, "error" to error)
+    }
+
+    public class FieldShown(
         public val fieldKey: String,
-    ) : FormEvent("field_shown")
+    ) : FormEvent("field_shown") {
+        override fun equals(other: Any?): Boolean = equalParts(other, FieldShown::parts)
 
-    public data class FieldHidden(
+        override fun hashCode(): Int = parts().partsHash()
+
+        override fun toString(): String = parts().describe("FieldShown")
+
+        private fun parts(): ValueParts = listOf("fieldKey" to fieldKey)
+    }
+
+    public class FieldHidden(
         public val fieldKey: String,
-    ) : FormEvent("field_hidden")
+    ) : FormEvent("field_hidden") {
+        override fun equals(other: Any?): Boolean = equalParts(other, FieldHidden::parts)
 
-    public data class StepCompleted(
+        override fun hashCode(): Int = parts().partsHash()
+
+        override fun toString(): String = parts().describe("FieldHidden")
+
+        private fun parts(): ValueParts = listOf("fieldKey" to fieldKey)
+    }
+
+    public class StepCompleted(
         public val stepId: String,
-    ) : FormEvent("step_completed")
+    ) : FormEvent("step_completed") {
+        override fun equals(other: Any?): Boolean = equalParts(other, StepCompleted::parts)
 
-    public data class StepSkipped(
+        override fun hashCode(): Int = parts().partsHash()
+
+        override fun toString(): String = parts().describe("StepCompleted")
+
+        private fun parts(): ValueParts = listOf("stepId" to stepId)
+    }
+
+    public class StepSkipped(
         public val stepId: String,
-    ) : FormEvent("step_skipped")
+    ) : FormEvent("step_skipped") {
+        override fun equals(other: Any?): Boolean = equalParts(other, StepSkipped::parts)
 
-    public data class FormSubmitted(
+        override fun hashCode(): Int = parts().partsHash()
+
+        override fun toString(): String = parts().describe("StepSkipped")
+
+        private fun parts(): ValueParts = listOf("stepId" to stepId)
+    }
+
+    public class FormSubmitted(
         public val fieldCount: Int,
-    ) : FormEvent("form_submitted")
+    ) : FormEvent("form_submitted") {
+        override fun equals(other: Any?): Boolean = equalParts(other, FormSubmitted::parts)
+
+        override fun hashCode(): Int = parts().partsHash()
+
+        override fun toString(): String = parts().describe("FormSubmitted")
+
+        private fun parts(): ValueParts = listOf("fieldCount" to fieldCount)
+    }
 
     public data object FormSubmitSucceeded : FormEvent("form_submit_succeeded")
 
-    public data class FormSubmitFailed(
+    public class FormSubmitFailed(
         public val reason: SubmitFailureReason,
-    ) : FormEvent("form_submit_failed")
+    ) : FormEvent("form_submit_failed") {
+        override fun equals(other: Any?): Boolean = equalParts(other, FormSubmitFailed::parts)
 
-    public data class StepRedirected(
+        override fun hashCode(): Int = parts().partsHash()
+
+        override fun toString(): String = parts().describe("FormSubmitFailed")
+
+        private fun parts(): ValueParts = listOf("reason" to reason)
+    }
+
+    public class StepRedirected(
         public val requestedStepId: String,
         public val stepId: String?,
         public val reason: StepRedirectReason,
-    ) : FormEvent("step_redirected")
+    ) : FormEvent("step_redirected") {
+        override fun equals(other: Any?): Boolean = equalParts(other, StepRedirected::parts)
+
+        override fun hashCode(): Int = parts().partsHash()
+
+        override fun toString(): String = parts().describe("StepRedirected")
+
+        private fun parts(): ValueParts = listOf("requestedStepId" to requestedStepId, "stepId" to stepId, "reason" to reason)
+    }
 
     public data object FormReset : FormEvent("form_reset")
 }

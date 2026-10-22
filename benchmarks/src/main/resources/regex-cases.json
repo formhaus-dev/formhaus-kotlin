@@ -1,0 +1,35 @@
+{
+  "typical": [
+    {"id": "email", "label": "email", "pattern": "^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$", "short": "ada@example.com",
+     "long": [{"repeat": "a", "count": 9988}, "@example.com"]},
+    {"id": "phone", "label": "phone", "pattern": "^\\+?[0-9 ()-]{7,20}$", "short": "+44 (20) 7946-0958",
+     "long": [{"repeat": "0", "count": 10000}]},
+    {"id": "postcode", "label": "postcode", "pattern": "^[A-Z]{1,2}\\d[A-Z\\d]? ?\\d[A-Z]{2}$", "short": "SW1A 1AA",
+     "long": [{"repeat": "A", "count": 10000}]},
+    {"id": "iban", "label": "IBAN", "pattern": "^[A-Z]{2}\\d{2}[A-Z0-9]{11,30}$", "short": "GB82WEST12345698765432",
+     "long": ["GB82", {"repeat": "W", "count": 9996}]},
+    {"id": "password", "label": "password (3 lookaheads)", "pattern": "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$", "short": "Passw0rd!",
+     "long": [{"repeat": "a", "count": 9999}, "A"]},
+    {"id": "quoted", "label": "quoted (backreference)", "pattern": "^(['\"]).*\\1$", "short": "\"hello\"",
+     "long": ["\"", {"repeat": "a", "count": 9998}, "'"]}
+  ],
+  "pathological": [
+    {"id": "nested-plus", "label": "`(a+)+$` on 9,999 `a` and `!`", "pattern": "(a+)+$",
+     "long": [{"repeat": "a", "count": 9999}, "!"]},
+    {"id": "alternation", "label": "`(a|aa)+$` on 9,999 `a` and `!`", "pattern": "(a|aa)+$",
+     "long": [{"repeat": "a", "count": 9999}, "!"]},
+    {"id": "double-plus", "label": "`(x+x+)+y` on 10,000 `x`", "pattern": "(x+x+)+y",
+     "long": [{"repeat": "x", "count": 10000}]},
+    {"id": "captures", "label": "`(?:a|[]()…)*\\1(?!)` with 15,000 `()` on 9,999 `a`",
+     "pattern": ["(?:a|[]", {"repeat": "()", "count": 15000}, ")*\\1(?!)"],
+     "long": [{"repeat": "a", "count": 9999}]},
+    {"id": "lookarounds", "label": "`(?=(?!b)[^]*x)y(?:z|$)` on 9,999 `y` and `x`", "pattern": "(?=(?!b)[^]*x)y(?:z|$)",
+     "long": [{"repeat": "y", "count": 9999}, "x"]},
+    {"id": "dfa-states", "label": "`[^]*a[^]{3900}$` on 10,000 random `a` and `b`", "pattern": "[^]*a[^]{3900}$",
+     "long": [{"random": 10000, "seed": 1}]},
+    {"id": "counted-repeat", "label": "`[a-z]{0,4001}1` on 6,000 `b` and `1`", "pattern": "[a-z]{0,4001}1",
+     "long": [{"repeat": "b", "count": 6000}, "1"]},
+    {"id": "dfa-reset", "label": "`[ab]*a[ab]{12}$` on 10,000 random `a` and `b`", "pattern": "[ab]*a[ab]{12}$",
+     "long": [{"random": 10000, "seed": 7}]}
+  ]
+}

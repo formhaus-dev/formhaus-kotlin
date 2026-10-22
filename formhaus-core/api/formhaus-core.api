@@ -1,0 +1,1277 @@
+public final class dev/formhaus/core/definitionvalidation/CheckDefinitionOptions {
+	public fun <init> ()V
+	public fun <init> (Ljava/util/List;)V
+	public synthetic fun <init> (Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getValidators ()Ljava/util/List;
+}
+
+public final class dev/formhaus/core/definitionvalidation/CheckDefinitionOptionsKt {
+	public static final fun checkDefinition (Ldev/formhaus/core/json/JsonValue;Ldev/formhaus/core/definitionvalidation/CheckDefinitionOptions;)Ljava/util/List;
+	public static synthetic fun checkDefinition$default (Ldev/formhaus/core/json/JsonValue;Ldev/formhaus/core/definitionvalidation/CheckDefinitionOptions;ILjava/lang/Object;)Ljava/util/List;
+}
+
+public final class dev/formhaus/core/definitionvalidation/DefinitionIssue {
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCode-SGZMid8 ()Ljava/lang/String;
+	public final fun getHint ()Ljava/lang/String;
+	public final fun getMessage ()Ljava/lang/String;
+	public final fun getPath ()Ljava/lang/String;
+	public final fun getSeverity ()Ldev/formhaus/core/definitionvalidation/DefinitionIssue$Severity;
+	public fun hashCode ()I
+	public final fun isError ()Z
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/formhaus/core/definitionvalidation/DefinitionIssue$Severity : java/lang/Enum {
+	public static final field ERROR Ldev/formhaus/core/definitionvalidation/DefinitionIssue$Severity;
+	public static final field WARNING Ldev/formhaus/core/definitionvalidation/DefinitionIssue$Severity;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Ldev/formhaus/core/definitionvalidation/DefinitionIssue$Severity;
+	public static fun values ()[Ldev/formhaus/core/definitionvalidation/DefinitionIssue$Severity;
+}
+
+public final class dev/formhaus/core/definitionvalidation/FormDefinitionError : java/lang/Exception {
+	public final fun getIssues ()Ljava/util/List;
+}
+
+public final class dev/formhaus/core/definitionvalidation/IssueCode {
+	public static final field Companion Ldev/formhaus/core/definitionvalidation/IssueCode$Companion;
+	public static final synthetic fun box-impl (Ljava/lang/String;)Ldev/formhaus/core/definitionvalidation/IssueCode;
+	public static fun constructor-impl (Ljava/lang/String;)Ljava/lang/String;
+	public fun equals (Ljava/lang/Object;)Z
+	public static fun equals-impl (Ljava/lang/String;Ljava/lang/Object;)Z
+	public static final fun equals-impl0 (Ljava/lang/String;Ljava/lang/String;)Z
+	public final fun getRawValue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public static fun hashCode-impl (Ljava/lang/String;)I
+	public fun toString ()Ljava/lang/String;
+	public static fun toString-impl (Ljava/lang/String;)Ljava/lang/String;
+	public final synthetic fun unbox-impl ()Ljava/lang/String;
+}
+
+public final class dev/formhaus/core/definitionvalidation/IssueCode$Companion {
+	public final fun getAUTOCOMPLETE_NOT_APPLICABLE-SGZMid8 ()Ljava/lang/String;
+	public final fun getCOLUMNS_NOT_APPLICABLE-SGZMid8 ()Ljava/lang/String;
+	public final fun getCONDITION_ALWAYS_TRUE-SGZMid8 ()Ljava/lang/String;
+	public final fun getCONDITION_CYCLE-SGZMid8 ()Ljava/lang/String;
+	public final fun getCONDITION_OPERATOR_COUNT-SGZMid8 ()Ljava/lang/String;
+	public final fun getCONDITION_VALUE_MISMATCH-SGZMid8 ()Ljava/lang/String;
+	public final fun getCONTAINS_NOT_IN_OPTIONS-SGZMid8 ()Ljava/lang/String;
+	public final fun getCONTAINS_NOT_LIST-SGZMid8 ()Ljava/lang/String;
+	public final fun getCUSTOM_TYPE_NAME-SGZMid8 ()Ljava/lang/String;
+	public final fun getDEFAULT_ITEMS_GREATER_THAN_MAX-SGZMid8 ()Ljava/lang/String;
+	public final fun getDEFAULT_NOT_IN_OPTIONS-SGZMid8 ()Ljava/lang/String;
+	public final fun getDEFINITION_RESET-SGZMid8 ()Ljava/lang/String;
+	public final fun getDISABLED_NOT_APPLICABLE-SGZMid8 ()Ljava/lang/String;
+	public final fun getDUPLICATE_KEY-SGZMid8 ()Ljava/lang/String;
+	public final fun getDUPLICATE_OPTION_VALUE-SGZMid8 ()Ljava/lang/String;
+	public final fun getDUPLICATE_STEP_ID-SGZMid8 ()Ljava/lang/String;
+	public final fun getEXCLUSIVE_DEFAULT_VALUE-SGZMid8 ()Ljava/lang/String;
+	public final fun getEXCLUSIVE_NOT_APPLICABLE-SGZMid8 ()Ljava/lang/String;
+	public final fun getEXCLUSIVE_OPTION_POSITION-SGZMid8 ()Ljava/lang/String;
+	public final fun getEXCLUSIVE_WITH_MIN_LENGTH-SGZMid8 ()Ljava/lang/String;
+	public final fun getFIELDS_AND_STEPS-SGZMid8 ()Ljava/lang/String;
+	public final fun getFORWARD_REFERENCE-SGZMid8 ()Ljava/lang/String;
+	public final fun getGROUP_ITEM_LIMIT-SGZMid8 ()Ljava/lang/String;
+	public final fun getGROUP_SCOPE-SGZMid8 ()Ljava/lang/String;
+	public final fun getI18N_KEY_WITHOUT_TEXT-SGZMid8 ()Ljava/lang/String;
+	public final fun getI18N_UNSAFE_IDENTIFIER-SGZMid8 ()Ljava/lang/String;
+	public final fun getINVALID_COLUMNS-SGZMid8 ()Ljava/lang/String;
+	public final fun getINVALID_NESTING-SGZMid8 ()Ljava/lang/String;
+	public final fun getINVALID_PATTERN-SGZMid8 ()Ljava/lang/String;
+	public final fun getINVALID_SCALE-SGZMid8 ()Ljava/lang/String;
+	public final fun getINVALID_TYPE-SGZMid8 ()Ljava/lang/String;
+	public final fun getMIN_GREATER_THAN_MAX-SGZMid8 ()Ljava/lang/String;
+	public final fun getMISSING_COMPONENT-SGZMid8 ()Ljava/lang/String;
+	public final fun getMISSING_LABEL-SGZMid8 ()Ljava/lang/String;
+	public final fun getMISSING_LABEL_KEY-SGZMid8 ()Ljava/lang/String;
+	public final fun getMISSING_MESSAGE_KEY-SGZMid8 ()Ljava/lang/String;
+	public final fun getMISSING_OPTIONS-SGZMid8 ()Ljava/lang/String;
+	public final fun getMISSING_PROPERTY-SGZMid8 ()Ljava/lang/String;
+	public final fun getMISSING_RESEARCH-SGZMid8 ()Ljava/lang/String;
+	public final fun getOUTDATED_FORMAT_VERSION-SGZMid8 ()Ljava/lang/String;
+	public final fun getRANDOMIZE_NOT_APPLICABLE-SGZMid8 ()Ljava/lang/String;
+	public final fun getRECALL_FORWARD_REFERENCE-SGZMid8 ()Ljava/lang/String;
+	public final fun getRECALL_QUERY_SOURCE-SGZMid8 ()Ljava/lang/String;
+	public final fun getRECALL_SENSITIVE_FIELD-SGZMid8 ()Ljava/lang/String;
+	public final fun getRECALL_SYNTAX-SGZMid8 ()Ljava/lang/String;
+	public final fun getRECALL_UNTRUSTED_SOURCE-SGZMid8 ()Ljava/lang/String;
+	public final fun getRESERVED_KEY-SGZMid8 ()Ljava/lang/String;
+	public final fun getROUTE_FALLTHROUGH-SGZMid8 ()Ljava/lang/String;
+	public final fun getROUTE_TARGET-SGZMid8 ()Ljava/lang/String;
+	public final fun getRULE_NOT_APPLICABLE-SGZMid8 ()Ljava/lang/String;
+	public final fun getSKIP_UNREACHABLE-SGZMid8 ()Ljava/lang/String;
+	public final fun getSLOW_PATTERN-SGZMid8 ()Ljava/lang/String;
+	public final fun getSNAPSHOT_MISMATCH-SGZMid8 ()Ljava/lang/String;
+	public final fun getSNAPSHOT_TOO_LARGE-SGZMid8 ()Ljava/lang/String;
+	public final fun getSOURCE_NOT_APPLICABLE-SGZMid8 ()Ljava/lang/String;
+	public final fun getUNKNOWN_AUTOCOMPLETE_TOKEN-SGZMid8 ()Ljava/lang/String;
+	public final fun getUNKNOWN_FIELD-SGZMid8 ()Ljava/lang/String;
+	public final fun getUNKNOWN_FIELD_TYPE-SGZMid8 ()Ljava/lang/String;
+	public final fun getUNKNOWN_I18N_SLOT-SGZMid8 ()Ljava/lang/String;
+	public final fun getUNKNOWN_LABEL_KEY-SGZMid8 ()Ljava/lang/String;
+	public final fun getUNKNOWN_MESSAGE_KEY-SGZMid8 ()Ljava/lang/String;
+	public final fun getUNKNOWN_OPERATOR-SGZMid8 ()Ljava/lang/String;
+	public final fun getUNKNOWN_PROPERTY-SGZMid8 ()Ljava/lang/String;
+	public final fun getUNKNOWN_RECALL_FIELD-SGZMid8 ()Ljava/lang/String;
+	public final fun getUNKNOWN_SOURCE-SGZMid8 ()Ljava/lang/String;
+	public final fun getUNKNOWN_VALIDATOR-SGZMid8 ()Ljava/lang/String;
+	public final fun getUNSAFE_IMAGE_URL-SGZMid8 ()Ljava/lang/String;
+	public final fun getUNSUPPORTED_FORMAT_VERSION-SGZMid8 ()Ljava/lang/String;
+}
+
+public final class dev/formhaus/core/engine/FormEngine {
+	public fun <init> (Ldev/formhaus/core/json/JsonValue;Ldev/formhaus/core/json/StringMap;Ldev/formhaus/core/engine/FormEngineOptions;Ldev/formhaus/core/engine/FormSnapshot;)V
+	public synthetic fun <init> (Ldev/formhaus/core/json/JsonValue;Ldev/formhaus/core/json/StringMap;Ldev/formhaus/core/engine/FormEngineOptions;Ldev/formhaus/core/engine/FormSnapshot;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ldev/formhaus/core/model/FormDefinition;Ldev/formhaus/core/json/StringMap;Ldev/formhaus/core/engine/FormEngineOptions;Ldev/formhaus/core/engine/FormSnapshot;)V
+	public synthetic fun <init> (Ldev/formhaus/core/model/FormDefinition;Ldev/formhaus/core/json/StringMap;Ldev/formhaus/core/engine/FormEngineOptions;Ldev/formhaus/core/engine/FormSnapshot;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun addItem (Ljava/lang/String;)Z
+	public final fun back (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun cancelPendingActions ()V
+	public final fun getCanGoNext ()Z
+	public final fun getCurrentStep ()Ldev/formhaus/core/model/FormStep;
+	public final fun getCurrentStepIndex ()I
+	public final fun getDefinition ()Ldev/formhaus/core/model/FormDefinition;
+	public final fun getErrors ()Ldev/formhaus/core/json/StringMap;
+	public final fun getFieldLoading ()Ldev/formhaus/core/json/StringMap;
+	public final fun getProgress ()Ldev/formhaus/core/engine/StepProgress;
+	public final fun getSeed ()Ljava/lang/String;
+	public final fun getStepErrors ()Ldev/formhaus/core/json/StringMap;
+	public final fun getStepValidating ()Z
+	public final fun getSubmitValues ()Ldev/formhaus/core/json/StringMap;
+	public final fun getSubmitting ()Z
+	public final fun getTopLevelErrors ()Ljava/util/List;
+	public final fun getValues ()Ldev/formhaus/core/json/StringMap;
+	public final fun getVisibleFields ()Ljava/util/List;
+	public final fun getVisibleNodes ()Ljava/util/List;
+	public final fun getVisibleSteps ()Ljava/util/List;
+	public final fun goToStep (Ljava/lang/String;)Ldev/formhaus/core/engine/GoToStepResult;
+	public final fun goToStepWithField (Ljava/lang/String;)V
+	public final fun isActionDisabled (Ldev/formhaus/core/model/FormAction;)Z
+	public final fun isFirstStep ()Z
+	public final fun isLastStep ()Z
+	public final fun isMultiStep ()Z
+	public final fun isStepSkipped (Ljava/lang/String;)Z
+	public final fun items (Ljava/lang/String;)Ljava/util/List;
+	public final fun next (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun orderOptions (Ljava/lang/String;Ljava/util/List;)Ljava/util/List;
+	public static synthetic fun orderOptions$default (Ldev/formhaus/core/engine/FormEngine;Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)Ljava/util/List;
+	public final fun recallText (Ljava/lang/String;Ldev/formhaus/core/engine/RecallOptions;)Ljava/lang/String;
+	public static synthetic fun recallText$default (Ldev/formhaus/core/engine/FormEngine;Ljava/lang/String;Ldev/formhaus/core/engine/RecallOptions;ILjava/lang/Object;)Ljava/lang/String;
+	public final fun removeItem (Ljava/lang/String;I)Z
+	public final fun replaceDefinition (Ldev/formhaus/core/json/JsonValue;)V
+	public final fun replaceDefinition (Ldev/formhaus/core/model/FormDefinition;)V
+	public final fun reset (Ldev/formhaus/core/json/StringMap;)V
+	public static synthetic fun reset$default (Ldev/formhaus/core/engine/FormEngine;Ldev/formhaus/core/json/StringMap;ILjava/lang/Object;)V
+	public final fun setErrors (Ldev/formhaus/core/json/StringMap;)V
+	public final fun setFieldLoading (Ljava/lang/String;Z)V
+	public final fun setItemValue (Ljava/lang/String;ILjava/lang/String;Ldev/formhaus/core/json/JsonValue;)V
+	public final fun setValue (Ljava/lang/String;Ldev/formhaus/core/json/JsonValue;)V
+	public final fun skip (Lkotlin/jvm/functions/Function3;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun skip$default (Ldev/formhaus/core/engine/FormEngine;Lkotlin/jvm/functions/Function3;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public final fun start ()V
+	public final fun submit (Lkotlin/jvm/functions/Function3;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun subscribe (Lkotlin/jvm/functions/Function0;)Lkotlin/jvm/functions/Function0;
+	public final fun validate ()Ldev/formhaus/core/json/StringMap;
+	public final fun validateField (Ljava/lang/String;)Ljava/lang/String;
+}
+
+public final class dev/formhaus/core/engine/FormEngineOptions {
+	public fun <init> ()V
+	public fun <init> (Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Ldev/formhaus/core/json/StringMap;Ldev/formhaus/core/validation/MessageSource;Ljava/lang/String;Lkotlin/jvm/functions/Function3;Ldev/formhaus/core/engine/RecallFormatter;Ljava/lang/String;Ldev/formhaus/core/engine/FormResearch;Ldev/formhaus/core/engine/HiddenValues;Ljava/lang/Boolean;)V
+	public synthetic fun <init> (Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Ldev/formhaus/core/json/StringMap;Ldev/formhaus/core/validation/MessageSource;Ljava/lang/String;Lkotlin/jvm/functions/Function3;Ldev/formhaus/core/engine/RecallFormatter;Ljava/lang/String;Ldev/formhaus/core/engine/FormResearch;Ldev/formhaus/core/engine/HiddenValues;Ljava/lang/Boolean;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getDebugChecks ()Ljava/lang/Boolean;
+	public final fun getFormatRecall ()Lkotlin/jvm/functions/Function3;
+	public final fun getHiddenValues ()Ldev/formhaus/core/engine/HiddenValues;
+	public final fun getLang ()Ljava/lang/String;
+	public final fun getMessages ()Ldev/formhaus/core/validation/MessageSource;
+	public final fun getOnAfterStepChange ()Lkotlin/jvm/functions/Function2;
+	public final fun getOnAfterSubmit ()Lkotlin/jvm/functions/Function3;
+	public final fun getOnBeforeStepChange ()Lkotlin/jvm/functions/Function2;
+	public final fun getOnBeforeSubmit ()Lkotlin/jvm/functions/Function2;
+	public final fun getOnFormEvent ()Lkotlin/jvm/functions/Function1;
+	public final fun getOnStepValidate ()Lkotlin/jvm/functions/Function3;
+	public final fun getOnWarning ()Lkotlin/jvm/functions/Function1;
+	public final fun getRecallFormatter ()Ldev/formhaus/core/engine/RecallFormatter;
+	public final fun getResearch ()Ldev/formhaus/core/engine/FormResearch;
+	public final fun getSeed ()Ljava/lang/String;
+	public final fun getValidators ()Ldev/formhaus/core/json/StringMap;
+}
+
+public abstract class dev/formhaus/core/engine/FormEvent {
+	public synthetic fun <init> (Ljava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getType ()Ljava/lang/String;
+}
+
+public final class dev/formhaus/core/engine/FormEvent$FieldError : dev/formhaus/core/engine/FormEvent {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getError ()Ljava/lang/String;
+	public final fun getFieldKey ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/formhaus/core/engine/FormEvent$FieldHidden : dev/formhaus/core/engine/FormEvent {
+	public fun <init> (Ljava/lang/String;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getFieldKey ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/formhaus/core/engine/FormEvent$FieldShown : dev/formhaus/core/engine/FormEvent {
+	public fun <init> (Ljava/lang/String;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getFieldKey ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/formhaus/core/engine/FormEvent$FormReset : dev/formhaus/core/engine/FormEvent {
+	public static final field INSTANCE Ldev/formhaus/core/engine/FormEvent$FormReset;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/formhaus/core/engine/FormEvent$FormSubmitFailed : dev/formhaus/core/engine/FormEvent {
+	public fun <init> (Ldev/formhaus/core/engine/SubmitFailureReason;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getReason ()Ldev/formhaus/core/engine/SubmitFailureReason;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/formhaus/core/engine/FormEvent$FormSubmitSucceeded : dev/formhaus/core/engine/FormEvent {
+	public static final field INSTANCE Ldev/formhaus/core/engine/FormEvent$FormSubmitSucceeded;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/formhaus/core/engine/FormEvent$FormSubmitted : dev/formhaus/core/engine/FormEvent {
+	public fun <init> (I)V
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getFieldCount ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/formhaus/core/engine/FormEvent$FormViewed : dev/formhaus/core/engine/FormEvent {
+	public static final field INSTANCE Ldev/formhaus/core/engine/FormEvent$FormViewed;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/formhaus/core/engine/FormEvent$StepCompleted : dev/formhaus/core/engine/FormEvent {
+	public fun <init> (Ljava/lang/String;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getStepId ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/formhaus/core/engine/FormEvent$StepRedirected : dev/formhaus/core/engine/FormEvent {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ldev/formhaus/core/engine/StepRedirectReason;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getReason ()Ldev/formhaus/core/engine/StepRedirectReason;
+	public final fun getRequestedStepId ()Ljava/lang/String;
+	public final fun getStepId ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/formhaus/core/engine/FormEvent$StepSkipped : dev/formhaus/core/engine/FormEvent {
+	public fun <init> (Ljava/lang/String;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getStepId ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/formhaus/core/engine/FormEvent$StepViewed : dev/formhaus/core/engine/FormEvent {
+	public fun <init> (Ljava/lang/String;I)V
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getStepId ()Ljava/lang/String;
+	public final fun getStepIndex ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/formhaus/core/engine/FormLifecycleError : java/lang/Exception {
+	public final fun getCommitted ()Z
+	public final fun getPhase ()Ldev/formhaus/core/engine/FormLifecycleError$Phase;
+}
+
+public final class dev/formhaus/core/engine/FormLifecycleError$Phase : java/lang/Enum {
+	public static final field AFTER_STEP_CHANGE Ldev/formhaus/core/engine/FormLifecycleError$Phase;
+	public static final field AFTER_SUBMIT Ldev/formhaus/core/engine/FormLifecycleError$Phase;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public final fun getRawValue ()Ljava/lang/String;
+	public static fun valueOf (Ljava/lang/String;)Ldev/formhaus/core/engine/FormLifecycleError$Phase;
+	public static fun values ()[Ldev/formhaus/core/engine/FormLifecycleError$Phase;
+}
+
+public abstract interface class dev/formhaus/core/engine/FormResearch {
+	public abstract fun order (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Ljava/util/List;
+	public abstract fun seed ()Ljava/lang/String;
+}
+
+public final class dev/formhaus/core/engine/FormSnapshot {
+	public static final field CURRENT_VERSION I
+	public static final field Companion Ldev/formhaus/core/engine/FormSnapshot$Companion;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDefinitionId ()Ljava/lang/String;
+	public final fun getSeed ()Ljava/lang/String;
+	public final fun getSkipped ()Ljava/util/List;
+	public final fun getStep ()Ljava/lang/String;
+	public final fun getValues ()Ldev/formhaus/core/json/StringMap;
+	public final fun getVersion ()I
+	public fun hashCode ()I
+	public final fun toJson ()Ljava/lang/String;
+	public fun toString ()Ljava/lang/String;
+	public final fun withValues (Ldev/formhaus/core/json/StringMap;)Ldev/formhaus/core/engine/FormSnapshot;
+}
+
+public final class dev/formhaus/core/engine/FormSnapshot$Companion {
+	public final fun fromJson (Ljava/lang/String;)Ldev/formhaus/core/engine/FormSnapshot;
+	public final fun fromJson (Ljava/lang/String;Ldev/formhaus/core/engine/FormEngineOptions;)Ldev/formhaus/core/engine/FormSnapshot;
+}
+
+public final class dev/formhaus/core/engine/FormSnapshotKt {
+	public static final fun snapshot (Ldev/formhaus/core/engine/FormEngine;)Ldev/formhaus/core/engine/FormSnapshot;
+	public static final fun snapshotJson (Ldev/formhaus/core/engine/FormEngine;I)Ljava/lang/String;
+}
+
+public final class dev/formhaus/core/engine/GoToStepResult {
+	public fun <init> (Ljava/lang/String;ZLdev/formhaus/core/engine/StepRedirectReason;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getReached ()Z
+	public final fun getReason ()Ldev/formhaus/core/engine/StepRedirectReason;
+	public final fun getStepId ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/formhaus/core/engine/GroupItem {
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getFields ()Ljava/util/List;
+	public final fun getId ()Ljava/lang/String;
+	public fun hashCode ()I
+}
+
+public final class dev/formhaus/core/engine/HiddenValues : java/lang/Enum {
+	public static final field CLEAR Ldev/formhaus/core/engine/HiddenValues;
+	public static final field Companion Ldev/formhaus/core/engine/HiddenValues$Companion;
+	public static final field KEEP Ldev/formhaus/core/engine/HiddenValues;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public final fun getRawValue ()Ljava/lang/String;
+	public static fun valueOf (Ljava/lang/String;)Ldev/formhaus/core/engine/HiddenValues;
+	public static fun values ()[Ldev/formhaus/core/engine/HiddenValues;
+}
+
+public final class dev/formhaus/core/engine/HiddenValues$Companion {
+	public final fun of (Ljava/lang/String;)Ldev/formhaus/core/engine/HiddenValues;
+}
+
+public final class dev/formhaus/core/engine/OptionOrderKt {
+	public static final fun optionKey (Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+}
+
+public abstract class dev/formhaus/core/engine/RecallAnswer {
+	public final fun getStored ()Ljava/lang/String;
+}
+
+public final class dev/formhaus/core/engine/RecallAnswer$Items : dev/formhaus/core/engine/RecallAnswer {
+	public fun <init> (Ljava/util/List;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun copy (Ljava/util/List;)Ldev/formhaus/core/engine/RecallAnswer$Items;
+	public static synthetic fun copy$default (Ldev/formhaus/core/engine/RecallAnswer$Items;Ljava/util/List;ILjava/lang/Object;)Ldev/formhaus/core/engine/RecallAnswer$Items;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getItems ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/formhaus/core/engine/RecallAnswer$Number : dev/formhaus/core/engine/RecallAnswer {
+	public fun <init> (D)V
+	public final fun component1 ()D
+	public final fun copy (D)Ldev/formhaus/core/engine/RecallAnswer$Number;
+	public static synthetic fun copy$default (Ldev/formhaus/core/engine/RecallAnswer$Number;DILjava/lang/Object;)Ldev/formhaus/core/engine/RecallAnswer$Number;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getNumber ()D
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/formhaus/core/engine/RecallAnswer$Text : dev/formhaus/core/engine/RecallAnswer {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Ldev/formhaus/core/engine/RecallAnswer$Text;
+	public static synthetic fun copy$default (Ldev/formhaus/core/engine/RecallAnswer$Text;Ljava/lang/String;ILjava/lang/Object;)Ldev/formhaus/core/engine/RecallAnswer$Text;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getText ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class dev/formhaus/core/engine/RecallFormatter {
+	public abstract fun conjunction (Ljava/util/List;Ljava/util/Locale;)Ljava/lang/String;
+	public abstract fun dateTime (Ljava/time/LocalDateTime;Ljava/time/format/FormatStyle;Ljava/time/format/FormatStyle;Ljava/util/Locale;)Ljava/lang/String;
+	public abstract fun number (DILjava/util/Locale;)Ljava/lang/String;
+}
+
+public final class dev/formhaus/core/engine/RecallItem {
+	public fun <init> (Ljava/lang/String;I)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()I
+	public final fun copy (Ljava/lang/String;I)Ldev/formhaus/core/engine/RecallItem;
+	public static synthetic fun copy$default (Ldev/formhaus/core/engine/RecallItem;Ljava/lang/String;IILjava/lang/Object;)Ldev/formhaus/core/engine/RecallItem;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getGroup ()Ljava/lang/String;
+	public final fun getIndex ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/formhaus/core/engine/RecallKt {
+	public static final fun recallStatic (Ldev/formhaus/core/model/FormDefinition;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+	public static synthetic fun recallStatic$default (Ldev/formhaus/core/model/FormDefinition;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Ljava/lang/String;
+	public static final fun recallText (Ldev/formhaus/core/model/FormDefinition;Ljava/lang/String;Ldev/formhaus/core/json/StringMap;Ldev/formhaus/core/engine/RecallOptions;)Ljava/lang/String;
+	public static synthetic fun recallText$default (Ldev/formhaus/core/model/FormDefinition;Ljava/lang/String;Ldev/formhaus/core/json/StringMap;Ldev/formhaus/core/engine/RecallOptions;ILjava/lang/Object;)Ljava/lang/String;
+}
+
+public final class dev/formhaus/core/engine/RecallOptions {
+	public fun <init> ()V
+	public fun <init> (Ldev/formhaus/core/engine/RecallItem;Ljava/lang/String;Lkotlin/jvm/functions/Function3;)V
+	public synthetic fun <init> (Ldev/formhaus/core/engine/RecallItem;Ljava/lang/String;Lkotlin/jvm/functions/Function3;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getFormat ()Lkotlin/jvm/functions/Function3;
+	public final fun getItem ()Ldev/formhaus/core/engine/RecallItem;
+	public final fun getLang ()Ljava/lang/String;
+}
+
+public final class dev/formhaus/core/engine/StepChangeContext {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ldev/formhaus/core/engine/StepChangeReason;Ldev/formhaus/core/json/StringMap;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getFromStepId ()Ljava/lang/String;
+	public final fun getReason ()Ldev/formhaus/core/engine/StepChangeReason;
+	public final fun getToStepId ()Ljava/lang/String;
+	public final fun getValues ()Ldev/formhaus/core/json/StringMap;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/formhaus/core/engine/StepChangeReason : java/lang/Enum {
+	public static final field AUTO_ADVANCE Ldev/formhaus/core/engine/StepChangeReason;
+	public static final field BACK Ldev/formhaus/core/engine/StepChangeReason;
+	public static final field NEXT Ldev/formhaus/core/engine/StepChangeReason;
+	public static final field SKIP Ldev/formhaus/core/engine/StepChangeReason;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public final fun getRawValue ()Ljava/lang/String;
+	public static fun valueOf (Ljava/lang/String;)Ldev/formhaus/core/engine/StepChangeReason;
+	public static fun values ()[Ldev/formhaus/core/engine/StepChangeReason;
+}
+
+public final class dev/formhaus/core/engine/StepProgress {
+	public fun <init> (II)V
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCurrent ()I
+	public final fun getTotal ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/formhaus/core/engine/StepRedirectReason : java/lang/Enum {
+	public static final field BLOCKED Ldev/formhaus/core/engine/StepRedirectReason;
+	public static final field NOT_ON_PATH Ldev/formhaus/core/engine/StepRedirectReason;
+	public static final field UNKNOWN_STEP Ldev/formhaus/core/engine/StepRedirectReason;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public final fun getRawValue ()Ljava/lang/String;
+	public static fun valueOf (Ljava/lang/String;)Ldev/formhaus/core/engine/StepRedirectReason;
+	public static fun values ()[Ldev/formhaus/core/engine/StepRedirectReason;
+}
+
+public abstract class dev/formhaus/core/engine/SubmitFailureReason {
+	public synthetic fun <init> (Ljava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getName ()Ljava/lang/String;
+}
+
+public final class dev/formhaus/core/engine/SubmitFailureReason$Error : dev/formhaus/core/engine/SubmitFailureReason {
+	public fun <init> (Ljava/lang/Integer;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getStatus ()Ljava/lang/Integer;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/formhaus/core/engine/SubmitFailureReason$Rejected : dev/formhaus/core/engine/SubmitFailureReason {
+	public static final field INSTANCE Ldev/formhaus/core/engine/SubmitFailureReason$Rejected;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/formhaus/core/engine/SubmitFailureReason$Validation : dev/formhaus/core/engine/SubmitFailureReason {
+	public static final field INSTANCE Ldev/formhaus/core/engine/SubmitFailureReason$Validation;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract class dev/formhaus/core/engine/SubmitResult {
+	public static final field Companion Ldev/formhaus/core/engine/SubmitResult$Companion;
+}
+
+public final class dev/formhaus/core/engine/SubmitResult$Companion {
+	public final fun of (Ldev/formhaus/core/json/JsonValue;)Ldev/formhaus/core/engine/SubmitResult;
+}
+
+public final class dev/formhaus/core/engine/SubmitResult$Ok : dev/formhaus/core/engine/SubmitResult {
+	public static final field INSTANCE Ldev/formhaus/core/engine/SubmitResult$Ok;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/formhaus/core/engine/SubmitResult$Rejected : dev/formhaus/core/engine/SubmitResult {
+	public fun <init> ()V
+	public fun <init> (Ldev/formhaus/core/json/StringMap;Ljava/util/List;)V
+	public synthetic fun <init> (Ldev/formhaus/core/json/StringMap;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getErrors ()Ldev/formhaus/core/json/StringMap;
+	public final fun getFormErrors ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class dev/formhaus/core/engine/SubmitStatusError {
+	public abstract fun getStatus ()Ljava/lang/Integer;
+}
+
+public final class dev/formhaus/core/i18n/Localized {
+	public final fun getDefinition ()Ldev/formhaus/core/model/FormDefinition;
+	public final fun getLabels ()Ldev/formhaus/core/json/JsonValue;
+	public final fun getMessages ()Ldev/formhaus/core/json/JsonValue;
+}
+
+public final class dev/formhaus/core/i18n/LocalizedKt {
+	public static final fun localize (Ldev/formhaus/core/json/JsonValue;Ldev/formhaus/core/json/JsonValue;Ljava/lang/String;)Ldev/formhaus/core/i18n/Localized;
+	public static synthetic fun localize$default (Ldev/formhaus/core/json/JsonValue;Ldev/formhaus/core/json/JsonValue;Ljava/lang/String;ILjava/lang/Object;)Ldev/formhaus/core/i18n/Localized;
+}
+
+public final class dev/formhaus/core/i18n/MissingKeys {
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getLabels ()Ljava/util/List;
+	public final fun getMessages ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/formhaus/core/i18n/MissingKeysKt {
+	public static final fun missingKeys (Ldev/formhaus/core/validation/MessageSource;Ldev/formhaus/core/renderer/LabelSource;)Ldev/formhaus/core/i18n/MissingKeys;
+	public static synthetic fun missingKeys$default (Ldev/formhaus/core/validation/MessageSource;Ldev/formhaus/core/renderer/LabelSource;ILjava/lang/Object;)Ldev/formhaus/core/i18n/MissingKeys;
+}
+
+public final class dev/formhaus/core/i18n/TextSlot {
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAddress ()Ljava/lang/String;
+	public final fun getHash ()Ljava/lang/String;
+	public final fun getKey ()Ljava/lang/String;
+	public final fun getParams ()Ljava/util/List;
+	public final fun getText ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/formhaus/core/i18n/TextSlotsKt {
+	public static final fun textSlots (Ldev/formhaus/core/model/FormDefinition;Ldev/formhaus/core/i18n/TranslationPrefix;)Ljava/util/List;
+	public static synthetic fun textSlots$default (Ldev/formhaus/core/model/FormDefinition;Ldev/formhaus/core/i18n/TranslationPrefix;ILjava/lang/Object;)Ljava/util/List;
+}
+
+public abstract interface class dev/formhaus/core/i18n/TranslationPrefix {
+}
+
+public final class dev/formhaus/core/i18n/TranslationPrefix$Custom : dev/formhaus/core/i18n/TranslationPrefix {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Ldev/formhaus/core/i18n/TranslationPrefix$Custom;
+	public static synthetic fun copy$default (Ldev/formhaus/core/i18n/TranslationPrefix$Custom;Ljava/lang/String;ILjava/lang/Object;)Ldev/formhaus/core/i18n/TranslationPrefix$Custom;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getText ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/formhaus/core/i18n/TranslationPrefix$DefinitionId : dev/formhaus/core/i18n/TranslationPrefix {
+	public static final field INSTANCE Ldev/formhaus/core/i18n/TranslationPrefix$DefinitionId;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/formhaus/core/i18n/TranslationPrefix$None : dev/formhaus/core/i18n/TranslationPrefix {
+	public static final field INSTANCE Ldev/formhaus/core/i18n/TranslationPrefix$None;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/formhaus/core/json/JsonParseException : java/lang/Exception {
+	public fun <init> (ILjava/lang/String;)V
+	public final fun getOffset ()I
+	public final fun getReason ()Ljava/lang/String;
+}
+
+public final class dev/formhaus/core/json/JsonStringifyKt {
+	public static final fun toJsonBytes (Ldev/formhaus/core/json/JsonValue;)[B
+	public static final fun toJsonBytes (Ldev/formhaus/core/json/StringMap;)[B
+	public static final fun toJsonString (Ldev/formhaus/core/json/JsonValue;)Ljava/lang/String;
+	public static final fun toJsonString (Ldev/formhaus/core/json/StringMap;)Ljava/lang/String;
+}
+
+public abstract class dev/formhaus/core/json/JsonValue {
+	public static final field Companion Ldev/formhaus/core/json/JsonValue$Companion;
+	public static final field MAX_NESTING_DEPTH I
+	public final fun get (Ljava/lang/String;)Ldev/formhaus/core/json/JsonValue;
+	public final fun getArrayValue ()Ljava/util/List;
+	public final fun getBoolValue ()Ljava/lang/Boolean;
+	public final fun getNumberValue ()Ljava/lang/Double;
+	public final fun getObjectValue ()Ldev/formhaus/core/json/StringMap;
+	public final fun getStringValue ()Ljava/lang/String;
+	public final fun isNull ()Z
+	public final fun toString ()Ljava/lang/String;
+}
+
+public final class dev/formhaus/core/json/JsonValue$Array : dev/formhaus/core/json/JsonValue {
+	public fun <init> (Ljava/util/List;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun copy (Ljava/util/List;)Ldev/formhaus/core/json/JsonValue$Array;
+	public static synthetic fun copy$default (Ldev/formhaus/core/json/JsonValue$Array;Ljava/util/List;ILjava/lang/Object;)Ldev/formhaus/core/json/JsonValue$Array;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getItems ()Ljava/util/List;
+	public fun hashCode ()I
+}
+
+public final class dev/formhaus/core/json/JsonValue$Bool : dev/formhaus/core/json/JsonValue {
+	public fun <init> (Z)V
+	public final fun component1 ()Z
+	public final fun copy (Z)Ldev/formhaus/core/json/JsonValue$Bool;
+	public static synthetic fun copy$default (Ldev/formhaus/core/json/JsonValue$Bool;ZILjava/lang/Object;)Ldev/formhaus/core/json/JsonValue$Bool;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()Z
+	public fun hashCode ()I
+}
+
+public final class dev/formhaus/core/json/JsonValue$Companion {
+	public final fun parse (Ljava/lang/String;)Ldev/formhaus/core/json/JsonValue;
+	public final fun parse ([B)Ldev/formhaus/core/json/JsonValue;
+}
+
+public final class dev/formhaus/core/json/JsonValue$Null : dev/formhaus/core/json/JsonValue {
+	public static final field INSTANCE Ldev/formhaus/core/json/JsonValue$Null;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+}
+
+public final class dev/formhaus/core/json/JsonValue$Number : dev/formhaus/core/json/JsonValue {
+	public fun <init> (D)V
+	public fun <init> (I)V
+	public final fun component1 ()D
+	public final fun copy (D)Ldev/formhaus/core/json/JsonValue$Number;
+	public static synthetic fun copy$default (Ldev/formhaus/core/json/JsonValue$Number;DILjava/lang/Object;)Ldev/formhaus/core/json/JsonValue$Number;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()D
+	public fun hashCode ()I
+}
+
+public final class dev/formhaus/core/json/JsonValue$Object : dev/formhaus/core/json/JsonValue {
+	public fun <init> (Ldev/formhaus/core/json/StringMap;)V
+	public final fun component1 ()Ldev/formhaus/core/json/StringMap;
+	public final fun copy (Ldev/formhaus/core/json/StringMap;)Ldev/formhaus/core/json/JsonValue$Object;
+	public static synthetic fun copy$default (Ldev/formhaus/core/json/JsonValue$Object;Ldev/formhaus/core/json/StringMap;ILjava/lang/Object;)Ldev/formhaus/core/json/JsonValue$Object;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getMembers ()Ldev/formhaus/core/json/StringMap;
+	public fun hashCode ()I
+}
+
+public final class dev/formhaus/core/json/JsonValue$String : dev/formhaus/core/json/JsonValue {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Ldev/formhaus/core/json/JsonValue$String;
+	public static synthetic fun copy$default (Ldev/formhaus/core/json/JsonValue$String;Ljava/lang/String;ILjava/lang/Object;)Ldev/formhaus/core/json/JsonValue$String;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()Ljava/lang/String;
+	public fun hashCode ()I
+}
+
+public final class dev/formhaus/core/json/MutableStringMap : dev/formhaus/core/json/StringMap {
+	public final fun remove (Ljava/lang/String;)Ljava/lang/Object;
+	public final fun set (Ljava/lang/String;Ljava/lang/Object;)V
+}
+
+public final class dev/formhaus/core/json/MutableStringMapKt {
+	public static final fun mutableStringMapOf ([Lkotlin/Pair;)Ldev/formhaus/core/json/MutableStringMap;
+	public static final fun stringMapOf ([Lkotlin/Pair;)Ldev/formhaus/core/json/StringMap;
+}
+
+public class dev/formhaus/core/json/StringMap : java/lang/Iterable, kotlin/jvm/internal/markers/KMappedMarker {
+	public final fun contains (Ljava/lang/String;)Z
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun get (Ljava/lang/String;)Ljava/lang/Object;
+	public final fun getKeys ()Ljava/util/List;
+	public final fun getSize ()I
+	public final fun getValues ()Ljava/util/List;
+	public fun hashCode ()I
+	public final fun isEmpty ()Z
+	public fun iterator ()Ljava/util/Iterator;
+	public final fun toMutableStringMap ()Ldev/formhaus/core/json/MutableStringMap;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/formhaus/core/json/ValuePartsKt {
+	public static final fun describe (Ljava/util/List;Ljava/lang/String;)Ljava/lang/String;
+	public static final fun partsHash (Ljava/util/List;)I
+}
+
+public abstract interface class dev/formhaus/core/model/Conditional {
+	public abstract fun getShow ()Ljava/util/List;
+	public abstract fun getShowAny ()Ljava/util/List;
+}
+
+public final class dev/formhaus/core/model/FieldOption {
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getExclusive ()Z
+	public final fun getImage ()Ljava/lang/String;
+	public final fun getLabel ()Ljava/lang/String;
+	public final fun getPinned ()Z
+	public final fun getValue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/formhaus/core/model/FieldValidation {
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getMatchField ()Ljava/lang/String;
+	public final fun getMax ()Ljava/lang/Double;
+	public final fun getMaxLength ()Ljava/lang/Double;
+	public final fun getMin ()Ljava/lang/Double;
+	public final fun getMinLength ()Ljava/lang/Double;
+	public final fun getPattern ()Ljava/lang/String;
+	public final fun getRequired ()Ldev/formhaus/core/json/JsonValue;
+	public final fun getValidator ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/formhaus/core/model/FormAction {
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDisabled ()Ljava/util/List;
+	public final fun getLabel ()Ljava/lang/String;
+	public final fun getVariant ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/formhaus/core/model/FormDefinition {
+	public static final field Companion Ldev/formhaus/core/model/FormDefinition$Companion;
+	public static final field SUPPORTED_FORMAT_VERSION Ljava/lang/String;
+	public fun <init> (Ldev/formhaus/core/json/JsonValue;)V
+	public final fun getCancel ()Ldev/formhaus/core/model/FormAction;
+	public final fun getDescription ()Ljava/lang/String;
+	public final fun getFields ()Ljava/util/List;
+	public final fun getFormatVersion ()Ljava/lang/String;
+	public final fun getI18n ()Ldev/formhaus/core/json/JsonValue;
+	public final fun getId ()Ljava/lang/String;
+	public final fun getLabels ()Ldev/formhaus/core/json/JsonValue;
+	public final fun getLang ()Ljava/lang/String;
+	public final fun getMessages ()Ldev/formhaus/core/json/JsonValue;
+	public final fun getSteps ()Ljava/util/List;
+	public final fun getSubmit ()Ldev/formhaus/core/model/FormAction;
+	public final fun getTitle ()Ljava/lang/String;
+	public final fun isMultiStep ()Z
+}
+
+public final class dev/formhaus/core/model/FormDefinition$Companion {
+}
+
+public final class dev/formhaus/core/model/FormDefinitionKt {
+	public static final fun parseDefinition (Ldev/formhaus/core/json/JsonValue;)Ldev/formhaus/core/model/FormDefinition;
+}
+
+public final class dev/formhaus/core/model/FormField : dev/formhaus/core/model/FormNode {
+	public final fun getAccept ()Ldev/formhaus/core/json/JsonValue;
+	public final fun getAddLabel ()Ljava/lang/String;
+	public final fun getAutoAdvance ()Ldev/formhaus/core/json/JsonValue;
+	public final fun getAutocomplete ()Ldev/formhaus/core/json/JsonValue;
+	public final fun getColumns ()Ljava/lang/Integer;
+	public final fun getDefaultItems ()Ljava/lang/Double;
+	public final fun getDefaultValue ()Ldev/formhaus/core/json/JsonValue;
+	public final fun getFields ()Ljava/util/List;
+	public final fun getHasOptionsFrom ()Z
+	public final fun getHelperText ()Ljava/lang/String;
+	public final fun getInputMode ()Ldev/formhaus/core/json/JsonValue;
+	public final fun getItemLabel ()Ljava/lang/String;
+	public final fun getItems ()Ljava/util/List;
+	public fun getKey ()Ljava/lang/String;
+	public final fun getLabel ()Ljava/lang/String;
+	public final fun getLayout ()Ldev/formhaus/core/json/JsonValue;
+	public final fun getMask ()Ldev/formhaus/core/json/JsonValue;
+	public final fun getOptions ()Ljava/util/List;
+	public final fun getOptionsDependsOn ()Ljava/util/List;
+	public final fun getOptionsFrom ()Ldev/formhaus/core/json/JsonValue;
+	public final fun getPlaceholder ()Ljava/lang/String;
+	public final fun getProps ()Ldev/formhaus/core/json/StringMap;
+	public final fun getRandomize ()Z
+	public final fun getRemoveLabel ()Ljava/lang/String;
+	public final fun getRows ()Ldev/formhaus/core/json/JsonValue;
+	public final fun getScaleRange ()Ldev/formhaus/core/model/ScaleRange;
+	public fun getShow ()Ljava/util/List;
+	public fun getShowAny ()Ljava/util/List;
+	public final fun getSource ()Ldev/formhaus/core/json/JsonValue;
+	public fun getType ()Ljava/lang/String;
+	public final fun getValidation ()Ldev/formhaus/core/model/FieldValidation;
+	public final fun isGroup ()Z
+	public final fun isScale ()Z
+}
+
+public abstract class dev/formhaus/core/model/FormNode : dev/formhaus/core/model/Conditional {
+	public abstract fun getKey ()Ljava/lang/String;
+	public abstract fun getType ()Ljava/lang/String;
+}
+
+public final class dev/formhaus/core/model/FormSection : dev/formhaus/core/model/FormNode {
+	public final fun getDescription ()Ljava/lang/String;
+	public final fun getFields ()Ljava/util/List;
+	public fun getKey ()Ljava/lang/String;
+	public final fun getLayout ()Ljava/lang/String;
+	public fun getShow ()Ljava/util/List;
+	public fun getShowAny ()Ljava/util/List;
+	public final fun getTitle ()Ljava/lang/String;
+	public fun getType ()Ljava/lang/String;
+	public final fun isMatrix ()Z
+}
+
+public final class dev/formhaus/core/model/FormStep : dev/formhaus/core/model/Conditional {
+	public final fun getBack ()Ldev/formhaus/core/model/StepButton;
+	public final fun getCanSkip ()Z
+	public final fun getDescription ()Ljava/lang/String;
+	public final fun getFields ()Ljava/util/List;
+	public final fun getId ()Ljava/lang/String;
+	public final fun getNext ()Ldev/formhaus/core/model/StepButton;
+	public final fun getRoutes ()Ljava/util/List;
+	public fun getShow ()Ljava/util/List;
+	public fun getShowAny ()Ljava/util/List;
+	public final fun getSkip ()Ldev/formhaus/core/model/StepButton;
+	public final fun getTitle ()Ljava/lang/String;
+}
+
+public final class dev/formhaus/core/model/ScaleRange {
+	public fun <init> (DD)V
+	public final fun component1 ()D
+	public final fun component2 ()D
+	public final fun copy (DD)Ldev/formhaus/core/model/ScaleRange;
+	public static synthetic fun copy$default (Ldev/formhaus/core/model/ScaleRange;DDILjava/lang/Object;)Ldev/formhaus/core/model/ScaleRange;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getMax ()D
+	public final fun getMin ()D
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/formhaus/core/model/ShowCondition {
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getField ()Ljava/lang/String;
+	public final fun getOperatorName ()Ljava/lang/String;
+	public fun hashCode ()I
+	public final fun operand (Ljava/lang/String;)Ldev/formhaus/core/json/JsonValue;
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract class dev/formhaus/core/model/StepButton {
+	public fun getAction ()Ldev/formhaus/core/model/FormAction;
+}
+
+public final class dev/formhaus/core/model/StepButton$Absent : dev/formhaus/core/model/StepButton {
+	public static final field INSTANCE Ldev/formhaus/core/model/StepButton$Absent;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/formhaus/core/model/StepButton$Action : dev/formhaus/core/model/StepButton {
+	public fun <init> (Ldev/formhaus/core/model/FormAction;)V
+	public final fun component1 ()Ldev/formhaus/core/model/FormAction;
+	public final fun copy (Ldev/formhaus/core/model/FormAction;)Ldev/formhaus/core/model/StepButton$Action;
+	public static synthetic fun copy$default (Ldev/formhaus/core/model/StepButton$Action;Ldev/formhaus/core/model/FormAction;ILjava/lang/Object;)Ldev/formhaus/core/model/StepButton$Action;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getAction ()Ldev/formhaus/core/model/FormAction;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/formhaus/core/model/StepButton$Hidden : dev/formhaus/core/model/StepButton {
+	public static final field INSTANCE Ldev/formhaus/core/model/StepButton$Hidden;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/formhaus/core/model/StepRoute : dev/formhaus/core/model/Conditional {
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getEndsForm ()Z
+	public fun getShow ()Ljava/util/List;
+	public fun getShowAny ()Ljava/util/List;
+	public final fun getTo ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/formhaus/core/renderer/AutocompleteKt {
+	public static final fun autocomplete (Ldev/formhaus/core/engine/FormEngine;Ldev/formhaus/core/model/FormField;Ljava/lang/String;)Ljava/lang/String;
+	public static synthetic fun autocomplete$default (Ldev/formhaus/core/engine/FormEngine;Ldev/formhaus/core/model/FormField;Ljava/lang/String;ILjava/lang/Object;)Ljava/lang/String;
+}
+
+public final class dev/formhaus/core/renderer/EngineLabelsKt {
+	public static final fun actionsState (Ldev/formhaus/core/engine/FormEngine;Ldev/formhaus/core/renderer/LabelSource;)Ldev/formhaus/core/renderer/FormActionsState;
+	public static final fun errorGroups (Ldev/formhaus/core/engine/FormEngine;Ldev/formhaus/core/renderer/LabelSource;)Ljava/util/List;
+	public static final fun itemTitle (Ldev/formhaus/core/engine/FormEngine;Ldev/formhaus/core/model/FormField;ILdev/formhaus/core/renderer/LabelSource;)Ljava/lang/String;
+	public static final fun label (Ldev/formhaus/core/engine/FormEngine;Ljava/lang/String;Ldev/formhaus/core/renderer/LabelSource;Ldev/formhaus/core/json/StringMap;)Ljava/lang/String;
+	public static synthetic fun label$default (Ldev/formhaus/core/engine/FormEngine;Ljava/lang/String;Ldev/formhaus/core/renderer/LabelSource;Ldev/formhaus/core/json/StringMap;ILjava/lang/Object;)Ljava/lang/String;
+}
+
+public final class dev/formhaus/core/renderer/EngineRevisionsKt {
+	public static final fun getDefinitionRevision (Ldev/formhaus/core/engine/FormEngine;)I
+	public static final fun getErrorsVersion (Ldev/formhaus/core/engine/FormEngine;)I
+	public static final fun getRestarts (Ldev/formhaus/core/engine/FormEngine;)I
+	public static final fun getSending (Ldev/formhaus/core/engine/FormEngine;)Z
+	public static final fun getVersion (Ldev/formhaus/core/engine/FormEngine;)I
+}
+
+public final class dev/formhaus/core/renderer/EngineValuesKt {
+	public static final fun hasValue (Ldev/formhaus/core/engine/FormEngine;Ljava/lang/String;)Z
+	public static final fun itemPath (Ldev/formhaus/core/engine/FormEngine;Ljava/lang/String;)Ldev/formhaus/core/renderer/ItemPath;
+	public static final fun optionKey (Ldev/formhaus/core/engine/FormEngine;Ljava/lang/String;)Ljava/lang/String;
+	public static final fun value (Ldev/formhaus/core/engine/FormEngine;Ljava/lang/String;)Ldev/formhaus/core/json/JsonValue;
+}
+
+public final class dev/formhaus/core/renderer/ErrorEntry {
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getId ()Ljava/lang/String;
+	public final fun getKey ()Ljava/lang/String;
+	public final fun getLabel ()Ljava/lang/String;
+	public final fun getMessage ()Ljava/lang/String;
+	public final fun getText ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/formhaus/core/renderer/ErrorGroup {
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getEntries ()Ljava/util/List;
+	public final fun getId ()Ljava/lang/String;
+	public final fun getTitle ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/formhaus/core/renderer/FormActionsState {
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBackAction ()Ldev/formhaus/core/model/FormAction;
+	public final fun getBackLabel ()Ljava/lang/String;
+	public final fun getCancelAction ()Ldev/formhaus/core/model/FormAction;
+	public final fun getNextAction ()Ldev/formhaus/core/model/FormAction;
+	public final fun getPrimaryDisabled ()Z
+	public final fun getPrimaryLabel ()Ljava/lang/String;
+	public final fun getShowBack ()Z
+	public final fun getShowPrimary ()Z
+	public final fun getShowSkip ()Z
+	public final fun getSkipAction ()Ldev/formhaus/core/model/FormAction;
+	public final fun getSkipLabel ()Ljava/lang/String;
+	public final fun getSubmitAction ()Ldev/formhaus/core/model/FormAction;
+	public fun hashCode ()I
+	public final fun isFirstStep ()Z
+	public final fun isLastStep ()Z
+	public final fun isMultiStep ()Z
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/formhaus/core/renderer/ImageKey {
+	public static final synthetic fun box-impl (Ljava/lang/String;)Ldev/formhaus/core/renderer/ImageKey;
+	public fun equals (Ljava/lang/Object;)Z
+	public static fun equals-impl (Ljava/lang/String;Ljava/lang/Object;)Z
+	public static final fun equals-impl0 (Ljava/lang/String;Ljava/lang/String;)Z
+	public final fun getSource ()Ljava/lang/String;
+	public fun hashCode ()I
+	public static fun hashCode-impl (Ljava/lang/String;)I
+	public fun toString ()Ljava/lang/String;
+	public static fun toString-impl (Ljava/lang/String;)Ljava/lang/String;
+	public final synthetic fun unbox-impl ()Ljava/lang/String;
+}
+
+public final class dev/formhaus/core/renderer/ImageSourceKt {
+	public static final fun imageSource (Ljava/lang/String;)Ljava/lang/String;
+}
+
+public final class dev/formhaus/core/renderer/ItemBounds {
+	public final fun component1 ()I
+	public final fun component2 ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getMax ()I
+	public final fun getMin ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/formhaus/core/renderer/ItemBoundsKt {
+	public static final fun itemLimits (Ldev/formhaus/core/engine/FormEngine;Ldev/formhaus/core/model/FormField;)Ldev/formhaus/core/renderer/ItemBounds;
+}
+
+public final class dev/formhaus/core/renderer/ItemContentKt {
+	public static final fun itemHasContent (Ldev/formhaus/core/engine/FormEngine;Ljava/lang/String;I)Z
+	public static final fun itemsHaveContent (Ldev/formhaus/core/engine/FormEngine;Ljava/lang/String;)Ljava/util/List;
+}
+
+public final class dev/formhaus/core/renderer/ItemPath {
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()I
+	public final fun component3 ()Ljava/lang/String;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getField ()Ljava/lang/String;
+	public final fun getGroup ()Ljava/lang/String;
+	public final fun getIndex ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class dev/formhaus/core/renderer/LabelSource {
+}
+
+public final class dev/formhaus/core/renderer/LabelSource$Catalog : dev/formhaus/core/renderer/LabelSource {
+	public fun <init> (Ldev/formhaus/core/json/JsonValue;)V
+	public final fun component1 ()Ldev/formhaus/core/json/JsonValue;
+	public final fun copy (Ldev/formhaus/core/json/JsonValue;)Ldev/formhaus/core/renderer/LabelSource$Catalog;
+	public static synthetic fun copy$default (Ldev/formhaus/core/renderer/LabelSource$Catalog;Ldev/formhaus/core/json/JsonValue;ILjava/lang/Object;)Ldev/formhaus/core/renderer/LabelSource$Catalog;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCatalog ()Ldev/formhaus/core/json/JsonValue;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/formhaus/core/renderer/LabelSource$Function : dev/formhaus/core/renderer/LabelSource {
+	public fun <init> (Lkotlin/jvm/functions/Function2;)V
+	public final fun getResolve ()Lkotlin/jvm/functions/Function2;
+}
+
+public final class dev/formhaus/core/renderer/LabelsKt {
+	public static final fun formatTemplate (Ljava/lang/String;Ldev/formhaus/core/json/StringMap;)Ljava/lang/String;
+}
+
+public final class dev/formhaus/core/renderer/OptionTextsKt {
+	public static final fun dividerBefore (Ldev/formhaus/core/model/FormField;Ljava/util/List;I)Z
+	public static final fun optionTexts (Ljava/util/List;)Ljava/util/List;
+}
+
+public final class dev/formhaus/core/renderer/RecallDependency {
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getKey ()Ljava/lang/String;
+	public fun hashCode ()I
+	public final fun isGroup ()Z
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/formhaus/core/renderer/RecalledKt {
+	public static final fun itemTitleDependencies (Ldev/formhaus/core/engine/FormEngine;Ldev/formhaus/core/model/FormField;I)Ljava/util/List;
+	public static final fun recallDependencies (Ldev/formhaus/core/engine/FormEngine;Ldev/formhaus/core/model/FormField;Ljava/lang/String;)Ljava/util/List;
+	public static final fun recallDependencies (Ldev/formhaus/core/engine/FormEngine;Ldev/formhaus/core/model/FormSection;)Ljava/util/List;
+	public static final fun recallDependencies (Ldev/formhaus/core/engine/FormEngine;Ldev/formhaus/core/model/FormStep;)Ljava/util/List;
+	public static synthetic fun recallDependencies$default (Ldev/formhaus/core/engine/FormEngine;Ldev/formhaus/core/model/FormField;Ljava/lang/String;ILjava/lang/Object;)Ljava/util/List;
+	public static final fun recalledTexts (Ldev/formhaus/core/engine/FormEngine;Ldev/formhaus/core/model/FormField;Ljava/lang/String;)Ldev/formhaus/core/renderer/RecalledTexts;
+	public static final fun recalledTexts (Ldev/formhaus/core/engine/FormEngine;Ldev/formhaus/core/model/FormSection;)Ldev/formhaus/core/renderer/RecalledTexts;
+	public static final fun recalledTexts (Ldev/formhaus/core/engine/FormEngine;Ldev/formhaus/core/model/FormStep;)Ldev/formhaus/core/renderer/RecalledTexts;
+	public static synthetic fun recalledTexts$default (Ldev/formhaus/core/engine/FormEngine;Ldev/formhaus/core/model/FormField;Ljava/lang/String;ILjava/lang/Object;)Ldev/formhaus/core/renderer/RecalledTexts;
+}
+
+public final class dev/formhaus/core/renderer/RecalledTexts {
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDescription ()Ljava/lang/String;
+	public final fun getHelperText ()Ljava/lang/String;
+	public final fun getLabel ()Ljava/lang/String;
+	public final fun getPlaceholder ()Ljava/lang/String;
+	public final fun getTitle ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface annotation class dev/formhaus/core/renderer/RendererApi : java/lang/annotation/Annotation {
+}
+
+public final class dev/formhaus/core/renderer/RendererSupportKt {
+	public static final fun FieldOption (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Ldev/formhaus/core/model/FieldOption;
+	public static synthetic fun FieldOption$default (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Ldev/formhaus/core/model/FieldOption;
+	public static final fun clampedInt (Ljava/lang/Double;Lkotlin/ranges/IntRange;)Ljava/lang/Integer;
+	public static final fun getAdvancesOnCommit (Ldev/formhaus/core/model/FormField;)Z
+	public static final fun getHasPictureOptions (Ldev/formhaus/core/model/FormField;)Z
+	public static final fun getImageKey (Ldev/formhaus/core/model/FieldOption;)Ljava/lang/String;
+	public static final fun getNodeId (Ldev/formhaus/core/model/FormNode;)I
+	public static final fun getNodeId (Ldev/formhaus/core/model/FormStep;)I
+	public static final fun getSafeImage (Ldev/formhaus/core/model/FieldOption;)Ljava/lang/String;
+	public static final fun getSource (Ldev/formhaus/core/model/FormDefinition;)Ldev/formhaus/core/json/StringMap;
+	public static final fun isRequired (Ldev/formhaus/core/model/FormField;)Z
+	public static final fun withPreferredCalendar (Ljava/util/Locale;)Ljava/util/Locale;
+}
+
+public final class dev/formhaus/core/renderer/StepStateKt {
+	public static final fun autoAdvance (Ldev/formhaus/core/engine/FormEngine;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static final fun firstErrorKey (Ldev/formhaus/core/engine/FormEngine;)Ljava/lang/String;
+	public static final fun visibleNodes (Ldev/formhaus/core/engine/FormEngine;Ldev/formhaus/core/model/FormStep;)Ljava/util/List;
+}
+
+public final class dev/formhaus/core/renderer/TestIdTarget {
+	public fun <init> (Ldev/formhaus/core/renderer/TestIdTarget$Kind;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Ldev/formhaus/core/renderer/TestIdTarget$Kind;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun copy (Ldev/formhaus/core/renderer/TestIdTarget$Kind;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Ldev/formhaus/core/renderer/TestIdTarget;
+	public static synthetic fun copy$default (Ldev/formhaus/core/renderer/TestIdTarget;Ldev/formhaus/core/renderer/TestIdTarget$Kind;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Ldev/formhaus/core/renderer/TestIdTarget;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDefaultId ()Ljava/lang/String;
+	public final fun getDefinitionId ()Ljava/lang/String;
+	public final fun getKey ()Ljava/lang/String;
+	public final fun getKind ()Ldev/formhaus/core/renderer/TestIdTarget$Kind;
+	public final fun getValue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/formhaus/core/renderer/TestIdTarget$Kind : java/lang/Enum {
+	public static final field BACK Ldev/formhaus/core/renderer/TestIdTarget$Kind;
+	public static final field CANCEL Ldev/formhaus/core/renderer/TestIdTarget$Kind;
+	public static final field FIELD Ldev/formhaus/core/renderer/TestIdTarget$Kind;
+	public static final field FORM Ldev/formhaus/core/renderer/TestIdTarget$Kind;
+	public static final field NEXT Ldev/formhaus/core/renderer/TestIdTarget$Kind;
+	public static final field OPTION Ldev/formhaus/core/renderer/TestIdTarget$Kind;
+	public static final field SUBMIT Ldev/formhaus/core/renderer/TestIdTarget$Kind;
+	public static final field SUMMARY Ldev/formhaus/core/renderer/TestIdTarget$Kind;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public final fun getRawValue ()Ljava/lang/String;
+	public static fun valueOf (Ljava/lang/String;)Ldev/formhaus/core/renderer/TestIdTarget$Kind;
+	public static fun values ()[Ldev/formhaus/core/renderer/TestIdTarget$Kind;
+}
+
+public final class dev/formhaus/core/server/SubmissionOptions {
+	public fun <init> ()V
+	public fun <init> (Ldev/formhaus/core/json/JsonValue;Ldev/formhaus/core/json/StringMap;Ldev/formhaus/core/validation/MessageSource;Ldev/formhaus/core/engine/HiddenValues;)V
+	public synthetic fun <init> (Ldev/formhaus/core/json/JsonValue;Ldev/formhaus/core/json/StringMap;Ldev/formhaus/core/validation/MessageSource;Ldev/formhaus/core/engine/HiddenValues;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/util/List;Ldev/formhaus/core/json/StringMap;Ldev/formhaus/core/validation/MessageSource;Ldev/formhaus/core/engine/HiddenValues;)V
+	public synthetic fun <init> (Ljava/util/List;Ldev/formhaus/core/json/StringMap;Ldev/formhaus/core/validation/MessageSource;Ldev/formhaus/core/engine/HiddenValues;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getHiddenValues ()Ldev/formhaus/core/engine/HiddenValues;
+	public final fun getMessages ()Ldev/formhaus/core/validation/MessageSource;
+	public final fun getSkippedSteps ()Ldev/formhaus/core/json/JsonValue;
+	public final fun getValidators ()Ldev/formhaus/core/json/StringMap;
+}
+
+public final class dev/formhaus/core/server/SubmissionResult {
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getErrors ()Ldev/formhaus/core/json/StringMap;
+	public final fun getValues ()Ldev/formhaus/core/json/StringMap;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/formhaus/core/server/ValidateSubmissionKt {
+	public static final fun validateSubmission (Ldev/formhaus/core/json/JsonValue;Ldev/formhaus/core/json/JsonValue;Ldev/formhaus/core/server/SubmissionOptions;)Ldev/formhaus/core/server/SubmissionResult;
+	public static final fun validateSubmission (Ldev/formhaus/core/model/FormDefinition;Ldev/formhaus/core/json/JsonValue;Ldev/formhaus/core/server/SubmissionOptions;)Ldev/formhaus/core/server/SubmissionResult;
+	public static synthetic fun validateSubmission$default (Ldev/formhaus/core/json/JsonValue;Ldev/formhaus/core/json/JsonValue;Ldev/formhaus/core/server/SubmissionOptions;ILjava/lang/Object;)Ldev/formhaus/core/server/SubmissionResult;
+	public static synthetic fun validateSubmission$default (Ldev/formhaus/core/model/FormDefinition;Ldev/formhaus/core/json/JsonValue;Ldev/formhaus/core/server/SubmissionOptions;ILjava/lang/Object;)Ldev/formhaus/core/server/SubmissionResult;
+}
+
+public final class dev/formhaus/core/validation/MessageKey {
+	public static final field Companion Ldev/formhaus/core/validation/MessageKey$Companion;
+	public static final synthetic fun box-impl (Ljava/lang/String;)Ldev/formhaus/core/validation/MessageKey;
+	public static fun constructor-impl (Ljava/lang/String;)Ljava/lang/String;
+	public fun equals (Ljava/lang/Object;)Z
+	public static fun equals-impl (Ljava/lang/String;Ljava/lang/Object;)Z
+	public static final fun equals-impl0 (Ljava/lang/String;Ljava/lang/String;)Z
+	public final fun getRawValue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public static fun hashCode-impl (Ljava/lang/String;)I
+	public fun toString ()Ljava/lang/String;
+	public static fun toString-impl (Ljava/lang/String;)Ljava/lang/String;
+	public final synthetic fun unbox-impl ()Ljava/lang/String;
+}
+
+public final class dev/formhaus/core/validation/MessageKey$Companion {
+	public final fun getBOOLEAN-39ywlMs ()Ljava/lang/String;
+	public final fun getDATE-39ywlMs ()Ljava/lang/String;
+	public final fun getDATETIME-39ywlMs ()Ljava/lang/String;
+	public final fun getEMAIL-39ywlMs ()Ljava/lang/String;
+	public final fun getEXCLUSIVE-39ywlMs ()Ljava/lang/String;
+	public final fun getFILE-39ywlMs ()Ljava/lang/String;
+	public final fun getHIDDEN-39ywlMs ()Ljava/lang/String;
+	public final fun getMATCH_FIELD-39ywlMs ()Ljava/lang/String;
+	public final fun getMAX-39ywlMs ()Ljava/lang/String;
+	public final fun getMAX_ITEMS-39ywlMs ()Ljava/lang/String;
+	public final fun getMAX_LENGTH-39ywlMs ()Ljava/lang/String;
+	public final fun getMIN-39ywlMs ()Ljava/lang/String;
+	public final fun getMIN_ITEMS-39ywlMs ()Ljava/lang/String;
+	public final fun getMIN_LENGTH-39ywlMs ()Ljava/lang/String;
+	public final fun getNUMBER-39ywlMs ()Ljava/lang/String;
+	public final fun getOPTION-39ywlMs ()Ljava/lang/String;
+	public final fun getOPTIONS-39ywlMs ()Ljava/lang/String;
+	public final fun getPATTERN-39ywlMs ()Ljava/lang/String;
+	public final fun getREQUIRED-39ywlMs ()Ljava/lang/String;
+	public final fun getSTRING-39ywlMs ()Ljava/lang/String;
+	public final fun getTIME-39ywlMs ()Ljava/lang/String;
+	public final fun getVALUE-39ywlMs ()Ljava/lang/String;
+}
+
+public abstract interface class dev/formhaus/core/validation/MessageSource {
+}
+
+public final class dev/formhaus/core/validation/MessageSource$Catalog : dev/formhaus/core/validation/MessageSource {
+	public fun <init> (Ldev/formhaus/core/json/JsonValue;)V
+	public final fun component1 ()Ldev/formhaus/core/json/JsonValue;
+	public final fun copy (Ldev/formhaus/core/json/JsonValue;)Ldev/formhaus/core/validation/MessageSource$Catalog;
+	public static synthetic fun copy$default (Ldev/formhaus/core/validation/MessageSource$Catalog;Ldev/formhaus/core/json/JsonValue;ILjava/lang/Object;)Ldev/formhaus/core/validation/MessageSource$Catalog;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCatalog ()Ldev/formhaus/core/json/JsonValue;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/formhaus/core/validation/MessageSource$Function : dev/formhaus/core/validation/MessageSource {
+	public fun <init> (Lkotlin/jvm/functions/Function3;)V
+	public final fun getResolve ()Lkotlin/jvm/functions/Function3;
+}
+
+public final class dev/formhaus/core/validation/MessagesKt {
+	public static final fun getDefaultMessage-yWFQVzk (Ljava/lang/String;Ldev/formhaus/core/json/StringMap;)Ljava/lang/String;
+	public static synthetic fun getDefaultMessage-yWFQVzk$default (Ljava/lang/String;Ldev/formhaus/core/json/StringMap;ILjava/lang/Object;)Ljava/lang/String;
+}
+
+public final class dev/formhaus/core/validation/ValidateFieldKt {
+	public static final fun validateFieldValue (Ldev/formhaus/core/model/FormField;Ldev/formhaus/core/json/JsonValue;Ldev/formhaus/core/json/StringMap;Ldev/formhaus/core/validation/ValidateOptions;)Ljava/lang/String;
+	public static synthetic fun validateFieldValue$default (Ldev/formhaus/core/model/FormField;Ldev/formhaus/core/json/JsonValue;Ldev/formhaus/core/json/StringMap;Ldev/formhaus/core/validation/ValidateOptions;ILjava/lang/Object;)Ljava/lang/String;
+}
+
+public final class dev/formhaus/core/validation/ValidateOptions {
+	public fun <init> ()V
+	public fun <init> (Ldev/formhaus/core/json/StringMap;Ldev/formhaus/core/validation/MessageSource;)V
+	public synthetic fun <init> (Ldev/formhaus/core/json/StringMap;Ldev/formhaus/core/validation/MessageSource;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getMessages ()Ldev/formhaus/core/validation/MessageSource;
+	public final fun getValidators ()Ldev/formhaus/core/json/StringMap;
+}
+
+public final class dev/formhaus/core/validation/ValidateStepKt {
+	public static final fun validateFields (Ljava/util/List;Ldev/formhaus/core/json/StringMap;Ldev/formhaus/core/validation/ValidateOptions;)Ldev/formhaus/core/json/StringMap;
+	public static synthetic fun validateFields$default (Ljava/util/List;Ldev/formhaus/core/json/StringMap;Ldev/formhaus/core/validation/ValidateOptions;ILjava/lang/Object;)Ldev/formhaus/core/json/StringMap;
+	public static final fun validateStep (Ldev/formhaus/core/model/FormStep;Ldev/formhaus/core/json/StringMap;Ldev/formhaus/core/validation/ValidateOptions;)Ldev/formhaus/core/json/StringMap;
+	public static synthetic fun validateStep$default (Ldev/formhaus/core/model/FormStep;Ldev/formhaus/core/json/StringMap;Ldev/formhaus/core/validation/ValidateOptions;ILjava/lang/Object;)Ldev/formhaus/core/json/StringMap;
+}
+
+public final class dev/formhaus/core/visibility/VisibilityKt {
+	public static final fun evaluateCondition (Ldev/formhaus/core/model/ShowCondition;Ldev/formhaus/core/json/StringMap;)Z
+	public static final fun isActionDisabled (Ldev/formhaus/core/model/FormAction;Ldev/formhaus/core/json/StringMap;)Z
+	public static final fun isVisible (Ldev/formhaus/core/model/Conditional;Ldev/formhaus/core/json/StringMap;)Z
+}
+

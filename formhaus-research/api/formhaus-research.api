@@ -1,0 +1,6 @@
+public final class dev/formhaus/research/Research : dev/formhaus/core/engine/FormResearch {
+	public fun <init> ()V
+	public fun order (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Ljava/util/List;
+	public fun seed ()Ljava/lang/String;
+}
+

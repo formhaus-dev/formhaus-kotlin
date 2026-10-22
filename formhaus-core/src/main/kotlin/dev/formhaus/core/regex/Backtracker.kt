@@ -4,12 +4,12 @@ internal class Backtracker(
     val program: RegexProgram,
     val context: MatchContext,
 ) {
-    val text: CharArray = context.text
+    val text: String = context.text
     var slots: IntArray = IntArray(2 * (program.captureCount + 1)) { -1 }
     val registers: IntArray = IntArray(program.registerCount) { -1 }
     val frames: Frames = Frames()
     val saved: ArrayList<IntArray> = ArrayList()
-    private val width = text.size + 1
+    private val width = text.length + 1
     private val memo: Bitset?
     var pc: Int = 0
     var offset: Int = 0
@@ -20,10 +20,10 @@ internal class Backtracker(
     }
 
     fun search(prefilter: Prefilter): Boolean {
-        for (start in 0..(text.size - prefilter.minimumLength)) {
+        for (start in 0..(text.length - prefilter.minimumLength)) {
             if (prefilter.anchored && start > 0) return false
             val first = prefilter.first
-            if (first != null && (start == text.size || text[start] !in first)) continue
+            if (first != null && (start == text.length || text[start] !in first)) continue
             if (run(0, start)) return true
         }
         return false
@@ -80,12 +80,12 @@ internal class Backtracker(
                 }
 
                 Frames.SCAN -> {
-                    resumeScan(frames.scan(frame))
+                    resumeScan(frame)
                     return true
                 }
 
                 else -> {
-                    if (resumeExtend(frames.scan(frame))) return true
+                    if (resumeExtend(frame)) return true
                 }
             }
         }
@@ -95,7 +95,8 @@ internal class Backtracker(
     fun memoized(pc: Int): Boolean = memo != null && pc >= program.memoFrom && pc < program.mainEnd
 
     private fun execute(): Int {
-        if (memoized(pc) && memo?.insert((pc - program.memoFrom) * width + offset) == false) return FAILURE
+        val memo = memo
+        if (memo != null && memoized(pc) && !memo.insert((pc - program.memoFrom) * width + offset)) return FAILURE
         return when (val instruction = program.instructions[pc]) {
             is Instruction.Unit, is Instruction.Set -> {
                 if (consume()) PROCEED else FAILURE
@@ -110,7 +111,7 @@ internal class Backtracker(
                 PROCEED
             }
 
-            Instruction.Succeed, Instruction.Match -> {
+            is Instruction.Succeed, is Instruction.Match -> {
                 SUCCESS
             }
 
@@ -126,7 +127,7 @@ internal class Backtracker(
     }
 
     private fun split(instruction: Instruction.Split): Int {
-        if (program.instructions[instruction.second] == Instruction.Match) return SUCCESS
+        if (program.instructions[instruction.second] is Instruction.Match) return SUCCESS
         frames.push(Frames.RESUME, instruction.second, offset)
         pc = instruction.first
         return PROCEED

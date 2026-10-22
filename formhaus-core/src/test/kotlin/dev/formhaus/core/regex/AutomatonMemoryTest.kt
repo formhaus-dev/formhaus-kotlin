@@ -28,4 +28,36 @@ class AutomatonMemoryTest {
         }
         assertTrue(rounds < 100)
     }
+
+    @Test
+    fun `a pattern evicted from the cache returns its memory to the pool at once`() {
+        val pool = MemoryPool()
+        MemoryPool.current.withValue(pool) {
+            val cache = PatternCache(limit = 1)
+            val source = "[^]*a[^]{40}$(?=)"
+            val pattern = requireNotNull(cache.pattern(source))
+            assertEquals(false, pattern.test(RegexRegressionTest.randomText(400, "ab", 7L) + "b".repeat(41)))
+            assertFalse(pool.take(pool.limit))
+            cache.pattern("b")
+            assertTrue(pool.take(pool.limit))
+        }
+    }
+
+    @Test
+    fun `releasing a shard while it runs returns its memory when the run ends`() {
+        val pool = MemoryPool()
+        MemoryPool.current.withValue(pool) {
+            val pattern = CompiledPattern("[^]*a[^]{40}$(?=)")
+            assertEquals(false, pattern.test(RegexRegressionTest.randomText(400, "ab", 7L) + "b".repeat(41)))
+            val shard = AutomatonShard(requireNotNull(pattern.automaton).plan)
+            val ran =
+                shard.runLocked { automaton ->
+                    assertTrue(automaton.memory.reserve(4096))
+                    shard.release()
+                    shard.bytes > 0
+                }
+            assertEquals(true, ran)
+            assertEquals(0, shard.bytes)
+        }
+    }
 }

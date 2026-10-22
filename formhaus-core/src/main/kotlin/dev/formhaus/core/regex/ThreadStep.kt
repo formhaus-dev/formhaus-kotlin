@@ -11,7 +11,7 @@ internal class ThreadStep(
     class Advance(
         val next: IntList,
         val accepts: Boolean,
-        val volatile: Boolean,
+        val looks: IntArray?,
     )
 
     private var seen = IntArray(program.instructions.size)
@@ -19,7 +19,7 @@ internal class ThreadStep(
     private val stack = IntList()
     private val consumers = IntList()
     private var accepts = false
-    private var volatile = false
+    private val looks = IntList()
 
     fun advance(
         pcs: IntArray,
@@ -29,29 +29,24 @@ internal class ThreadStep(
         context: MatchContext,
     ): Advance {
         val current = UnitContext.of(unit)
-        val closure =
-            closure(
-                pcs,
-                if (backward) current else previous,
-                if (backward) previous else current,
-                position,
-                context,
-            )
+        closure(
+            pcs,
+            if (backward) current else previous,
+            if (backward) previous else current,
+            position,
+            context,
+        )
+        val consulted = if (looks.isEmpty()) null else looks.toArray()
         val next = IntList(consumers.size + 1)
-        if ((closure.accepts && !scanning) || unit < 0) return Advance(next, closure.accepts, closure.volatile)
+        if ((accepts && !scanning) || unit < 0) return Advance(next, accepts, consulted)
         val char = unit.toChar()
         for (index in 0 until consumers.size) {
             val pc = consumers[index]
             if (program.consumes(pc, char)) next.add(pc + 1)
         }
         if (!anchored) next.add(0)
-        return Advance(next, closure.accepts, closure.volatile)
+        return Advance(next, accepts, consulted)
     }
-
-    private class Closure(
-        val accepts: Boolean,
-        val volatile: Boolean,
-    )
 
     private fun closure(
         pcs: IntArray,
@@ -59,14 +54,14 @@ internal class ThreadStep(
         after: UnitContext,
         position: Int,
         context: MatchContext,
-    ): Closure {
+    ) {
         generation++
         if (generation == 0) {
             seen = IntArray(seen.size)
             generation = 1
         }
         accepts = false
-        volatile = false
+        looks.truncate(0)
         consumers.truncate(0)
         stack.truncate(0)
         for (index in pcs.indices.reversed()) stack.add(pcs[index])
@@ -79,7 +74,6 @@ internal class ThreadStep(
             expand(pc, before, after, position, context)
         }
         context.spend(visited)
-        return Closure(accepts, volatile)
     }
 
     private fun expand(
@@ -108,8 +102,9 @@ internal class ThreadStep(
             }
 
             is Instruction.Look -> {
-                volatile = true
-                if (context.holds(instruction.look, position) != program.looks[instruction.look].look.negated) stack.add(pc + 1)
+                val holds = context.holds(instruction.look, position)
+                looks.add(LookOutcome.of(instruction.look, holds))
+                if (holds != program.looks[instruction.look].look.negated) stack.add(pc + 1)
             }
 
             Instruction.Match, Instruction.Succeed -> {
@@ -128,14 +123,14 @@ internal class ThreadStep(
 
     fun matches(
         start: LazyDFA.Key,
-        text: CharArray,
+        text: String,
         offset: Int,
         context: MatchContext,
-    ): Boolean = run(start, text, offset, text.size, context) == Verdict.MATCH
+    ): Boolean = run(start, text, offset, text.length, context) == Verdict.MATCH
 
     fun run(
         start: LazyDFA.Key,
-        text: CharArray,
+        text: String,
         origin: Int,
         floor: Int,
         context: MatchContext,
@@ -157,15 +152,15 @@ internal class ThreadStep(
 
     fun acceptance(
         start: LazyDFA.Key,
-        text: CharArray,
+        text: String,
         offset: Int,
         accepted: BooleanArray,
         context: MatchContext,
     ) {
         var pcs = start.pcs
         var previous = start.context
-        for (step in offset..text.size) {
-            val position = if (backward) text.size - step else step
+        for (step in offset..text.length) {
+            val position = if (backward) text.length - step else step
             val unit = text.nextUnit(position, backward)
             val result = advance(pcs, previous, unit, position, context)
             accepted[position] = result.accepts

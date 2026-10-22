@@ -51,6 +51,7 @@ internal class EngineCore(
     val skipped = ArrayList<SkippedKeys>()
     var validationEpoch = 0
     var operationEpoch = 0
+    var restarts = 0
     var latestOperation = 0
     var sending: Int? = null
     var started = false

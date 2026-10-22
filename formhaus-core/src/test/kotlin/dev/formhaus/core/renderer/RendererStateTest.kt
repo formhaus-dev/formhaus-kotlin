@@ -1,12 +1,14 @@
 package dev.formhaus.core.renderer
 
 import dev.formhaus.core.definitionvalidation.FormDefinitionError
+import dev.formhaus.core.engine.SubmitResult
 import dev.formhaus.core.json.JsonValue
 import dev.formhaus.core.json.stringMapOf
 import dev.formhaus.core.model.parseDefinition
 import dev.formhaus.core.support.engine
 import dev.formhaus.core.support.field
 import dev.formhaus.core.support.text
+import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotEquals
@@ -47,6 +49,34 @@ class RendererStateTest {
         assertEquals(start, engine.definitionRevision)
         engine.replaceDefinition(JsonValue.parse(form))
         assertEquals(start + 1, engine.definitionRevision)
+    }
+
+    @Test
+    fun `restarts moves on reset and on a replaced definition only`() {
+        val engine = engine(form)
+        val start = engine.restarts
+        engine.setValue("name", text("Ada"))
+        engine.validate()
+        assertEquals(start, engine.restarts)
+        engine.reset()
+        assertEquals(start + 1, engine.restarts)
+        engine.replaceDefinition(JsonValue.parse(form))
+        assertEquals(start + 2, engine.restarts)
+    }
+
+    @Test
+    fun `sending is true only while the submit handler runs`() {
+        val engine = engine(form, """{"name":"Ada","email":"ada@example.com"}""")
+        val seen = mutableListOf<Boolean>()
+        assertFalse(engine.sending)
+        runBlocking {
+            engine.submit { _, _ ->
+                seen += engine.sending
+                SubmitResult.Ok
+            }
+        }
+        assertEquals(listOf(true), seen)
+        assertFalse(engine.sending)
     }
 
     @Test

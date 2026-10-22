@@ -12,7 +12,7 @@ internal sealed interface SearchPlan {
     val backward: Boolean get() = this != Forward
 
     fun end(
-        text: CharArray,
+        text: String,
         previous: Int?,
     ): Int? =
         when (this) {
@@ -21,12 +21,13 @@ internal sealed interface SearchPlan {
             }
 
             FromEnd -> {
-                if (previous == null) text.size else null
+                if (previous == null) text.length else null
             }
 
             is Suffix -> {
                 val length = search.literal.size
-                search.index(text, previous?.let { it - length + 1 } ?: 0)?.let { it + length }
+                val found = search.index(text, previous?.let { it - length + 1 } ?: 0)
+                if (found == LiteralSearch.NONE) null else found + length
             }
         }
 

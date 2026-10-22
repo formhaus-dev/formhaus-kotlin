@@ -9,11 +9,11 @@ internal class Prefilter(
     )
 
     val minimumLength: Int = root.minimumLength
-    val required: LiteralSearch = LiteralSearch(required(root).toCharArray())
+    private val required: LiteralSearch? = required(root).takeIf { it.isNotEmpty() }?.let { LiteralSearch(it.toCharArray()) }
     val anchored: Boolean = anchored(root)
     val first: CharSet? = first(root)?.takeIf { !it.nullable }?.set
 
-    fun admits(text: CharArray): Boolean = text.size >= minimumLength && required.index(text, 0) != null
+    fun admits(text: String): Boolean = text.length >= minimumLength && (required == null || required.index(text, 0) != LiteralSearch.NONE)
 
     companion object {
         const val LITERAL_LIMIT: Int = 64

@@ -68,6 +68,8 @@ public value class IssueCode(
         public val UNKNOWN_AUTOCOMPLETE_TOKEN: IssueCode = IssueCode("unknown-autocomplete-token")
         public val AUTOCOMPLETE_NOT_APPLICABLE: IssueCode = IssueCode("autocomplete-not-applicable")
         public val UNSAFE_IMAGE_URL: IssueCode = IssueCode("unsafe-image-url")
+        public val SNAPSHOT_MISMATCH: IssueCode = IssueCode("snapshot-mismatch")
+        public val SNAPSHOT_TOO_LARGE: IssueCode = IssueCode("snapshot-too-large")
         public val EXCLUSIVE_NOT_APPLICABLE: IssueCode = IssueCode("exclusive-not-applicable")
         public val EXCLUSIVE_OPTION_POSITION: IssueCode = IssueCode("exclusive-option-position")
         public val EXCLUSIVE_DEFAULT_VALUE: IssueCode = IssueCode("exclusive-default-value")

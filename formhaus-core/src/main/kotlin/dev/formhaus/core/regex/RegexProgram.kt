@@ -138,21 +138,21 @@ internal fun RegexAssertion.holds(
         RegexAssertion.NOT_WORD_BOUNDARY -> (before == UnitContext.WORD) == (after == UnitContext.WORD)
     }
 
-internal fun CharArray.nextUnit(
+internal fun String.nextUnit(
     position: Int,
     backward: Boolean,
 ): Int =
     when {
         backward -> if (position > 0) this[position - 1].code else -1
-        else -> if (position < size) this[position].code else -1
+        else -> if (position < length) this[position].code else -1
     }
 
-internal fun CharArray.holds(
+internal fun String.holds(
     assertion: RegexAssertion,
     position: Int,
 ): Boolean {
     if (assertion == RegexAssertion.INPUT_START) return position == 0
-    if (assertion == RegexAssertion.INPUT_END) return position == size
+    if (assertion == RegexAssertion.INPUT_END) return position == length
     return assertion.holds(
         UnitContext.of(nextUnit(position, backward = true)),
         UnitContext.of(nextUnit(position, backward = false)),

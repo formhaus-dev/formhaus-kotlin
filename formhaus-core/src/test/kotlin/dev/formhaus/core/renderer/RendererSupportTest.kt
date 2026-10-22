@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import java.util.Locale
 
 @OptIn(RendererApi::class)
 class RendererSupportTest {
@@ -85,6 +86,18 @@ class RendererSupportTest {
     }
 
     @Test
+    fun `value types compare, hash and print by their properties`() {
+        val target = TestIdTarget(TestIdTarget.Kind.FIELD, "f", "plan")
+        val option = target.copy(kind = TestIdTarget.Kind.OPTION, value = "pro")
+        assertEquals(TestIdTarget(TestIdTarget.Kind.OPTION, "f", "plan", "pro"), option)
+        assertEquals(TestIdTarget(TestIdTarget.Kind.FIELD, "f", "plan").hashCode(), target.hashCode())
+        assertNotEquals(target, option)
+        assertEquals("TestIdTarget(kind=FIELD, definitionId=f, key=plan, value=null)", target.toString())
+        assertEquals(ErrorEntry("a", "A", "Empty"), ErrorEntry("a", "A", "Empty"))
+        assertNotEquals(ErrorEntry("a", "A", "Empty"), ErrorEntry("a", "A", "Short"))
+    }
+
+    @Test
     fun `renderer helpers expose ids, limits and options`() {
         assertEquals("f.email", TestIdTarget(TestIdTarget.Kind.FIELD, "f", "email").defaultId)
         assertEquals("f.plan.pro", TestIdTarget(TestIdTarget.Kind.OPTION, "f", "plan", "pro").defaultId)
@@ -101,5 +114,16 @@ class RendererSupportTest {
         assertNotEquals(FieldOption("a", "A", "Aa").imageKey, FieldOption("a", "A", "BB").imageKey)
         assertNull(FieldOption("a", "A").imageKey)
         assertTrue(field("""{"key":"a","type":"text","validation":{"required":"yes"}}""").isRequired)
+    }
+
+    @Test
+    fun `locales take the calendar CLDR prefers for them unless they name one`() {
+        fun calendar(tag: String) = Locale.forLanguageTag(tag).withPreferredCalendar().getUnicodeLocaleType("ca")
+        assertEquals("buddhist", calendar("th-TH"))
+        assertEquals("buddhist", calendar("th"))
+        assertEquals("persian", calendar("fa-IR"))
+        assertEquals("gregory", calendar("en-US"))
+        assertEquals("gregory", calendar("th-TH-u-ca-gregory"))
+        assertEquals("japanese", calendar("ja-JP-u-ca-japanese"))
     }
 }

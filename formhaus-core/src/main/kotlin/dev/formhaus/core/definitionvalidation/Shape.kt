@@ -2,166 +2,78 @@ package dev.formhaus.core.definitionvalidation
 
 import dev.formhaus.core.json.JsonObject
 import dev.formhaus.core.json.JsonValue
-import dev.formhaus.core.model.FormDefinition
-import dev.formhaus.core.regex.JsRegex
 
-private val versionPattern = JsRegex.unchecked("^[1-9]\\d*(\\.\\d+)?$")
 private const val MAX_NESTED_FIELD_LISTS = 3
 private const val MAX_COLUMNS = 4.0
 
 internal fun nestable(path: String): Boolean = path.split("/fields/").size <= MAX_NESTED_FIELD_LISTS
 
-private enum class Kind(
-    val label: String,
-    val accepts: (JsonValue) -> Boolean,
-) {
-    STRING("a string", { it.stringValue != null }),
-    NUMBER("a number", { it.isFiniteNumber }),
-    BOOLEAN("true or false", { it.boolValue != null }),
-    REQUIREMENT("true, false or a message string", { it.boolValue != null || it.stringValue != null }),
-    SCALAR("a string, number or boolean", { it.typeName in listOf("string", "number", "boolean") }),
-    LIST("an array of strings or numbers", { value ->
-        value.arrayValue?.all {
-            it.stringValue != null ||
-                it.numberValue != null
-        } ==
-            true
-    }),
-}
-
-private typealias Check = (JsonObject, String) -> List<DefinitionIssue>
-
-private fun typed(
-    value: JsonObject,
-    rules: List<Pair<String, Kind>>,
-    path: String,
-): List<DefinitionIssue> =
-    rules.mapNotNull { (key, kind) ->
-        val item = value[key]
-        if (item == null ||
-            kind.accepts(item)
-        ) {
-            null
-        } else {
-            error(IssueCode.INVALID_TYPE, "$path/${pointer(key)}", "\"$key\" must be ${kind.label}")
-        }
-    }
-
-internal fun missing(
-    path: String,
-    key: String,
-    hint: String? = null,
-    severity: DefinitionIssue.Severity = DefinitionIssue.Severity.ERROR,
-) = error(IssueCode.MISSING_PROPERTY, path, "missing required property \"$key\"", hint).withSeverity(severity)
-
-private fun list(
-    value: JsonValue?,
-    path: String,
-    name: String,
-    check: Check,
-    required: Boolean = false,
-): List<DefinitionIssue> {
-    if (!required && (value == null || value.isNull)) return emptyList()
-    if (value == null) {
-        val key = path.substringAfterLast('/')
-        return listOf(missing(path.dropLast(key.length + 1), key))
-    }
-    val items =
-        value.arrayValue
-            ?: return listOf(
-                error(
-                    IssueCode.INVALID_TYPE,
-                    path,
-                    "must be an array",
-                    if (required) "Use [] when there is nothing to list" else null,
-                ),
-            )
-    return items.withIndex().flatMap { (index, item) ->
-        val json =
-            item.objectValue ?: return@flatMap listOf(error(IssueCode.INVALID_TYPE, "$path/$index", "must be $name"))
-        check(json, "$path/$index")
-    }
-}
-
-private fun text(
-    value: JsonObject,
-    key: String,
-    path: String,
-): List<DefinitionIssue> {
-    val item = value[key] ?: return listOf(missing(path, key))
-    return if (item.stringValue != null) {
-        emptyList()
-    } else {
-        listOf(error(IssueCode.INVALID_TYPE, "$path/${pointer(key)}", "\"$key\" must be a string"))
-    }
-}
-
 private val conditionRules =
     listOf(
-        "field" to Kind.STRING,
-        "eq" to Kind.SCALAR,
-        "neq" to Kind.SCALAR,
-        "in" to Kind.LIST,
-        "notIn" to Kind.LIST,
-        "contains" to Kind.SCALAR,
-        "notContains" to Kind.SCALAR,
-        "notEmpty" to Kind.BOOLEAN,
-        "gt" to Kind.NUMBER,
-        "gte" to Kind.NUMBER,
-        "lt" to Kind.NUMBER,
-        "lte" to Kind.NUMBER,
+        "field" to ShapeKind.STRING,
+        "eq" to ShapeKind.SCALAR,
+        "neq" to ShapeKind.SCALAR,
+        "in" to ShapeKind.LIST,
+        "notIn" to ShapeKind.LIST,
+        "contains" to ShapeKind.SCALAR,
+        "notContains" to ShapeKind.SCALAR,
+        "notEmpty" to ShapeKind.BOOLEAN,
+        "gt" to ShapeKind.NUMBER,
+        "gte" to ShapeKind.NUMBER,
+        "lt" to ShapeKind.NUMBER,
+        "lte" to ShapeKind.NUMBER,
     )
 
 private fun condition(
     value: JsonObject,
     path: String,
-) = typed(value, conditionRules, path)
+) = typedProperties(value, conditionRules, path)
 
 private fun conditionLists(
     value: JsonObject,
     path: String,
 ): List<DefinitionIssue> =
-    list(value["show"], "$path/show", "a condition object", ::condition) +
-        list(value["showAny"], "$path/showAny", "a condition object", ::condition)
+    objectList(value["show"], "$path/show", "a condition object", ::condition) +
+        objectList(value["showAny"], "$path/showAny", "a condition object", ::condition)
 
 private fun action(
     value: JsonValue?,
     path: String,
 ): List<DefinitionIssue> {
     val json = value?.objectValue ?: return emptyList()
-    return typed(json, listOf("label" to Kind.STRING), path) +
-        list(json["disabled"], "$path/disabled", "a condition object", ::condition)
+    return typedProperties(json, listOf("label" to ShapeKind.STRING), path) +
+        objectList(json["disabled"], "$path/disabled", "a condition object", ::condition)
 }
 
 private val optionRules =
     listOf(
-        "label" to Kind.STRING,
-        "image" to Kind.STRING,
-        "exclusive" to Kind.BOOLEAN,
-        "pinned" to Kind.BOOLEAN,
+        "label" to ShapeKind.STRING,
+        "image" to ShapeKind.STRING,
+        "exclusive" to ShapeKind.BOOLEAN,
+        "pinned" to ShapeKind.BOOLEAN,
     )
 
 private fun option(
     value: JsonObject,
     path: String,
-) = text(value, "value", path) + typed(value, optionRules, path)
+) = requiredString(value, "value", path) + typedProperties(value, optionRules, path)
 
 private val validationRules =
     listOf(
-        "required" to Kind.REQUIREMENT,
-        "minLength" to Kind.NUMBER,
-        "maxLength" to Kind.NUMBER,
-        "min" to Kind.NUMBER,
-        "max" to Kind.NUMBER,
-        "pattern" to Kind.STRING,
-        "matchField" to Kind.STRING,
-        "validator" to Kind.STRING,
-        "minLengthMessage" to Kind.STRING,
-        "maxLengthMessage" to Kind.STRING,
-        "minMessage" to Kind.STRING,
-        "maxMessage" to Kind.STRING,
-        "patternMessage" to Kind.STRING,
-        "matchFieldMessage" to Kind.STRING,
+        "required" to ShapeKind.REQUIREMENT,
+        "minLength" to ShapeKind.NUMBER,
+        "maxLength" to ShapeKind.NUMBER,
+        "min" to ShapeKind.NUMBER,
+        "max" to ShapeKind.NUMBER,
+        "pattern" to ShapeKind.STRING,
+        "matchField" to ShapeKind.STRING,
+        "validator" to ShapeKind.STRING,
+        "minLengthMessage" to ShapeKind.STRING,
+        "maxLengthMessage" to ShapeKind.STRING,
+        "minMessage" to ShapeKind.STRING,
+        "maxMessage" to ShapeKind.STRING,
+        "patternMessage" to ShapeKind.STRING,
+        "matchFieldMessage" to ShapeKind.STRING,
     )
 
 private fun validation(
@@ -171,7 +83,7 @@ private fun validation(
     value ?: return emptyList()
     val json =
         value.objectValue ?: return listOf(error(IssueCode.INVALID_TYPE, path, "must be an object of validation rules"))
-    return typed(json, validationRules, path)
+    return typedProperties(json, validationRules, path)
 }
 
 private fun props(
@@ -205,17 +117,17 @@ private fun columns(
 
 private val labelRules =
     listOf(
-        "label" to Kind.STRING,
-        "placeholder" to Kind.STRING,
-        "autocomplete" to Kind.STRING,
-        "helperText" to Kind.STRING,
-        "title" to Kind.STRING,
-        "description" to Kind.STRING,
-        "itemLabel" to Kind.STRING,
-        "addLabel" to Kind.STRING,
-        "removeLabel" to Kind.STRING,
-        "defaultItems" to Kind.NUMBER,
-        "randomize" to Kind.BOOLEAN,
+        "label" to ShapeKind.STRING,
+        "placeholder" to ShapeKind.STRING,
+        "autocomplete" to ShapeKind.STRING,
+        "helperText" to ShapeKind.STRING,
+        "title" to ShapeKind.STRING,
+        "description" to ShapeKind.STRING,
+        "itemLabel" to ShapeKind.STRING,
+        "addLabel" to ShapeKind.STRING,
+        "removeLabel" to ShapeKind.STRING,
+        "defaultItems" to ShapeKind.NUMBER,
+        "randomize" to ShapeKind.BOOLEAN,
     )
 
 private fun field(
@@ -224,10 +136,10 @@ private fun field(
 ): List<DefinitionIssue> {
     val type = value["type"]?.stringValue
     val container = (type == "section" || type == "group") && nestable(path)
-    return text(value, "key", path) + text(value, "type", path) + typed(value, labelRules, path) +
+    return requiredString(value, "key", path) + requiredString(value, "type", path) + typedProperties(value, labelRules, path) +
         (
             if (container) {
-                list(
+                objectList(
                     value["fields"],
                     "$path/fields",
                     "a field object",
@@ -239,7 +151,7 @@ private fun field(
             }
         ) +
         conditionLists(value, path) +
-        list(value["options"], "$path/options", "an option object", ::option) +
+        objectList(value["options"], "$path/options", "an option object", ::option) +
         validation(value["validation"], "$path/validation") +
         dependencies(value["optionsDependsOn"], "$path/optionsDependsOn") +
         props(value["props"], "$path/props") +
@@ -263,39 +175,23 @@ private fun step(
     value: JsonObject,
     path: String,
 ): List<DefinitionIssue> =
-    text(value, "id", path) + typed(value, listOf("title" to Kind.STRING, "description" to Kind.STRING), path) +
-        list(value["fields"], "$path/fields", "a field object", ::field, required = true) +
+    requiredString(
+        value,
+        "id",
+        path,
+    ) + typedProperties(value, listOf("title" to ShapeKind.STRING, "description" to ShapeKind.STRING), path) +
+        objectList(value["fields"], "$path/fields", "a field object", ::field, required = true) +
         conditionLists(value, path) +
-        list(value["routes"], "$path/routes", "a route object", ::route) +
+        objectList(value["routes"], "$path/routes", "a route object", ::route) +
         listOf("next", "back", "skip").flatMap { action(value[it], "$path/$it") }
-
-private fun majorVersion(version: String): Double = version.substringBefore('.').toDoubleOrNull() ?: 0.0
-
-internal fun formatIssues(input: JsonObject): List<DefinitionIssue> {
-    val version = input["formatVersion"] ?: return emptyList()
-    val text = version.stringValue
-    if (text == null || versionPattern.test(text) != true) {
-        val hint = "Use \"${FormDefinition.SUPPORTED_FORMAT_VERSION}\""
-        return listOf(error(IssueCode.INVALID_TYPE, "/formatVersion", "must be a version string", hint))
-    }
-    if (majorVersion(text) <= majorVersion(FormDefinition.SUPPORTED_FORMAT_VERSION)) return emptyList()
-    return listOf(
-        error(
-            IssueCode.UNSUPPORTED_FORMAT_VERSION,
-            "/formatVersion",
-            "format $text is not supported",
-            "Upgrade @formhaus/core",
-        ),
-    )
-}
 
 internal fun shapeIssues(input: JsonValue): List<DefinitionIssue> {
     val json =
         input.objectValue ?: return listOf(error(IssueCode.INVALID_TYPE, "", "the form definition must be an object"))
     val format = formatIssues(json)
     if (format.isNotEmpty()) return format
-    return list(json["fields"], "/fields", "a field object", ::field) +
-        list(json["steps"], "/steps", "a step object", ::step) +
+    return objectList(json["fields"], "/fields", "a field object", ::field) +
+        objectList(json["steps"], "/steps", "a step object", ::step) +
         action(json["submit"], "/submit") + action(json["cancel"], "/cancel")
 }
 
@@ -308,5 +204,5 @@ internal fun metaIssues(input: JsonObject): List<DefinitionIssue> {
             is JsonValue.Object -> emptyList()
             else -> listOf(error(IssueCode.INVALID_TYPE, "/submit", "must be an action object", SUBMIT_HINT))
         }
-    return text(input, "id", "") + submit
+    return requiredString(input, "id", "") + submit
 }

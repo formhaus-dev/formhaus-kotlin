@@ -1,4 +1,5 @@
 pluginManagement {
+    includeBuild("build-logic")
     repositories {
         google()
         mavenCentral()
@@ -17,3 +18,8 @@ dependencyResolutionManagement {
 rootProject.name = "formhaus-kotlin"
 
 include(":formhaus-core")
+include(":formhaus-compose")
+include(":formhaus-research")
+include(":demo")
+include(":benchmarks")
+include(":benchmarks-compose")

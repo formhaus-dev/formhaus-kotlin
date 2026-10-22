@@ -43,26 +43,34 @@ public class FormEngine(
     definition: FormDefinition,
     values: JsonObject = MutableJsonObject(),
     internal val options: FormEngineOptions = FormEngineOptions(),
+    restoring: FormSnapshot? = null,
 ) {
-    public val seed: String = options.seed?.takeIf { it.isNotEmpty() } ?: options.research?.seed() ?: ""
+    private val restored = restoring?.matching(definition, options)
+    public val seed: String =
+        restored?.seed?.takeIf { it.isNotEmpty() } ?: options.seed?.takeIf { it.isNotEmpty() } ?: options.research?.seed() ?: ""
     private val listeners = Listeners()
-    private val ownerThread = OwnerThread(options.debugChecks)
+    private val ownerThread = OwnerThread(options.checksOn)
     internal val core: EngineCore
 
-    public constructor(definition: JsonValue, values: JsonObject = MutableJsonObject(), options: FormEngineOptions = FormEngineOptions()) :
-        this(FormDefinition(definition), values, options)
+    public constructor(
+        definition: JsonValue,
+        values: JsonObject = MutableJsonObject(),
+        options: FormEngineOptions = FormEngineOptions(),
+        restoring: FormSnapshot? = null,
+    ) : this(FormDefinition(definition), values, options, restoring)
 
     init {
         reportWarnings(definition, options)
         core =
             EngineCore(
                 definition,
-                values,
+                restored?.values ?: values,
                 options.validators,
                 options.messages,
                 options.hiddenValues == HiddenValues.KEEP,
                 missingMessageReporter(options),
             )
+        restored?.let(core::restore)
         core.emitEvent = options.onFormEvent
         core.onChange = listeners::fire
     }

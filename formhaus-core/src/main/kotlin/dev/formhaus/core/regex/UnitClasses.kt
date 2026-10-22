@@ -9,12 +9,9 @@ internal class UnitClasses(
     init {
         val boundaries = boundaries(program.sets)
         for (instruction in program.instructions) {
-            if (instruction !is Instruction.Unit) continue
-            boundaries.add(instruction.unit.code)
-            boundaries.add(instruction.unit.code + 1)
+            if (instruction is Instruction.Unit) boundaries.addRange(instruction.unit.code, instruction.unit.code + 1)
         }
-        boundaries.sort()
-        starts = merged(boundaries, shared)
+        starts = merged(boundaries.toArray().apply { sort() }, shared)
         for ((index, start) in starts.withIndex()) {
             if (start >= LATIN) break
             val end = if (index + 1 < starts.size) minOf(starts[index + 1], LATIN) else LATIN
@@ -39,22 +36,23 @@ internal class UnitClasses(
     private companion object {
         const val LATIN = 256
 
-        val shared: List<Int> = (boundaries(listOf(CharSet.word, CharSet.lineTerminator)) + 0).sorted()
+        val shared: IntArray =
+            boundaries(listOf(CharSet.word, CharSet.lineTerminator))
+                .apply { add(0) }
+                .toArray()
+                .apply { sort() }
 
-        fun boundaries(sets: List<CharSet>): MutableList<Int> {
-            val boundaries = ArrayList<Int>()
+        fun boundaries(sets: List<CharSet>): IntList {
+            val boundaries = IntList()
             for (set in sets) {
-                for (index in 0 until set.rangeCount) {
-                    boundaries.add(set.lowerAt(index))
-                    boundaries.add(set.upperAt(index) + 1)
-                }
+                for (index in 0 until set.rangeCount) boundaries.addRange(set.lowerAt(index), set.upperAt(index) + 1)
             }
             return boundaries
         }
 
         fun merged(
-            first: List<Int>,
-            second: List<Int>,
+            first: IntArray,
+            second: IntArray,
         ): IntArray {
             val starts = IntList()
             var left = 0

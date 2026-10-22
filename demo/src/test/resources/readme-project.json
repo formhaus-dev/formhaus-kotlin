@@ -1,0 +1,74 @@
+{
+  "id": "project-inquiry",
+  "formatVersion": "1.5",
+  "title": "Start a project",
+  "submit": { "label": "Send inquiry" },
+  "steps": [
+    {
+      "id": "project",
+      "title": "Your project",
+      "fields": [
+        {
+          "key": "projectType",
+          "type": "radio",
+          "label": "What do you need?",
+          "options": [
+            { "value": "new-site", "label": "New website" },
+            { "value": "redesign", "label": "Redesign" },
+            { "value": "online-store", "label": "Online store" }
+          ],
+          "validation": { "required": true }
+        }
+      ]
+    },
+    {
+      "id": "budget",
+      "title": "Budget",
+      "fields": [
+        {
+          "key": "budget",
+          "type": "radio",
+          "label": "What is your budget?",
+          "options": [
+            { "value": "small", "label": "Under $10k" },
+            { "value": "medium", "label": "$10k to $50k" },
+            { "value": "large", "label": "Over $50k" }
+          ],
+          "validation": { "required": true }
+        }
+      ]
+    },
+    {
+      "id": "scope",
+      "title": "Scope",
+      "fields": [
+        {
+          "key": "services",
+          "type": "multiselect",
+          "label": "Which services do you need?",
+          "options": [
+            { "value": "design", "label": "Design" },
+            { "value": "development", "label": "Development" },
+            { "value": "copywriting", "label": "Copywriting" },
+            { "value": "seo", "label": "SEO" }
+          ],
+          "validation": { "required": true }
+        },
+        {
+          "key": "urgency",
+          "type": "scale",
+          "label": "How soon do you need it?",
+          "validation": { "required": true, "min": 1, "max": 5 }
+        }
+      ]
+    },
+    {
+      "id": "contact",
+      "title": "Your details",
+      "fields": [
+        { "key": "name", "type": "text", "label": "Full name", "validation": { "required": true } },
+        { "key": "email", "type": "email", "label": "Work email", "validation": { "required": true } }
+      ]
+    }
+  ]
+}
