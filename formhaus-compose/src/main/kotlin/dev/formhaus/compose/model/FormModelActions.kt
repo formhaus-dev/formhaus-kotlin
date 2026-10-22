@@ -61,7 +61,14 @@ public suspend fun FormModel.back() {
 }
 
 public suspend fun FormModel.skip() {
-    run { engine.skip(submitHandler) }
+    var sent = false
+    run {
+        engine
+            .skip { values, skipped ->
+                sent = true
+                submitHandler(values, skipped)
+            }.also { if (it && sent) snapshots.submitted() }
+    }
 }
 
 public suspend fun FormModel.submit() {
@@ -99,10 +106,14 @@ internal suspend fun FormModel.run(action: suspend () -> Boolean) {
         } catch (error: CancellationException) {
             throw error
         } catch (error: Throwable) {
-            options.onError?.invoke(error) ?: alerts.reportActionError(actionMessage(error))
+            reportError(error)
         }
         applyHeldEdits()
     }
+}
+
+internal fun FormModel.reportError(error: Throwable) {
+    options.onError?.invoke(error) ?: alerts.reportActionError(actionMessage(error))
 }
 
 internal fun FormModel.loadingChanged() {

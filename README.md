@@ -88,7 +88,7 @@ fun SignupScreen() {
 
 The submit handler runs on the main thread and returns a `SubmitResult?`. `SubmitResult.of(json)` reads the `{ ok, errors, formErrors }` object that a Formhaus endpoint returns. `FormhausForm` takes `initialValues`, `engineOptions` and `renderer` options. `FormhausFormContent(model)` renders the form without its own scroll container.
 
-`FormhausForm(definition)` keeps its values, step and picked files when the activity is recreated, for example on rotation or a dark mode switch, and restores them after process death. It keeps them in a `ViewModel` of the nearest `ViewModelStoreOwner`, so a form that leaves the composition and comes back, such as a `LazyColumn` item, a tab or a screen in the back stack, shows the same state. The state is released when that owner is cleared. Without an owner, the form releases its state when it leaves the composition. A submit that is already sending runs to the end. Progress over 256 KB is not saved for process death and reports a `snapshot-too-large` warning. Password values are never saved.
+`FormhausForm(definition)` keeps its values, step and picked files when the activity is recreated, for example on rotation or a dark mode switch, and restores them after process death. It keeps them in a `ViewModel` of the nearest `ViewModelStoreOwner`, so a form that leaves the composition and comes back, such as a `LazyColumn` item, a tab or a screen in the back stack, shows the same state. The state is released when that owner is cleared. Without an owner, the form releases its state when it leaves the composition. A submit that is already sending runs to the end. Progress over 96 KB, counted as UTF-16, is not saved for process death and reports a `snapshot-too-large` warning. Password values are never saved.
 
 Options with an `image` load the picture over the network, so the app needs the `android.permission.INTERNET` permission.
 
@@ -214,7 +214,7 @@ MaterialTheme {
 }
 ```
 
-`LocalFormBehavior` takes a `FormBehavior` for the error summary, the remove confirmation, the Back button placement, step scrolling and the title display mode.
+`LocalFormBehavior` takes a `FormBehavior` for the error summary, the remove confirmation, the Back button placement, step scrolling and the title display mode. With `BackPlacement.APP_BAR` the form leaves its Back button out, so your app bar shows Back while `model.actions.showBack` is true and calls `model.back()`.
 
 ### Your own components
 

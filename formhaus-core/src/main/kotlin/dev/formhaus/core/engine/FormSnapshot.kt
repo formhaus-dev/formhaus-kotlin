@@ -58,17 +58,31 @@ public class FormSnapshot internal constructor(
             val version = json["version"]?.numberValue?.takeIf { it % 1.0 == 0.0 } ?: return null
             val values = json["values"]?.objectValue ?: return null
             val skipped = json["skipped"]?.arrayValue ?: return null
+            val definitionId = json.optionalString("definitionId") ?: return null
+            val step = json.optionalString("step") ?: return null
             return FormSnapshot(
                 version.toInt(),
-                json["definitionId"]?.stringValue,
+                definitionId.value,
                 values,
-                json["step"]?.stringValue,
+                step.value,
                 skipped.map { it.stringValue ?: return null },
                 json["seed"]?.stringValue ?: return null,
             )
         }
+
+        public fun fromJson(
+            text: String,
+            options: FormEngineOptions,
+        ): FormSnapshot? = fromJson(text) ?: null.also { deliver(mismatchWarning(), options) }
     }
 }
+
+private fun JsonObject.optionalString(key: String): Box<String?>? =
+    when (val value = this[key]) {
+        null, JsonValue.Null -> Box(null)
+        is JsonValue.String -> Box(value.value)
+        else -> null
+    }
 
 public fun FormEngine.snapshot(): FormSnapshot =
     FormSnapshot(
@@ -82,7 +96,7 @@ public fun FormEngine.snapshot(): FormSnapshot =
 
 public fun FormEngine.snapshotJson(maxBytes: Int): String? {
     val json = snapshot().toJson()
-    if (json.encodeToByteArray().size <= maxBytes) return json
+    if (json.length * UTF16_BYTES <= maxBytes) return json
     deliver(
         warning(
             IssueCode.SNAPSHOT_TOO_LARGE,
@@ -112,21 +126,21 @@ internal fun FormSnapshot.matching(
             .map { it.id }
             .toSet()
     val stepsKnown = (listOfNotNull(step) + skipped).all { it in steps } && skipped.all { it in skippable }
-    val sameForm = id == null || definitionId == null || id == definitionId
+    val sameForm = id == definitionId
     if (version == FormSnapshot.CURRENT_VERSION && sameForm && stepsKnown) {
         return withValues(withoutPasswords(values, definition.allFields))
     }
-    deliver(
-        warning(
-            IssueCode.SNAPSHOT_MISMATCH,
-            "",
-            "The saved progress does not match this form, so the form starts fresh",
-            "Discard snapshots saved for another version of the form",
-        ),
-        options,
-    )
+    deliver(mismatchWarning(), options)
     return null
 }
+
+private fun mismatchWarning() =
+    warning(
+        IssueCode.SNAPSHOT_MISMATCH,
+        "",
+        "The saved progress does not match this form, so the form starts fresh",
+        "Discard snapshots saved for another version of the form",
+    )
 
 internal fun EngineCore.restore(snapshot: FormSnapshot) {
     val steps = definition.steps.orEmpty()
@@ -169,3 +183,4 @@ private fun itemsWithoutPasswords(
 }
 
 private const val PASSWORD = "password"
+private const val UTF16_BYTES = 2

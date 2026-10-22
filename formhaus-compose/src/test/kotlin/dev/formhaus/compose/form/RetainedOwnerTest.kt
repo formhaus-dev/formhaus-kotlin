@@ -1,8 +1,12 @@
 package dev.formhaus.compose.form
 
 import android.os.Bundle
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.ViewModelStore
+import androidx.lifecycle.ViewModelStoreOwner
+import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import dev.formhaus.compose.fields.TextInputField
 import dev.formhaus.compose.model.FormModel
 import dev.formhaus.compose.model.json
@@ -130,5 +134,26 @@ class RetainedOwnerTest {
         seen.clear()
         launch(saved = saved)
         assertNull(seen.last().engine.values["name"])
+    }
+
+    @Test
+    fun aCustomOwnerWithoutSavedStateGetsAPlainHandle() {
+        val store = ViewModelStore()
+        val owner =
+            object : ViewModelStoreOwner {
+                override val viewModelStore: ViewModelStore = store
+            }
+        HostActivity.content = {
+            CompositionLocalProvider(LocalViewModelStoreOwner provides owner) {
+                Provided(capturing) { FormhausForm(trip, engineOptions = options) { _, _ -> null } }
+            }
+        }
+        Robolectric.buildActivity(HostActivity::class.java).setup()
+        settle()
+        val model = seen.last()
+        model.setValue("name", JsonValue.String("Ada"))
+        assertTrue(model.scope.isActive)
+        store.clear()
+        assertFalse(model.scope.isActive)
     }
 }

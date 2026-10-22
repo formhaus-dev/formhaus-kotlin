@@ -373,6 +373,7 @@ public final class dev/formhaus/core/engine/FormSnapshot {
 
 public final class dev/formhaus/core/engine/FormSnapshot$Companion {
 	public final fun fromJson (Ljava/lang/String;)Ldev/formhaus/core/engine/FormSnapshot;
+	public final fun fromJson (Ljava/lang/String;Ldev/formhaus/core/engine/FormEngineOptions;)Ldev/formhaus/core/engine/FormSnapshot;
 }
 
 public final class dev/formhaus/core/engine/FormSnapshotKt {

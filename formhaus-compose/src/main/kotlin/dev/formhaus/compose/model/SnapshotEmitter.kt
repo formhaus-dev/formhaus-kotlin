@@ -28,7 +28,6 @@ internal class SnapshotEmitter(
     fun submitted() {
         cancel()
         cleared = true
-        if (closed) return
         last = null
         handler?.invoke(null)
     }

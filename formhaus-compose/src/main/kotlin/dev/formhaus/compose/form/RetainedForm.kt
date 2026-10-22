@@ -8,7 +8,9 @@ import androidx.compose.runtime.currentCompositeKeyHashCode
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.HasDefaultViewModelProviderFactory
+import androidx.lifecycle.SAVED_STATE_REGISTRY_OWNER_KEY
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.VIEW_MODEL_STORE_OWNER_KEY
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
@@ -29,11 +31,11 @@ import dev.formhaus.core.json.JsonObject
 import dev.formhaus.core.model.FormDefinition
 import dev.formhaus.core.renderer.source
 
-private const val SNAPSHOT_KEY = "dev.formhaus.snapshot"
-private const val SNAPSHOT_JSON = "json"
+internal const val SNAPSHOT_KEY = "dev.formhaus.snapshot"
+internal const val SNAPSHOT_JSON = "json"
 private const val HOLDER_KEY = "dev.formhaus.form:"
 private const val KEY_RADIX = 36
-internal const val MAX_SAVED_SNAPSHOT_BYTES = 256 * 1024
+internal const val MAX_SAVED_SNAPSHOT_BYTES = 96 * 1024
 
 internal class FormHolder(
     private val handle: SavedStateHandle,
@@ -60,11 +62,12 @@ internal class FormHolder(
     fun model(
         source: JsonObject,
         restoring: FormSnapshot?,
+        options: FormEngineOptions,
         create: (FormSnapshot?) -> FormModel,
     ): FormModel {
         val current = model
         if (current != null && this.source == source) return current
-        val saved = if (current == null) savedSnapshot() else null
+        val saved = if (current == null && restoring == null) savedSnapshot(options) else null
         if (current != null) retired = current
         val created = create(restoring ?: saved)
         model = created
@@ -91,7 +94,8 @@ internal class FormHolder(
         model = null
     }
 
-    private fun savedSnapshot(): FormSnapshot? = handle.get<Bundle>(SNAPSHOT_KEY)?.getString(SNAPSHOT_JSON)?.let(FormSnapshot::fromJson)
+    private fun savedSnapshot(options: FormEngineOptions): FormSnapshot? =
+        handle.get<Bundle>(SNAPSHOT_KEY)?.getString(SNAPSHOT_JSON)?.let { FormSnapshot.fromJson(it, options) }
 
     private fun savedJson(): String? {
         val current = model ?: return null
@@ -99,6 +103,13 @@ internal class FormHolder(
         return current.engine.snapshotJson(MAX_SAVED_SNAPSHOT_BYTES)
     }
 }
+
+private fun CreationExtras.savedStateHandle(): SavedStateHandle =
+    if (this[SAVED_STATE_REGISTRY_OWNER_KEY] != null && this[VIEW_MODEL_STORE_OWNER_KEY] != null) {
+        createSavedStateHandle()
+    } else {
+        SavedStateHandle()
+    }
 
 private class Binding {
     var holder: FormHolder? = null
@@ -110,7 +121,7 @@ private fun claimedHolder(
     binding: Binding,
 ): FormHolder {
     val extras = (owner as? HasDefaultViewModelProviderFactory)?.defaultViewModelCreationExtras ?: CreationExtras.Empty
-    val provider = ViewModelProvider.create(owner, viewModelFactory { initializer { FormHolder(createSavedStateHandle()) } }, extras)
+    val provider = ViewModelProvider.create(owner, viewModelFactory { initializer { FormHolder(savedStateHandle()) } }, extras)
     var index = 0
     while (true) {
         val holder = provider["$base#$index", FormHolder::class]
@@ -138,7 +149,7 @@ internal fun rememberOwnedModel(
             if (owner != null) claimedHolder(owner, base, binding) else FormHolder(SavedStateHandle()).also { it.claim(binding) }
         }
     val model =
-        holder.model(definition.source, restoring) { start ->
+        holder.model(definition.source, restoring, engineOptions) { start ->
             ownedFormModel(context, definition, initialValues, engineOptions, renderer, start, onSnapshotChange, onSubmit)
         }
     SideEffect {

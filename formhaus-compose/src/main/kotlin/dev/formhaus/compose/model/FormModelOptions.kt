@@ -5,6 +5,7 @@ import dev.formhaus.core.model.FieldOption
 import dev.formhaus.core.model.FormField
 import dev.formhaus.core.renderer.optionKey
 import kotlinx.coroutines.launch
+import kotlin.coroutines.cancellation.CancellationException
 
 public fun FormModel.options(key: String): List<FieldOption>? = optionsState(engine.optionKey(key)).options
 
@@ -38,7 +39,15 @@ private fun FormModel.load(
     val request = state.request
     val values = engine.values
     scope.launch {
-        val loaded = provider(values)
+        val loaded =
+            try {
+                provider(values)
+            } catch (error: CancellationException) {
+                throw error
+            } catch (error: Throwable) {
+                if (state.request == request) reportError(error)
+                null
+            }
         if (state.request == request) state.update(loaded)
     }
 }

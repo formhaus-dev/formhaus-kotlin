@@ -3,6 +3,7 @@ package dev.formhaus.core.engine
 import dev.formhaus.core.definitionvalidation.DefinitionIssue
 import dev.formhaus.core.definitionvalidation.IssueCode
 import dev.formhaus.core.json.JsonValue
+import dev.formhaus.core.model.FormDefinition
 import dev.formhaus.core.support.jsonObject
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -58,6 +59,8 @@ class SnapshotTest {
             listOf(
                 example.replace("\"version\":1", "\"version\":2"),
                 example.replace("\"definitionId\":\"trip\"", "\"definitionId\":\"other\""),
+                example.replace("\"definitionId\":\"trip\"", "\"definitionId\":null"),
+                example.replace("\"definitionId\":\"trip\",", ""),
                 example.replace("\"step\":\"seat\"", "\"step\":\"gone\""),
                 example.replace("[\"extras\"]", "[\"gone\"]"),
                 example.replace("[\"extras\"]", "[\"who\"]"),
@@ -72,17 +75,39 @@ class SnapshotTest {
     }
 
     @Test
-    fun `a snapshot without a definition id checks only the version`() {
-        val engine = restored(example.replace("\"definitionId\":\"trip\"", "\"definitionId\":null"))
-        assertEquals("seat", engine.currentStep?.id)
-        assertEquals("trip", engine.snapshot().definitionId)
+    fun `a definition without an id restores only a snapshot without a definition id`() {
+        val anonymous = FormDefinition(requireNotNull(JsonValue.parse(trip.replace("\"id\":\"trip\",", "")).objectValue))
+        for ((id, restores) in listOf("null" to true, "\"trip\"" to false)) {
+            issues.clear()
+            val text = example.replace("\"definitionId\":\"trip\"", "\"definitionId\":$id")
+            val engine = FormEngine(anonymous, options = options, restoring = FormSnapshot.fromJson(text))
+            assertEquals(if (restores) "seat" else "who", engine.currentStep?.id, text)
+            assertEquals(restores, issues.none { it.code == IssueCode.SNAPSHOT_MISMATCH }, text)
+        }
     }
 
     @Test
-    fun `malformed json reads as no snapshot`() {
-        for (text in listOf("", "[]", "{", """{"version":"1","values":{},"skipped":[],"seed":""}""")) {
-            assertNull(FormSnapshot.fromJson(text))
+    fun `malformed or wrongly typed json reads as no snapshot and reports a mismatch`() {
+        val cases =
+            listOf(
+                "",
+                "[]",
+                "{",
+                """{"version":"1","values":{},"skipped":[],"seed":""}""",
+                example.replace("\"definitionId\":\"trip\"", "\"definitionId\":5"),
+                example.replace("\"step\":\"seat\"", "\"step\":[\"seat\"]"),
+                example.replace("\"step\":\"seat\"", "\"step\":false"),
+                example.replace("[\"extras\"]", "[1]"),
+                example.replace("\"seed\":\"abc\"", "\"seed\":7"),
+                example.replace("{\"name\":\"Ada\"}", "[]"),
+            )
+        for (text in cases) {
+            issues.clear()
+            assertNull(FormSnapshot.fromJson(text), text)
+            assertNull(FormSnapshot.fromJson(text, options), text)
+            assertEquals(listOf(IssueCode.SNAPSHOT_MISMATCH), issues.map { it.code }, text)
         }
+        assertEquals(FormSnapshot.fromJson(example), FormSnapshot.fromJson(example, options))
     }
 
     private val account =

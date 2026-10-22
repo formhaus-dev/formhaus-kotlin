@@ -70,4 +70,27 @@ class GroupModelTest {
         form.setValue("country", JsonValue.String("de"))
         assertEquals(listOf("Berlin"), form.options("city")?.map { it.label })
     }
+
+    @Test
+    fun aFailingOptionsProviderReportsTheErrorAndFallsBackToTheStaticOptions() {
+        val failure = IllegalStateException("offline")
+        val reported = mutableListOf<Throwable>()
+        val provider: OptionsProvider = { values ->
+            check(values["country"] != JsonValue.String("fr")) { "offline" }
+            if (values["country"] == JsonValue.String("de")) throw failure
+            listOf(FieldOption("ber", "Berlin"))
+        }
+        val options = FormRendererOptions(optionsProviders = mapOf("cities" to provider), onError = { reported += it })
+        val form = model(groupDefinition, options = options)
+        form.start()
+        assertEquals(listOf("Berlin"), form.options("city")?.map { it.label })
+        form.setValue("country", JsonValue.String("de"))
+        assertEquals(listOf<Throwable>(failure), reported)
+        assertNull(form.options("city"))
+        val unhandled = model(groupDefinition, options = FormRendererOptions(optionsProviders = mapOf("cities" to provider)))
+        unhandled.start()
+        unhandled.setValue("country", JsonValue.String("fr"))
+        assertEquals("Form action failed", unhandled.actionError)
+        assertNull(unhandled.options("city"))
+    }
 }
