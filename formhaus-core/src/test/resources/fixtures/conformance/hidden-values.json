@@ -1,0 +1,272 @@
+{
+  "name": "hidden-values",
+  "issues": [],
+  "warnings": [],
+  "definition": {
+    "formatVersion": "1.4",
+    "id": "account",
+    "title": "Account",
+    "submit": {
+      "label": "Save"
+    },
+    "fields": [
+      {
+        "key": "type",
+        "type": "select",
+        "label": "Type",
+        "options": [
+          {
+            "value": "personal",
+            "label": "Personal"
+          },
+          {
+            "value": "business",
+            "label": "Business"
+          }
+        ]
+      },
+      {
+        "key": "company",
+        "type": "text",
+        "label": "Company",
+        "show": [
+          {
+            "field": "type",
+            "eq": "business"
+          }
+        ],
+        "validation": {
+          "required": true
+        }
+      },
+      {
+        "key": "vat",
+        "type": "text",
+        "label": "VAT number",
+        "show": [
+          {
+            "field": "company",
+            "notEmpty": true
+          }
+        ],
+        "validation": {
+          "pattern": "^[A-Z]{2}[0-9]+$"
+        }
+      },
+      {
+        "key": "employees",
+        "type": "number",
+        "label": "Employees",
+        "show": [
+          {
+            "field": "type",
+            "eq": "business"
+          }
+        ],
+        "validation": {
+          "min": 1
+        }
+      },
+      {
+        "key": "contacts",
+        "type": "group",
+        "label": "Contacts",
+        "fields": [
+          {
+            "key": "name",
+            "type": "text",
+            "label": "Name"
+          },
+          {
+            "key": "kind",
+            "type": "select",
+            "label": "Kind",
+            "options": [
+              {
+                "value": "phone",
+                "label": "Phone"
+              },
+              {
+                "value": "email",
+                "label": "Email"
+              }
+            ]
+          },
+          {
+            "key": "phone",
+            "type": "text",
+            "label": "Phone",
+            "show": [
+              {
+                "field": "kind",
+                "eq": "phone"
+              }
+            ],
+            "validation": {
+              "minLength": 7
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "cases": [
+    {
+      "name": "clear leaves hidden answers out",
+      "input": {
+        "values": {
+          "type": "personal",
+          "company": " Acme ",
+          "vat": "bad",
+          "employees": "x12",
+          "contacts": [
+            {
+              "name": "Ann",
+              "kind": "email",
+              "phone": "555"
+            }
+          ],
+          "note": "not a field"
+        },
+        "skippedSteps": []
+      },
+      "expected": {
+        "values": {
+          "type": "personal",
+          "contacts": [
+            {
+              "name": "Ann",
+              "kind": "email"
+            }
+          ]
+        },
+        "errors": {}
+      },
+      "canSubmit": true
+    },
+    {
+      "name": "keep sends hidden answers that pass validation",
+      "input": {
+        "values": {
+          "type": "personal",
+          "company": " Acme ",
+          "vat": "DE123",
+          "employees": "x12",
+          "contacts": [
+            {
+              "name": "Ann",
+              "kind": "email",
+              "phone": "555 0100"
+            }
+          ],
+          "note": "not a field"
+        },
+        "skippedSteps": [],
+        "hiddenValues": "keep"
+      },
+      "expected": {
+        "values": {
+          "type": "personal",
+          "company": "Acme",
+          "vat": "DE123",
+          "employees": "x12",
+          "contacts": [
+            {
+              "name": "Ann",
+              "kind": "email",
+              "phone": "555 0100"
+            }
+          ]
+        },
+        "errors": {}
+      },
+      "canSubmit": true,
+      "serverValues": {
+        "type": "personal",
+        "company": "Acme",
+        "vat": "DE123",
+        "contacts": [
+          {
+            "name": "Ann",
+            "kind": "email",
+            "phone": "555 0100"
+          }
+        ]
+      }
+    },
+    {
+      "name": "keep drops hidden answers that fail validation",
+      "input": {
+        "values": {
+          "type": "personal",
+          "company": "Acme",
+          "vat": "bad",
+          "employees": 0,
+          "contacts": [
+            {
+              "name": "Ann",
+              "kind": "email",
+              "phone": "555"
+            }
+          ]
+        },
+        "skippedSteps": [],
+        "hiddenValues": "keep"
+      },
+      "expected": {
+        "values": {
+          "type": "personal",
+          "company": "Acme",
+          "vat": "bad",
+          "employees": 0,
+          "contacts": [
+            {
+              "name": "Ann",
+              "kind": "email",
+              "phone": "555"
+            }
+          ]
+        },
+        "errors": {}
+      },
+      "canSubmit": true,
+      "serverValues": {
+        "type": "personal",
+        "company": "Acme",
+        "contacts": [
+          {
+            "name": "Ann",
+            "kind": "email"
+          }
+        ]
+      }
+    },
+    {
+      "name": "keep still validates visible answers",
+      "input": {
+        "values": {
+          "type": "business",
+          "company": "",
+          "vat": "bad"
+        },
+        "skippedSteps": [],
+        "hiddenValues": "keep"
+      },
+      "expected": {
+        "values": {
+          "type": "business",
+          "company": "",
+          "vat": "bad"
+        },
+        "errors": {
+          "company": "This field is required"
+        }
+      },
+      "canSubmit": false,
+      "serverValues": {
+        "type": "business",
+        "company": ""
+      }
+    }
+  ]
+}
