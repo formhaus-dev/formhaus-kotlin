@@ -12,7 +12,6 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import dev.formhaus.compose.form.FieldContext
@@ -34,19 +33,18 @@ internal class FilePicker {
 @Composable
 internal fun rememberFilePicker(context: FieldContext): FilePicker {
     val android = LocalContext.current
-    val scope = rememberCoroutineScope()
     val types = acceptedTypes(context.field.accept?.stringValue)
     val photos = types.all { it.startsWith("image/") }
     val picker = remember { FilePicker() }
     val received: (Uri?) -> Unit = { uri ->
         picker.active = false
         if (uri != null) {
-            scope.launch {
+            context.model.scope.launch {
                 val copy =
                     UploadStore.copy(
                         android.cacheDir,
-                        android.displayName(uri),
-                        context.model,
+                        context.model.uploadOwner,
+                        { android.displayName(uri) },
                     ) { android.contentResolver.openInputStream(uri) }
                 if (copy != null) context.replaceFile(copy)
             }

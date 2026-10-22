@@ -22,6 +22,7 @@ import dev.formhaus.compose.model.FormModel
 import dev.formhaus.compose.model.addItem
 import dev.formhaus.compose.model.itemTitle
 import dev.formhaus.compose.model.removeItem
+import dev.formhaus.compose.model.requestFocus
 import dev.formhaus.compose.model.texts
 import dev.formhaus.compose.system.SystemGroup
 import dev.formhaus.compose.theme.LocalFormhausTokens

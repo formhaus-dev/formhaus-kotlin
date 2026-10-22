@@ -44,6 +44,8 @@ class AppDebuggableTest {
                 MutableJsonObject(),
                 FormEngineOptions(debugChecks = debugChecks),
                 FormRendererOptions(),
+                null,
+                null,
             ) { _, _ -> null }
         var failed = false
         thread { failed = runCatching { form.engine.setValue("x", JsonValue.String("a")) }.isFailure }.join()

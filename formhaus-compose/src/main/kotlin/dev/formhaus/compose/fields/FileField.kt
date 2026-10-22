@@ -13,13 +13,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import dev.formhaus.compose.components.FormhausIcons
 import dev.formhaus.compose.components.PickerInput
 import dev.formhaus.compose.form.FieldContext
-import dev.formhaus.compose.model.FormModel
 import dev.formhaus.compose.theme.LocalFormhausTokens
 import dev.formhaus.compose.theme.TextRole
 import dev.formhaus.compose.theme.textStyle
-import dev.formhaus.core.json.JsonObject
 import dev.formhaus.core.json.JsonValue
-import dev.formhaus.core.renderer.value
 import java.io.File
 
 @Composable
@@ -53,27 +50,14 @@ public fun FileField(context: FieldContext) {
     }
 }
 
-internal val FieldContext.fileName: String? get() = UploadStore.owned(text, model)?.name
+internal val FieldContext.fileName: String? get() = UploadStore.owned(text, model.uploadOwner)?.name
 
 internal val FieldContext.reference: String? get() = if (text.isEmpty() || fileName != null) null else text
 
 internal val FieldContext.fileValueText: String get() = fileName ?: reference ?: text("chooseFile")
 
 internal fun FieldContext.replaceFile(file: File?) {
+    val previous = text.takeIf { fileName != null }
     setValue(file?.let { JsonValue.String(fileValue(it)) } ?: JsonValue.Null)
-}
-
-public fun FormModel.pickedFile(key: String): File? = engine.value(key)?.stringValue?.let { UploadStore.owned(it, this) }
-
-internal fun FormModel.pruneUploads(values: JsonObject) {
-    val files =
-        values.values
-            .mapNotNull { it.stringValue }
-            .filter { it.startsWith("file:") }
-            .toSet()
-    UploadStore.prune(this, files)
-}
-
-internal fun FormModel.releaseUploads() {
-    UploadStore.release(this)
+    if (previous != null && state.value?.stringValue != previous) UploadStore.discard(previous, model.uploadOwner)
 }

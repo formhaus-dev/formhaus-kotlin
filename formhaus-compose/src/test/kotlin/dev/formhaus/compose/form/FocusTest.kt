@@ -16,6 +16,7 @@ import dev.formhaus.compose.model.back
 import dev.formhaus.compose.model.focus
 import dev.formhaus.compose.model.model
 import dev.formhaus.compose.model.next
+import dev.formhaus.compose.model.requestFocus
 import dev.formhaus.compose.model.setErrors
 import dev.formhaus.compose.model.setValue
 import dev.formhaus.compose.model.submit

@@ -12,34 +12,31 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import dev.formhaus.compose.containers.FormActionsSlot
 import dev.formhaus.compose.containers.FormErrorSummary
 import dev.formhaus.compose.containers.FormProgress
 import dev.formhaus.compose.containers.FormTopLevelErrors
 import dev.formhaus.compose.model.FormModel
 import dev.formhaus.compose.model.FormRendererOptions
+import dev.formhaus.compose.model.SnapshotChangeFn
 import dev.formhaus.compose.model.formhausTestId
-import dev.formhaus.compose.model.ownedFormModel
 import dev.formhaus.compose.model.testId
 import dev.formhaus.compose.system.SystemForm
 import dev.formhaus.compose.theme.LocalFormhausTokens
 import dev.formhaus.compose.theme.ResolveFormhausTokens
 import dev.formhaus.core.engine.FormEngineOptions
+import dev.formhaus.core.engine.FormSnapshot
 import dev.formhaus.core.engine.SubmitHandler
 import dev.formhaus.core.json.JsonObject
 import dev.formhaus.core.json.MutableJsonObject
 import dev.formhaus.core.model.FormDefinition
 import dev.formhaus.core.renderer.TestIdTarget
-import dev.formhaus.core.renderer.source
 
 @Composable
 public fun FormhausForm(
@@ -48,20 +45,11 @@ public fun FormhausForm(
     initialValues: JsonObject = MutableJsonObject(),
     engineOptions: FormEngineOptions = FormEngineOptions(),
     renderer: FormRendererOptions = FormRendererOptions(),
+    restoring: FormSnapshot? = null,
+    onSnapshotChange: SnapshotChangeFn? = null,
     onSubmit: SubmitHandler,
 ) {
-    val context = LocalContext.current
-    val model =
-        remember(definition.source) {
-            ownedFormModel(context, definition, initialValues, engineOptions, renderer, onSubmit)
-        }
-    DisposableEffect(model) {
-        onDispose {
-            model.engine.cancelPendingActions()
-            model.close()
-        }
-    }
-    SideEffect { model.updateHandlers(engineOptions, renderer, onSubmit) }
+    val model = rememberOwnedModel(definition, initialValues, engineOptions, renderer, restoring, onSnapshotChange, onSubmit)
     FormhausForm(model, modifier)
 }
 

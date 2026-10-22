@@ -65,7 +65,7 @@ public suspend fun FormModel.skip() {
 }
 
 public suspend fun FormModel.submit() {
-    run { !engine.isActionDisabled(engine.definition.submit) && engine.submit(submitHandler) }
+    run { (!engine.isActionDisabled(engine.definition.submit) && engine.submit(submitHandler)).also { if (it) snapshots.submitted() } }
 }
 
 public suspend fun FormModel.performPrimaryAction() {

@@ -93,10 +93,12 @@ class FormLifecycleTest {
     }
 
     @Test
-    fun aNewDefinitionBuildsANewModelAndCancelsTheOldOne() {
+    fun aNewDefinitionBuildsANewModelAndLetsASendingSubmitFinish() {
         val gate = CompletableDeferred<SubmitResult?>()
+        val after = mutableListOf<String>()
+        val options = FormEngineOptions(onAfterSubmit = { _, _ -> after += "after" })
         var definition by mutableStateOf(parsed("a", "x"))
-        compose.setContent { Provided(capturing) { FormhausForm(definition) { _, _ -> gate.await() } } }
+        compose.setContent { Provided(capturing) { FormhausForm(definition, engineOptions = options) { _, _ -> gate.await() } } }
         compose.waitForIdle()
         val first = seen.single()
         compose.act(first) { submit() }
@@ -105,8 +107,33 @@ class FormLifecycleTest {
         compose.waitForIdle()
         assertEquals(2, seen.size)
         assertNotSame(first, seen.last())
-        assertFalse(first.submitting)
+        assertTrue(first.submitting)
         assertFalse(seen.last().submitting)
+        compose.runOnIdle { gate.complete(SubmitResult.Ok) }
+        compose.waitForIdle()
+        assertFalse(first.engine.submitting)
+        assertEquals(listOf("after"), after)
+    }
+
+    @Test
+    fun aNewDefinitionCancelsASubmitThatHasNotStartedSending() {
+        val gate = CompletableDeferred<Boolean?>()
+        val sent = mutableListOf<String>()
+        val options = FormEngineOptions(onBeforeSubmit = { gate.await() })
+        var definition by mutableStateOf(parsed("a", "x"))
+        compose.setContent {
+            Provided(capturing) { FormhausForm(definition, engineOptions = options) { _, _ -> null.also { sent += "sent" } } }
+        }
+        compose.waitForIdle()
+        val first = seen.single()
+        compose.act(first) { submit() }
+        assertTrue(first.submitting)
+        compose.runOnIdle { definition = parsed("b", "y") }
+        compose.waitForIdle()
+        assertFalse(first.engine.submitting)
+        compose.runOnIdle { gate.complete(true) }
+        compose.waitForIdle()
+        assertEquals(emptyList<String>(), sent)
     }
 
     @Test
