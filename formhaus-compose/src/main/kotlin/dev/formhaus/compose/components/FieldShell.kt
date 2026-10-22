@@ -23,6 +23,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import dev.formhaus.compose.form.FieldContext
+import dev.formhaus.compose.form.formhausScrollAnchor
 import dev.formhaus.compose.model.formhausTestId
 import dev.formhaus.compose.theme.FormhausTokens
 import dev.formhaus.compose.theme.LocalFormhausTokens
@@ -47,6 +48,7 @@ public fun FieldShell(
             .alpha(if (inline && context.isLocked) 0.6f else 1f)
             .semantics { if (error != null) error(error) }
             .formhausTestId(context.testId)
+            .formhausScrollAnchor(context)
             .measured("${context.key}/field"),
     ) {
         if (!inline) FieldHeader(context, variant, helper)

@@ -1,0 +1,72 @@
+package dev.formhaus.compose.form
+
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.ProvidableCompositionLocal
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Rect
+
+internal const val FORM_TOP_ANCHOR = "formhaus.top"
+internal const val SUMMARY_ANCHOR = "formhaus.summary"
+private const val SCREEN_REACH = 100_000f
+
+internal class ScrollAnchors {
+    private val requesters = mutableMapOf<String, BringIntoViewRequester>()
+
+    fun register(
+        key: String,
+        requester: BringIntoViewRequester,
+    ) {
+        requesters[key] = requester
+    }
+
+    fun unregister(
+        key: String,
+        requester: BringIntoViewRequester,
+    ) {
+        if (requesters[key] === requester) requesters.remove(key)
+    }
+
+    suspend fun scroll(target: ScrollTarget) {
+        when (target) {
+            ScrollTarget.Summary -> requesters[SUMMARY_ANCHOR]?.bringIntoView()
+            is ScrollTarget.Field -> requesters[target.key]?.bringIntoView()
+            ScrollTarget.FormTop -> requesters[FORM_TOP_ANCHOR]?.bringIntoView(Rect(0f, 0f, 1f, 1f))
+            ScrollTarget.ScreenTop -> requesters[FORM_TOP_ANCHOR]?.bringIntoView(Rect(0f, -SCREEN_REACH, 1f, 1 - SCREEN_REACH))
+        }
+    }
+}
+
+internal class TopRequests {
+    var issued: Int by mutableIntStateOf(0)
+        private set
+
+    fun request() {
+        issued += 1
+    }
+}
+
+internal val LocalScrollAnchors: ProvidableCompositionLocal<ScrollAnchors?> = staticCompositionLocalOf { null }
+
+internal val LocalTopRequests: ProvidableCompositionLocal<TopRequests?> = staticCompositionLocalOf { null }
+
+@Composable
+public fun Modifier.formhausScrollAnchor(context: FieldContext): Modifier = formhausScrollAnchor(context.key)
+
+@Composable
+internal fun Modifier.formhausScrollAnchor(key: String): Modifier {
+    val anchors = LocalScrollAnchors.current ?: return this
+    val requester = remember { BringIntoViewRequester() }
+    DisposableEffect(anchors, key) {
+        anchors.register(key, requester)
+        onDispose { anchors.unregister(key, requester) }
+    }
+    return bringIntoViewRequester(requester)
+}

@@ -43,7 +43,7 @@ public fun TextInputField(context: FieldContext) {
     }
 }
 
-private fun numberText(
+internal fun numberText(
     context: FieldContext,
     draft: String,
 ): String {

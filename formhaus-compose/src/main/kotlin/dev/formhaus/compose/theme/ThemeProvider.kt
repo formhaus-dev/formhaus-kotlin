@@ -11,6 +11,7 @@ import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.platform.LocalDensity
+import dev.formhaus.compose.system.materialColors
 
 public val LocalFormhausTheme: ProvidableCompositionLocal<FormhausTheme> =
     staticCompositionLocalOf { FormhausTheme.standard }
@@ -31,7 +32,9 @@ internal fun ResolveFormhausTokens(
     system: Boolean,
     content: @Composable () -> Unit,
 ) {
-    val theme = LocalFormhausTheme.current
+    val base = LocalFormhausTheme.current
+    val scheme = MaterialTheme.colorScheme
+    val theme = if (system) remember(base, scheme) { base.materialColors(scheme) } else base
     val dark = isSystemInDarkTheme()
     val fontScale = LocalDensity.current.fontScale
     val reduceMotion = rememberReduceMotion()

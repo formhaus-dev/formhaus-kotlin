@@ -55,4 +55,7 @@ internal object FormhausIcons {
     }
     val chevronsUpDown: ImageVector by lazy { lucide("chevrons-up-down", "m7 15 5 5 5-5", "m7 9 5-5 5 5", stroke = 2.5f) }
     val maximize: ImageVector by lazy { lucide("maximize-2", "M15 3h6v6", "m21 3-7 7", "m3 21 7-7", "M9 21H3v-6", stroke = 2.5f) }
+    val plus: ImageVector by lazy { lucide("plus", "M5 12h14", "M12 5v14", stroke = 2.5f) }
+    val chevronRight: ImageVector by lazy { lucide("chevron-right", "m9 18 6-6-6-6", stroke = 2.5f) }
+    val alert: ImageVector by lazy { lucide("circle-alert", CIRCLE, "M12 8v4", "M12 16h.01") }
 }
