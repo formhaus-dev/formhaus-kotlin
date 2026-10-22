@@ -3,32 +3,27 @@ package dev.formhaus.compose.containers
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.focusable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.layout.onPlaced
-import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.selected
@@ -116,7 +111,7 @@ public fun StepProgressView(
         context.steps?.let { steps ->
             val current = steps.getOrNull(context.current - 1)
             if (tokens.scale > LARGE_TYPE && current != null) {
-                StepMark(current, true, Modifier)
+                StepMark(current, true)
             } else {
                 StepMarks(steps, context.current)
             }
@@ -147,38 +142,9 @@ private fun StepMarks(
     steps: List<StepStatus>,
     current: Int,
 ) {
-    val tokens = LocalFormhausTokens.current
-    val scroll = rememberScrollState()
-    var shown by remember { mutableStateOf(IntRange.EMPTY) }
-    LaunchedEffect(shown) {
-        if (shown.isEmpty()) return@LaunchedEffect
-        val viewport = scroll.viewportSize
-        if (shown.first >= scroll.value && shown.last <= scroll.value + viewport) return@LaunchedEffect
-        val target = (shown.first + shown.last - viewport) / 2
-        if (tokens.reduceMotion) scroll.scrollTo(target) else scroll.animateScrollTo(target)
-    }
-    Row(
-        Modifier.horizontalScroll(scroll),
-        horizontalArrangement = Arrangement.spacedBy(tokens.spacing.s7),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        steps.forEachIndexed { index, step ->
-            val selected = index + 1 == current
-            val placed =
-                if (selected) {
-                    Modifier.onPlaced {
-                        shown =
-                            it
-                                .positionInParent()
-                                .x
-                                .toInt()
-                                .let { start -> start..start + it.size.width }
-                    }
-                } else {
-                    Modifier
-                }
-            StepMark(step, selected, placed)
-        }
+    val spacing = Arrangement.spacedBy(LocalFormhausTokens.current.spacing.s7)
+    FlowRow(horizontalArrangement = spacing, verticalArrangement = spacing, itemVerticalAlignment = Alignment.CenterVertically) {
+        steps.forEachIndexed { index, step -> StepMark(step, index + 1 == current) }
     }
 }
 
@@ -202,7 +168,6 @@ private fun ProgressBar(fraction: Float) {
 private fun StepMark(
     step: StepStatus,
     current: Boolean,
-    modifier: Modifier,
 ) {
     val tokens = LocalFormhausTokens.current
     val colors = tokens.colors
@@ -214,14 +179,18 @@ private fun StepMark(
         }
     val style = tokens.textStyle(TextRole.counter, colored = false).copy(color = color)
     Row(
-        modifier.semantics(mergeDescendants = true) {
+        Modifier.semantics(mergeDescendants = true) {
             selected = current
             step.errorLabel?.let { stateDescription = it }
         },
         horizontalArrangement = Arrangement.spacedBy(tokens.spacing.s2),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(step.title, style = style.copy(fontWeight = if (current) FontWeight.SemiBold else FontWeight.Normal), maxLines = 1)
+        Text(
+            step.title,
+            Modifier.weight(1f, fill = false),
+            style = style.copy(fontWeight = if (current) FontWeight.SemiBold else FontWeight.Normal),
+        )
         if (step.errorCount > 0) {
             Text(
                 "${step.errorCount}",

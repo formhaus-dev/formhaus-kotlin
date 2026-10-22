@@ -11,8 +11,10 @@ import dev.formhaus.compose.form.FormComponents
 import dev.formhaus.compose.form.Slot
 import dev.formhaus.compose.model.FormModel
 import dev.formhaus.compose.model.back
+import dev.formhaus.compose.model.goToStep
 import dev.formhaus.compose.model.model
 import dev.formhaus.compose.model.next
+import dev.formhaus.compose.model.setErrors
 import dev.formhaus.compose.model.submit
 import dev.formhaus.core.engine.SubmitResult
 import dev.formhaus.core.json.JsonValue
@@ -52,6 +54,17 @@ private val survey =
         {"key": "room", "type": "radio", "label": "Room", "validation": {"required": true}, "options": $GRADES},
         {"key": "food", "type": "radio", "label": "Food", "options": $GRADES},
         {"key": "staff", "type": "radio", "label": "Staff", "options": $GRADES}]}]}
+    """.trimIndent()
+
+private val booking =
+    """
+    {"id": "booking", "title": "Booking", "submit": {"label": "Book"}, "steps": [
+      {"id": "contact", "title": "Contact", "fields": [{"key": "email", "type": "email", "label": "Email"}]},
+      {"id": "address", "title": "Address", "fields": [{"key": "city", "type": "text", "label": "City"}]},
+      {"id": "dates", "title": "Dates", "fields": [{"key": "arrival", "type": "date", "label": "Arrival"}]},
+      {"id": "guests", "title": "Guests", "fields": [{"key": "adults", "type": "number", "label": "Adults"}]},
+      {"id": "extras", "title": "Extras", "fields": [{"key": "parking", "type": "checkbox", "label": "Parking"}]},
+      {"id": "review", "title": "Review", "fields": [{"key": "notes", "type": "textarea", "label": "Notes"}]}]}
     """.trimIndent()
 
 private const val GRADES = """[{"value": "1", "label": "Poor"}, {"value": "2", "label": "Fair"}, {"value": "3", "label": "Good"}]"""
@@ -103,7 +116,7 @@ private val headless: FormComponents =
 class FormEntry(
     val name: String,
     val components: FormComponents = FormComponents.standard,
-    val behavior: FormBehavior = FormBehavior(errorSummary = true, stepErrorMarks = true),
+    val behavior: FormBehavior = FormBehavior(),
     val prepare: suspend FormModel.() -> Unit = {},
     val rtl: Boolean = false,
     val fontScale: Float = 1f,
@@ -143,5 +156,9 @@ val formEntries: List<FormEntry> =
         FormEntry("form-group-invalid", prepare = { next() }) { model(trip, INVALID_TRAVELLERS) },
         FormEntry("form-submit-disabled") { model(signup, """{"email": "ada@example.com"}""") },
         FormEntry("form-large-text", fontScale = 1.3f) { model(contact, FILLED_CONTACT) },
+        FormEntry("form-step-marks", behavior = FormBehavior(stepErrorMarks = true), prepare = {
+            setErrors(stringMapOf("city" to "Enter a city"))
+            goToStep("guests")
+        }) { model(booking, """{"email": "ada@example.com"}""") },
         FormEntry("form-rtl", rtl = true, prepare = { submit() }) { model(arabic, """{"topic": "help"}""") },
     )
