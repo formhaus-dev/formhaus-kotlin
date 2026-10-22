@@ -6,9 +6,13 @@ import androidx.compose.runtime.Stable
 import dev.formhaus.compose.model.ActionTestIds
 import dev.formhaus.compose.model.FieldState
 import dev.formhaus.compose.model.FormModel
+import dev.formhaus.compose.model.ValueParts
 import dev.formhaus.compose.model.actionTestIds
 import dev.formhaus.compose.model.back
 import dev.formhaus.compose.model.cancel
+import dev.formhaus.compose.model.describe
+import dev.formhaus.compose.model.equalParts
+import dev.formhaus.compose.model.partsHash
 import dev.formhaus.compose.model.performPrimaryAction
 import dev.formhaus.compose.model.skip
 import dev.formhaus.compose.model.testId
@@ -69,24 +73,51 @@ public class GroupContext internal constructor(
 )
 
 @Immutable
-public data class StepStatus(
-    val id: String,
-    val title: String,
-    val errorCount: Int,
-    val errorLabel: String?,
-)
+public class StepStatus internal constructor(
+    public val id: String,
+    public val title: String,
+    public val errorCount: Int,
+    public val errorLabel: String?,
+) {
+    override fun equals(other: Any?): Boolean = equalParts(other, StepStatus::parts)
+
+    override fun hashCode(): Int = parts().partsHash()
+
+    override fun toString(): String = parts().describe("StepStatus")
+
+    private fun parts(): ValueParts = listOf("id" to id, "title" to title, "errorCount" to errorCount, "errorLabel" to errorLabel)
+}
 
 @Immutable
-public data class ProgressContext(
-    val current: Int,
-    val total: Int,
-    val counterLabel: String,
-    val stepTitle: String?,
-    val stepDescription: String?,
-    val steps: List<StepStatus>?,
-    val errorCount: Int = 0,
-    val errorLabel: String? = null,
-)
+@Suppress("LongParameterList")
+public class ProgressContext internal constructor(
+    public val current: Int,
+    public val total: Int,
+    public val counterLabel: String,
+    public val stepTitle: String?,
+    public val stepDescription: String?,
+    public val steps: List<StepStatus>?,
+    public val errorCount: Int = 0,
+    public val errorLabel: String? = null,
+) {
+    override fun equals(other: Any?): Boolean = equalParts(other, ProgressContext::parts)
+
+    override fun hashCode(): Int = parts().partsHash()
+
+    override fun toString(): String = parts().describe("ProgressContext")
+
+    private fun parts(): ValueParts =
+        listOf(
+            "current" to current,
+            "total" to total,
+            "counterLabel" to counterLabel,
+            "stepTitle" to stepTitle,
+            "stepDescription" to stepDescription,
+            "steps" to steps,
+            "errorCount" to errorCount,
+            "errorLabel" to errorLabel,
+        )
+}
 
 @Stable
 public class ActionsContext internal constructor(

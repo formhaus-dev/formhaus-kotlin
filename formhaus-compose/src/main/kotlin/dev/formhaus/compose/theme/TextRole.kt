@@ -5,14 +5,41 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.em
+import dev.formhaus.compose.model.ValueParts
+import dev.formhaus.compose.model.describe
+import dev.formhaus.compose.model.equalParts
+import dev.formhaus.compose.model.partsHash
 
-public data class TextRole(
-    val size: Size,
-    val weight: FontWeight = FontWeight.Normal,
-    val leading: Float = 1.5f,
-    val tone: Tone = Tone.TEXT,
-    val tabularDigits: Boolean = false,
+public class TextRole(
+    public val size: Size,
+    public val weight: FontWeight = FontWeight.Normal,
+    public val leading: Float = 1.5f,
+    public val tone: Tone = Tone.TEXT,
+    public val tabularDigits: Boolean = false,
 ) {
+    public fun copy(
+        size: Size = this.size,
+        weight: FontWeight = this.weight,
+        leading: Float = this.leading,
+        tone: Tone = this.tone,
+        tabularDigits: Boolean = this.tabularDigits,
+    ): TextRole = TextRole(size, weight, leading, tone, tabularDigits)
+
+    override fun equals(other: Any?): Boolean = equalParts(other, TextRole::parts)
+
+    override fun hashCode(): Int = parts().partsHash()
+
+    override fun toString(): String = parts().describe("TextRole")
+
+    private fun parts(): ValueParts =
+        listOf(
+            "size" to size,
+            "weight" to weight,
+            "leading" to leading,
+            "tone" to tone,
+            "tabularDigits" to tabularDigits,
+        )
+
     public enum class Size { BODY, SMALL, HEADING, TITLE }
 
     public enum class Tone { TEXT, MUTED, ERROR }

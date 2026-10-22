@@ -1,6 +1,10 @@
 package dev.formhaus.compose.theme
 
 import androidx.compose.ui.unit.dp
+import dev.formhaus.compose.model.ValueParts
+import dev.formhaus.compose.model.describe
+import dev.formhaus.compose.model.equalParts
+import dev.formhaus.compose.model.partsHash
 
 internal object NativeMetrics {
     val hitTarget = 48.dp
@@ -13,8 +17,22 @@ internal object NativeMetrics {
     val matrixWidth = 560.dp
 }
 
-public data class Motion(
-    val quick: Int = 140,
-    val standard: Int = 150,
-    val progress: Int = 200,
-)
+public class Motion(
+    public val quick: Int = 140,
+    public val standard: Int = 150,
+    public val progress: Int = 200,
+) {
+    public fun copy(
+        quick: Int = this.quick,
+        standard: Int = this.standard,
+        progress: Int = this.progress,
+    ): Motion = Motion(quick, standard, progress)
+
+    override fun equals(other: Any?): Boolean = equalParts(other, Motion::parts)
+
+    override fun hashCode(): Int = parts().partsHash()
+
+    override fun toString(): String = parts().describe("Motion")
+
+    private fun parts(): ValueParts = listOf("quick" to quick, "standard" to standard, "progress" to progress)
+}

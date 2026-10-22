@@ -163,6 +163,7 @@ public final class dev/formhaus/compose/form/ActionsContext {
 }
 
 public final class dev/formhaus/compose/form/BackPlacement : java/lang/Enum {
+	public static final field APP_BAR Ldev/formhaus/compose/form/BackPlacement;
 	public static final field AUTOMATIC Ldev/formhaus/compose/form/BackPlacement;
 	public static final field BOTTOM Ldev/formhaus/compose/form/BackPlacement;
 	public static fun getEntries ()Lkotlin/enums/EnumEntries;
@@ -216,13 +217,6 @@ public final class dev/formhaus/compose/form/FormBehavior {
 	public fun <init> ()V
 	public fun <init> (ZZZLdev/formhaus/compose/form/BackPlacement;Ldev/formhaus/compose/form/StepScroll;ILdev/formhaus/compose/form/TitleDisplayMode;)V
 	public synthetic fun <init> (ZZZLdev/formhaus/compose/form/BackPlacement;Ldev/formhaus/compose/form/StepScroll;ILdev/formhaus/compose/form/TitleDisplayMode;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1 ()Z
-	public final fun component2 ()Z
-	public final fun component3 ()Z
-	public final fun component4 ()Ldev/formhaus/compose/form/BackPlacement;
-	public final fun component5 ()Ldev/formhaus/compose/form/StepScroll;
-	public final fun component6 ()I
-	public final fun component7 ()Ldev/formhaus/compose/form/TitleDisplayMode;
 	public final fun copy (ZZZLdev/formhaus/compose/form/BackPlacement;Ldev/formhaus/compose/form/StepScroll;ILdev/formhaus/compose/form/TitleDisplayMode;)Ldev/formhaus/compose/form/FormBehavior;
 	public static synthetic fun copy$default (Ldev/formhaus/compose/form/FormBehavior;ZZZLdev/formhaus/compose/form/BackPlacement;Ldev/formhaus/compose/form/StepScroll;ILdev/formhaus/compose/form/TitleDisplayMode;ILjava/lang/Object;)Ldev/formhaus/compose/form/FormBehavior;
 	public fun equals (Ljava/lang/Object;)Z
@@ -307,18 +301,6 @@ public final class dev/formhaus/compose/form/GroupItemContext {
 
 public final class dev/formhaus/compose/form/ProgressContext {
 	public static final field $stable I
-	public fun <init> (IILjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ILjava/lang/String;)V
-	public synthetic fun <init> (IILjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ILjava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1 ()I
-	public final fun component2 ()I
-	public final fun component3 ()Ljava/lang/String;
-	public final fun component4 ()Ljava/lang/String;
-	public final fun component5 ()Ljava/lang/String;
-	public final fun component6 ()Ljava/util/List;
-	public final fun component7 ()I
-	public final fun component8 ()Ljava/lang/String;
-	public final fun copy (IILjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ILjava/lang/String;)Ldev/formhaus/compose/form/ProgressContext;
-	public static synthetic fun copy$default (Ldev/formhaus/compose/form/ProgressContext;IILjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ILjava/lang/String;ILjava/lang/Object;)Ldev/formhaus/compose/form/ProgressContext;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getCounterLabel ()Ljava/lang/String;
 	public final fun getCurrent ()I
@@ -354,13 +336,6 @@ public final class dev/formhaus/compose/form/StepScroll : java/lang/Enum {
 
 public final class dev/formhaus/compose/form/StepStatus {
 	public static final field $stable I
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;ILjava/lang/String;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Ljava/lang/String;
-	public final fun component3 ()I
-	public final fun component4 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;ILjava/lang/String;)Ldev/formhaus/compose/form/StepStatus;
-	public static synthetic fun copy$default (Ldev/formhaus/compose/form/StepStatus;Ljava/lang/String;Ljava/lang/String;ILjava/lang/String;ILjava/lang/Object;)Ldev/formhaus/compose/form/StepStatus;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getErrorCount ()I
 	public final fun getErrorLabel ()Ljava/lang/String;
@@ -382,13 +357,6 @@ public final class dev/formhaus/compose/form/TitleDisplayMode : java/lang/Enum {
 
 public final class dev/formhaus/compose/model/ActionTestIds {
 	public static final field $stable I
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Ljava/lang/String;
-	public final fun component3 ()Ljava/lang/String;
-	public final fun component4 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Ldev/formhaus/compose/model/ActionTestIds;
-	public static synthetic fun copy$default (Ldev/formhaus/compose/model/ActionTestIds;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Ldev/formhaus/compose/model/ActionTestIds;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getBack ()Ljava/lang/String;
 	public final fun getCancel ()Ljava/lang/String;
@@ -410,12 +378,6 @@ public final class dev/formhaus/compose/model/FieldState {
 
 public final class dev/formhaus/compose/model/FocusRequest {
 	public static final field $stable I
-	public fun <init> (Ljava/lang/String;IZ)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()I
-	public final fun component3 ()Z
-	public final fun copy (Ljava/lang/String;IZ)Ldev/formhaus/compose/model/FocusRequest;
-	public static synthetic fun copy$default (Ldev/formhaus/compose/model/FocusRequest;Ljava/lang/String;IZILjava/lang/Object;)Ldev/formhaus/compose/model/FocusRequest;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getId ()I
 	public final fun getKey ()Ljava/lang/String;
@@ -495,15 +457,6 @@ public final class dev/formhaus/compose/model/FormRendererOptions {
 	public fun <init> ()V
 	public fun <init> (Ldev/formhaus/core/renderer/LabelSource;Ljava/util/Map;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Ljava/lang/String;Lkotlin/jvm/functions/Function3;Ldev/formhaus/compose/model/TestIds;)V
 	public synthetic fun <init> (Ldev/formhaus/core/renderer/LabelSource;Ljava/util/Map;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Ljava/lang/String;Lkotlin/jvm/functions/Function3;Ldev/formhaus/compose/model/TestIds;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1 ()Ldev/formhaus/core/renderer/LabelSource;
-	public final fun component2 ()Ljava/util/Map;
-	public final fun component3 ()Lkotlin/jvm/functions/Function0;
-	public final fun component4 ()Lkotlin/jvm/functions/Function3;
-	public final fun component5 ()Lkotlin/jvm/functions/Function1;
-	public final fun component6 ()Lkotlin/jvm/functions/Function1;
-	public final fun component7 ()Ljava/lang/String;
-	public final fun component8 ()Lkotlin/jvm/functions/Function3;
-	public final fun component9 ()Ldev/formhaus/compose/model/TestIds;
 	public final fun copy (Ldev/formhaus/core/renderer/LabelSource;Ljava/util/Map;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Ljava/lang/String;Lkotlin/jvm/functions/Function3;Ldev/formhaus/compose/model/TestIds;)Ldev/formhaus/compose/model/FormRendererOptions;
 	public static synthetic fun copy$default (Ldev/formhaus/compose/model/FormRendererOptions;Ldev/formhaus/core/renderer/LabelSource;Ljava/util/Map;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Ljava/lang/String;Lkotlin/jvm/functions/Function3;Ldev/formhaus/compose/model/TestIds;ILjava/lang/Object;)Ldev/formhaus/compose/model/FormRendererOptions;
 	public fun equals (Ljava/lang/Object;)Z
@@ -567,28 +520,11 @@ public final class dev/formhaus/compose/model/TestIds$Off : dev/formhaus/compose
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class dev/formhaus/compose/system/ComposableSingletons$SystemTextFieldKt {
-	public static final field INSTANCE Ldev/formhaus/compose/system/ComposableSingletons$SystemTextFieldKt;
-	public fun <init> ()V
-	public final fun getLambda$2077359308$formhaus_compose ()Lkotlin/jvm/functions/Function2;
-}
-
 public final class dev/formhaus/compose/theme/Controls {
 	public static final field $stable I
 	public static final field Companion Ldev/formhaus/compose/theme/Controls$Companion;
 	public synthetic fun <init> (FFFFFFFFFFFILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public synthetic fun <init> (FFFFFFFFFFFLkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1-D9Ej5fM ()F
-	public final fun component10-D9Ej5fM ()F
-	public final fun component11-D9Ej5fM ()F
-	public final fun component2-D9Ej5fM ()F
-	public final fun component3-D9Ej5fM ()F
-	public final fun component4-D9Ej5fM ()F
-	public final fun component5-D9Ej5fM ()F
-	public final fun component6-D9Ej5fM ()F
-	public final fun component7-D9Ej5fM ()F
-	public final fun component8-D9Ej5fM ()F
-	public final fun component9-D9Ej5fM ()F
 	public final fun copy-kBVM9y0 (FFFFFFFFFFF)Ldev/formhaus/compose/theme/Controls;
 	public static synthetic fun copy-kBVM9y0$default (Ldev/formhaus/compose/theme/Controls;FFFFFFFFFFFILjava/lang/Object;)Ldev/formhaus/compose/theme/Controls;
 	public fun equals (Ljava/lang/Object;)Z
@@ -617,15 +553,6 @@ public final class dev/formhaus/compose/theme/FormhausTheme {
 	public static final field Companion Ldev/formhaus/compose/theme/FormhausTheme$Companion;
 	public fun <init> (Ldev/formhaus/compose/theme/Palette;Ldev/formhaus/compose/theme/Palette;Ldev/formhaus/compose/theme/Typography;Ldev/formhaus/compose/theme/Spacing;Ldev/formhaus/compose/theme/Radii;Ldev/formhaus/compose/theme/Controls;Ldev/formhaus/compose/theme/Motion;Ldev/formhaus/compose/theme/Palette;Ldev/formhaus/compose/theme/Palette;)V
 	public synthetic fun <init> (Ldev/formhaus/compose/theme/Palette;Ldev/formhaus/compose/theme/Palette;Ldev/formhaus/compose/theme/Typography;Ldev/formhaus/compose/theme/Spacing;Ldev/formhaus/compose/theme/Radii;Ldev/formhaus/compose/theme/Controls;Ldev/formhaus/compose/theme/Motion;Ldev/formhaus/compose/theme/Palette;Ldev/formhaus/compose/theme/Palette;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1 ()Ldev/formhaus/compose/theme/Palette;
-	public final fun component2 ()Ldev/formhaus/compose/theme/Palette;
-	public final fun component3 ()Ldev/formhaus/compose/theme/Typography;
-	public final fun component4 ()Ldev/formhaus/compose/theme/Spacing;
-	public final fun component5 ()Ldev/formhaus/compose/theme/Radii;
-	public final fun component6 ()Ldev/formhaus/compose/theme/Controls;
-	public final fun component7 ()Ldev/formhaus/compose/theme/Motion;
-	public final fun component8 ()Ldev/formhaus/compose/theme/Palette;
-	public final fun component9 ()Ldev/formhaus/compose/theme/Palette;
 	public final fun copy (Ldev/formhaus/compose/theme/Palette;Ldev/formhaus/compose/theme/Palette;Ldev/formhaus/compose/theme/Typography;Ldev/formhaus/compose/theme/Spacing;Ldev/formhaus/compose/theme/Radii;Ldev/formhaus/compose/theme/Controls;Ldev/formhaus/compose/theme/Motion;Ldev/formhaus/compose/theme/Palette;Ldev/formhaus/compose/theme/Palette;)Ldev/formhaus/compose/theme/FormhausTheme;
 	public static synthetic fun copy$default (Ldev/formhaus/compose/theme/FormhausTheme;Ldev/formhaus/compose/theme/Palette;Ldev/formhaus/compose/theme/Palette;Ldev/formhaus/compose/theme/Typography;Ldev/formhaus/compose/theme/Spacing;Ldev/formhaus/compose/theme/Radii;Ldev/formhaus/compose/theme/Controls;Ldev/formhaus/compose/theme/Motion;Ldev/formhaus/compose/theme/Palette;Ldev/formhaus/compose/theme/Palette;ILjava/lang/Object;)Ldev/formhaus/compose/theme/FormhausTheme;
 	public fun equals (Ljava/lang/Object;)Z
@@ -671,9 +598,6 @@ public final class dev/formhaus/compose/theme/Motion {
 	public fun <init> ()V
 	public fun <init> (III)V
 	public synthetic fun <init> (IIIILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1 ()I
-	public final fun component2 ()I
-	public final fun component3 ()I
 	public final fun copy (III)Ldev/formhaus/compose/theme/Motion;
 	public static synthetic fun copy$default (Ldev/formhaus/compose/theme/Motion;IIIILjava/lang/Object;)Ldev/formhaus/compose/theme/Motion;
 	public fun equals (Ljava/lang/Object;)Z
@@ -690,27 +614,6 @@ public final class dev/formhaus/compose/theme/Palette {
 	public fun <init> ()V
 	public synthetic fun <init> (JJJJJJJJJJJJJJJJLandroidx/compose/ui/graphics/Color;Landroidx/compose/ui/graphics/Color;Landroidx/compose/ui/graphics/Color;Landroidx/compose/ui/graphics/Color;Landroidx/compose/ui/graphics/Color;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public synthetic fun <init> (JJJJJJJJJJJJJJJJLandroidx/compose/ui/graphics/Color;Landroidx/compose/ui/graphics/Color;Landroidx/compose/ui/graphics/Color;Landroidx/compose/ui/graphics/Color;Landroidx/compose/ui/graphics/Color;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1-0d7_KjU ()J
-	public final fun component10-0d7_KjU ()J
-	public final fun component11-0d7_KjU ()J
-	public final fun component12-0d7_KjU ()J
-	public final fun component13-0d7_KjU ()J
-	public final fun component14-0d7_KjU ()J
-	public final fun component15-0d7_KjU ()J
-	public final fun component16-0d7_KjU ()J
-	public final fun component17-QN2ZGVo ()Landroidx/compose/ui/graphics/Color;
-	public final fun component18-QN2ZGVo ()Landroidx/compose/ui/graphics/Color;
-	public final fun component19-QN2ZGVo ()Landroidx/compose/ui/graphics/Color;
-	public final fun component2-0d7_KjU ()J
-	public final fun component20-QN2ZGVo ()Landroidx/compose/ui/graphics/Color;
-	public final fun component21-QN2ZGVo ()Landroidx/compose/ui/graphics/Color;
-	public final fun component3-0d7_KjU ()J
-	public final fun component4-0d7_KjU ()J
-	public final fun component5-0d7_KjU ()J
-	public final fun component6-0d7_KjU ()J
-	public final fun component7-0d7_KjU ()J
-	public final fun component8-0d7_KjU ()J
-	public final fun component9-0d7_KjU ()J
 	public final fun copy-tT8Pu14 (JJJJJJJJJJJJJJJJLandroidx/compose/ui/graphics/Color;Landroidx/compose/ui/graphics/Color;Landroidx/compose/ui/graphics/Color;Landroidx/compose/ui/graphics/Color;Landroidx/compose/ui/graphics/Color;)Ldev/formhaus/compose/theme/Palette;
 	public static synthetic fun copy-tT8Pu14$default (Ldev/formhaus/compose/theme/Palette;JJJJJJJJJJJJJJJJLandroidx/compose/ui/graphics/Color;Landroidx/compose/ui/graphics/Color;Landroidx/compose/ui/graphics/Color;Landroidx/compose/ui/graphics/Color;Landroidx/compose/ui/graphics/Color;ILjava/lang/Object;)Ldev/formhaus/compose/theme/Palette;
 	public fun equals (Ljava/lang/Object;)Z
@@ -749,8 +652,6 @@ public final class dev/formhaus/compose/theme/Radii {
 	public static final field Companion Ldev/formhaus/compose/theme/Radii$Companion;
 	public synthetic fun <init> (FFILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public synthetic fun <init> (FFLkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1-D9Ej5fM ()F
-	public final fun component2-D9Ej5fM ()F
 	public final fun copy-YgX7TsA (FF)Ldev/formhaus/compose/theme/Radii;
 	public static synthetic fun copy-YgX7TsA$default (Ldev/formhaus/compose/theme/Radii;FFILjava/lang/Object;)Ldev/formhaus/compose/theme/Radii;
 	public fun equals (Ljava/lang/Object;)Z
@@ -795,18 +696,6 @@ public final class dev/formhaus/compose/theme/Spacing {
 	public static final field $stable I
 	public static final field Companion Ldev/formhaus/compose/theme/Spacing$Companion;
 	public synthetic fun <init> (FFFFFFFFFFFFLkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1-D9Ej5fM ()F
-	public final fun component10-D9Ej5fM ()F
-	public final fun component11-D9Ej5fM ()F
-	public final fun component12-D9Ej5fM ()F
-	public final fun component2-D9Ej5fM ()F
-	public final fun component3-D9Ej5fM ()F
-	public final fun component4-D9Ej5fM ()F
-	public final fun component5-D9Ej5fM ()F
-	public final fun component6-D9Ej5fM ()F
-	public final fun component7-D9Ej5fM ()F
-	public final fun component8-D9Ej5fM ()F
-	public final fun component9-D9Ej5fM ()F
 	public final fun copy-CaHt2TY (FFFFFFFFFFFF)Ldev/formhaus/compose/theme/Spacing;
 	public static synthetic fun copy-CaHt2TY$default (Ldev/formhaus/compose/theme/Spacing;FFFFFFFFFFFFILjava/lang/Object;)Ldev/formhaus/compose/theme/Spacing;
 	public fun equals (Ljava/lang/Object;)Z
@@ -836,11 +725,6 @@ public final class dev/formhaus/compose/theme/TextRole {
 	public static final field Companion Ldev/formhaus/compose/theme/TextRole$Companion;
 	public fun <init> (Ldev/formhaus/compose/theme/TextRole$Size;Landroidx/compose/ui/text/font/FontWeight;FLdev/formhaus/compose/theme/TextRole$Tone;Z)V
 	public synthetic fun <init> (Ldev/formhaus/compose/theme/TextRole$Size;Landroidx/compose/ui/text/font/FontWeight;FLdev/formhaus/compose/theme/TextRole$Tone;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1 ()Ldev/formhaus/compose/theme/TextRole$Size;
-	public final fun component2 ()Landroidx/compose/ui/text/font/FontWeight;
-	public final fun component3 ()F
-	public final fun component4 ()Ldev/formhaus/compose/theme/TextRole$Tone;
-	public final fun component5 ()Z
 	public final fun copy (Ldev/formhaus/compose/theme/TextRole$Size;Landroidx/compose/ui/text/font/FontWeight;FLdev/formhaus/compose/theme/TextRole$Tone;Z)Ldev/formhaus/compose/theme/TextRole;
 	public static synthetic fun copy$default (Ldev/formhaus/compose/theme/TextRole;Ldev/formhaus/compose/theme/TextRole$Size;Landroidx/compose/ui/text/font/FontWeight;FLdev/formhaus/compose/theme/TextRole$Tone;ZILjava/lang/Object;)Ldev/formhaus/compose/theme/TextRole;
 	public fun equals (Ljava/lang/Object;)Z
@@ -903,11 +787,6 @@ public final class dev/formhaus/compose/theme/Typography {
 	public static final field Companion Ldev/formhaus/compose/theme/Typography$Companion;
 	public synthetic fun <init> (JJJJLandroidx/compose/ui/text/font/FontFamily;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public synthetic fun <init> (JJJJLandroidx/compose/ui/text/font/FontFamily;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1-XSAIIZE ()J
-	public final fun component2-XSAIIZE ()J
-	public final fun component3-XSAIIZE ()J
-	public final fun component4-XSAIIZE ()J
-	public final fun component5 ()Landroidx/compose/ui/text/font/FontFamily;
 	public final fun copy-dns8qtM (JJJJLandroidx/compose/ui/text/font/FontFamily;)Ldev/formhaus/compose/theme/Typography;
 	public static synthetic fun copy-dns8qtM$default (Ldev/formhaus/compose/theme/Typography;JJJJLandroidx/compose/ui/text/font/FontFamily;ILjava/lang/Object;)Ldev/formhaus/compose/theme/Typography;
 	public fun equals (Ljava/lang/Object;)Z

@@ -1,30 +1,113 @@
 package dev.formhaus.compose.theme
 
 import androidx.compose.ui.graphics.Color
+import dev.formhaus.compose.model.ValueParts
+import dev.formhaus.compose.model.describe
+import dev.formhaus.compose.model.equalParts
+import dev.formhaus.compose.model.partsHash
 
-public data class Palette(
-    val text: Color = lightPalette.text,
-    val textMuted: Color = lightPalette.textMuted,
-    val border: Color = lightPalette.border,
-    val inputBorder: Color = lightPalette.inputBorder,
-    val borderHover: Color = lightPalette.borderHover,
-    val control: Color = lightPalette.control,
-    val error: Color = lightPalette.error,
-    val errorHover: Color = lightPalette.errorHover,
-    val background: Color = lightPalette.background,
-    val backgroundDisabled: Color = lightPalette.backgroundDisabled,
-    val backgroundHover: Color = lightPalette.backgroundHover,
-    val primary: Color = lightPalette.primary,
-    val onPrimary: Color = lightPalette.onPrimary,
-    val secondaryBorder: Color = lightPalette.secondaryBorder,
-    val scrim: Color = lightPalette.scrim,
-    val shadow: Color = lightPalette.shadow,
-    val focus: Color? = null,
-    val primaryHover: Color? = null,
-    val primarySoft: Color? = null,
-    val errorSoft: Color? = null,
-    val inputBorderHover: Color? = null,
+@Suppress("LongParameterList")
+public class Palette(
+    public val text: Color = lightPalette.text,
+    public val textMuted: Color = lightPalette.textMuted,
+    public val border: Color = lightPalette.border,
+    public val inputBorder: Color = lightPalette.inputBorder,
+    public val borderHover: Color = lightPalette.borderHover,
+    public val control: Color = lightPalette.control,
+    public val error: Color = lightPalette.error,
+    public val errorHover: Color = lightPalette.errorHover,
+    public val background: Color = lightPalette.background,
+    public val backgroundDisabled: Color = lightPalette.backgroundDisabled,
+    public val backgroundHover: Color = lightPalette.backgroundHover,
+    public val primary: Color = lightPalette.primary,
+    public val onPrimary: Color = lightPalette.onPrimary,
+    public val secondaryBorder: Color = lightPalette.secondaryBorder,
+    public val scrim: Color = lightPalette.scrim,
+    public val shadow: Color = lightPalette.shadow,
+    public val focus: Color? = null,
+    public val primaryHover: Color? = null,
+    public val primarySoft: Color? = null,
+    public val errorSoft: Color? = null,
+    public val inputBorderHover: Color? = null,
 ) {
+    public fun copy(
+        text: Color = this.text,
+        textMuted: Color = this.textMuted,
+        border: Color = this.border,
+        inputBorder: Color = this.inputBorder,
+        borderHover: Color = this.borderHover,
+        control: Color = this.control,
+        error: Color = this.error,
+        errorHover: Color = this.errorHover,
+        background: Color = this.background,
+        backgroundDisabled: Color = this.backgroundDisabled,
+        backgroundHover: Color = this.backgroundHover,
+        primary: Color = this.primary,
+        onPrimary: Color = this.onPrimary,
+        secondaryBorder: Color = this.secondaryBorder,
+        scrim: Color = this.scrim,
+        shadow: Color = this.shadow,
+        focus: Color? = this.focus,
+        primaryHover: Color? = this.primaryHover,
+        primarySoft: Color? = this.primarySoft,
+        errorSoft: Color? = this.errorSoft,
+        inputBorderHover: Color? = this.inputBorderHover,
+    ): Palette =
+        Palette(
+            text,
+            textMuted,
+            border,
+            inputBorder,
+            borderHover,
+            control,
+            error,
+            errorHover,
+            background,
+            backgroundDisabled,
+            backgroundHover,
+            primary,
+            onPrimary,
+            secondaryBorder,
+            scrim,
+            shadow,
+            focus,
+            primaryHover,
+            primarySoft,
+            errorSoft,
+            inputBorderHover,
+        )
+
+    override fun equals(other: Any?): Boolean = equalParts(other, Palette::parts)
+
+    override fun hashCode(): Int = parts().partsHash()
+
+    override fun toString(): String = parts().describe("Palette")
+
+    private fun parts(): ValueParts =
+        listOf(
+            "text" to text,
+            "textMuted" to textMuted,
+            "border" to border,
+            "inputBorder" to inputBorder,
+            "borderHover" to borderHover,
+            "control" to control,
+            "error" to error,
+            "errorHover" to errorHover,
+            "background" to background,
+            "backgroundDisabled" to backgroundDisabled,
+            "backgroundHover" to backgroundHover,
+            "primary" to primary,
+            "onPrimary" to onPrimary,
+            "secondaryBorder" to secondaryBorder,
+            "scrim" to scrim,
+            "shadow" to shadow,
+            "focus" to focus,
+            "primaryHover" to primaryHover,
+            "primarySoft" to primarySoft,
+            "errorSoft" to errorSoft,
+            "inputBorderHover" to inputBorderHover,
+        )
+
     public companion object {
         public val light: Palette get() = lightPalette
         public val dark: Palette get() = darkPalette

@@ -109,8 +109,16 @@ internal data class OptionsSource(
     val inputs: List<JsonValue?>,
 )
 
-public data class FocusRequest(
-    val key: String?,
-    val id: Int,
-    val summary: Boolean,
-)
+public class FocusRequest internal constructor(
+    public val key: String?,
+    public val id: Int,
+    public val summary: Boolean,
+) {
+    override fun equals(other: Any?): Boolean = equalParts(other, FocusRequest::parts)
+
+    override fun hashCode(): Int = parts().partsHash()
+
+    override fun toString(): String = parts().describe("FocusRequest")
+
+    private fun parts(): ValueParts = listOf("key" to key, "id" to id, "summary" to summary)
+}

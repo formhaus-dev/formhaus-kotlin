@@ -14,12 +14,20 @@ public sealed interface TestIds {
     ) : TestIds
 }
 
-public data class ActionTestIds(
-    val submit: String?,
-    val next: String?,
-    val back: String?,
-    val cancel: String?,
-)
+public class ActionTestIds internal constructor(
+    public val submit: String?,
+    public val next: String?,
+    public val back: String?,
+    public val cancel: String?,
+) {
+    override fun equals(other: Any?): Boolean = equalParts(other, ActionTestIds::parts)
+
+    override fun hashCode(): Int = parts().partsHash()
+
+    override fun toString(): String = parts().describe("ActionTestIds")
+
+    private fun parts(): ValueParts = listOf("submit" to submit, "next" to next, "back" to back, "cancel" to cancel)
+}
 
 internal fun FormModel.testId(
     kind: TestIdTarget.Kind,

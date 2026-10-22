@@ -41,7 +41,14 @@ internal abstract class AbiDumpTask : AbiToolsTask() {
 
     @TaskAction
     fun write() {
-        val classFiles = classes.asFileTree.filter { it.extension == "class" }.map { it.toPath() }
+        val classFiles =
+            classes.asFileTree
+                .filter {
+                    it.extension == "class" &&
+                        !it.name.startsWith(
+                            "ComposableSingletons",
+                        )
+                }.map { it.toPath() }
         dump.get().asFile.writeText(abiText { dumpJvmAbiToStringOperationBuilder(it, classFiles).build() })
     }
 }
