@@ -1,15 +1,26 @@
 package dev.formhaus.core.i18n
 
+import dev.formhaus.core.json.ValueParts
+import dev.formhaus.core.json.describe
+import dev.formhaus.core.json.equalParts
+import dev.formhaus.core.json.partsHash
 import dev.formhaus.core.model.FormDefinition
 
-@ConsistentCopyVisibility
-public data class TextSlot internal constructor(
+public class TextSlot internal constructor(
     public val address: String,
     public val key: String?,
     public val text: String,
     public val params: List<String>,
     public val hash: String,
-)
+) {
+    override fun equals(other: Any?): Boolean = equalParts(other, TextSlot::parts)
+
+    override fun hashCode(): Int = parts().partsHash()
+
+    override fun toString(): String = parts().describe("TextSlot")
+
+    private fun parts(): ValueParts = listOf("address" to address, "key" to key, "text" to text, "params" to params, "hash" to hash)
+}
 
 public sealed interface TranslationPrefix {
     public data object DefinitionId : TranslationPrefix

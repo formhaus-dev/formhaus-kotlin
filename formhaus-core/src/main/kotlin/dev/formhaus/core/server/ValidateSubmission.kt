@@ -12,6 +12,10 @@ import dev.formhaus.core.json.JsonObject
 import dev.formhaus.core.json.JsonValue
 import dev.formhaus.core.json.MutableJsonObject
 import dev.formhaus.core.json.MutableStringMap
+import dev.formhaus.core.json.ValueParts
+import dev.formhaus.core.json.describe
+import dev.formhaus.core.json.equalParts
+import dev.formhaus.core.json.partsHash
 import dev.formhaus.core.json.stringMapOf
 import dev.formhaus.core.model.FormDefinition
 import dev.formhaus.core.model.FormField
@@ -39,11 +43,18 @@ public class SubmissionOptions(
     ) : this(JsonValue.Array(skippedSteps.map(JsonValue::String)), validators, messages, hiddenValues)
 }
 
-@ConsistentCopyVisibility
-public data class SubmissionResult internal constructor(
+public class SubmissionResult internal constructor(
     public val values: JsonObject,
     public val errors: FieldErrors,
-)
+) {
+    override fun equals(other: Any?): Boolean = equalParts(other, SubmissionResult::parts)
+
+    override fun hashCode(): Int = parts().partsHash()
+
+    override fun toString(): String = parts().describe("SubmissionResult")
+
+    private fun parts(): ValueParts = listOf("values" to values, "errors" to errors)
+}
 
 private const val BODY_MESSAGE = "Pass the values object as the second argument, not the request body with \"values\" and \"skippedSteps\"."
 

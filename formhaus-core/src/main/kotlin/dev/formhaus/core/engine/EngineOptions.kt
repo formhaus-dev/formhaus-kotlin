@@ -5,7 +5,11 @@ import dev.formhaus.core.json.FieldErrors
 import dev.formhaus.core.json.JsonObject
 import dev.formhaus.core.json.JsonValue
 import dev.formhaus.core.json.MutableStringMap
+import dev.formhaus.core.json.ValueParts
+import dev.formhaus.core.json.describe
+import dev.formhaus.core.json.equalParts
 import dev.formhaus.core.json.jsString
+import dev.formhaus.core.json.partsHash
 import dev.formhaus.core.json.stringMapOf
 import dev.formhaus.core.model.FieldOption
 import dev.formhaus.core.model.FormField
@@ -21,20 +25,36 @@ public enum class StepChangeReason(
     SKIP("skip"),
 }
 
-public data class StepChangeContext(
+public class StepChangeContext(
     public val fromStepId: String,
     public val toStepId: String,
     public val reason: StepChangeReason,
     public val values: JsonObject,
-)
+) {
+    override fun equals(other: Any?): Boolean = equalParts(other, StepChangeContext::parts)
+
+    override fun hashCode(): Int = parts().partsHash()
+
+    override fun toString(): String = parts().describe("StepChangeContext")
+
+    private fun parts(): ValueParts = listOf("fromStepId" to fromStepId, "toStepId" to toStepId, "reason" to reason, "values" to values)
+}
 
 public sealed class SubmitResult {
     public data object Ok : SubmitResult()
 
-    public data class Rejected(
+    public class Rejected(
         public val errors: FieldErrors = stringMapOf(),
         public val formErrors: List<String> = emptyList(),
-    ) : SubmitResult()
+    ) : SubmitResult() {
+        override fun equals(other: Any?): Boolean = equalParts(other, Rejected::parts)
+
+        override fun hashCode(): Int = parts().partsHash()
+
+        override fun toString(): String = parts().describe("Rejected")
+
+        private fun parts(): ValueParts = listOf("errors" to errors, "formErrors" to formErrors)
+    }
 
     public companion object {
         public fun of(json: JsonValue?): SubmitResult? {
@@ -52,10 +72,18 @@ public sealed class SubmitResult {
     }
 }
 
-public data class StepProgress(
+public class StepProgress(
     public val current: Int,
     public val total: Int,
-)
+) {
+    override fun equals(other: Any?): Boolean = equalParts(other, StepProgress::parts)
+
+    override fun hashCode(): Int = parts().partsHash()
+
+    override fun toString(): String = parts().describe("StepProgress")
+
+    private fun parts(): ValueParts = listOf("current" to current, "total" to total)
+}
 
 public class GroupItem internal constructor(
     public val id: String,

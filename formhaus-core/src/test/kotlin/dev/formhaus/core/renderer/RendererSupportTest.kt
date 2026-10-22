@@ -86,6 +86,18 @@ class RendererSupportTest {
     }
 
     @Test
+    fun `value types compare, hash and print by their properties`() {
+        val target = TestIdTarget(TestIdTarget.Kind.FIELD, "f", "plan")
+        val option = target.copy(kind = TestIdTarget.Kind.OPTION, value = "pro")
+        assertEquals(TestIdTarget(TestIdTarget.Kind.OPTION, "f", "plan", "pro"), option)
+        assertEquals(TestIdTarget(TestIdTarget.Kind.FIELD, "f", "plan").hashCode(), target.hashCode())
+        assertNotEquals(target, option)
+        assertEquals("TestIdTarget(kind=FIELD, definitionId=f, key=plan, value=null)", target.toString())
+        assertEquals(ErrorEntry("a", "A", "Empty"), ErrorEntry("a", "A", "Empty"))
+        assertNotEquals(ErrorEntry("a", "A", "Empty"), ErrorEntry("a", "A", "Short"))
+    }
+
+    @Test
     fun `renderer helpers expose ids, limits and options`() {
         assertEquals("f.email", TestIdTarget(TestIdTarget.Kind.FIELD, "f", "email").defaultId)
         assertEquals("f.plan.pro", TestIdTarget(TestIdTarget.Kind.OPTION, "f", "plan", "pro").defaultId)

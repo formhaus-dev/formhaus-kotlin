@@ -1,7 +1,11 @@
 package dev.formhaus.core.definitionvalidation
 
-@ConsistentCopyVisibility
-public data class DefinitionIssue internal constructor(
+import dev.formhaus.core.json.ValueParts
+import dev.formhaus.core.json.describe
+import dev.formhaus.core.json.equalParts
+import dev.formhaus.core.json.partsHash
+
+public class DefinitionIssue internal constructor(
     public val code: IssueCode,
     public val severity: Severity,
     public val path: String,
@@ -12,7 +16,15 @@ public data class DefinitionIssue internal constructor(
 
     public val isError: Boolean get() = severity == Severity.ERROR
 
-    internal fun withSeverity(severity: Severity): DefinitionIssue = copy(severity = severity)
+    internal fun withSeverity(severity: Severity): DefinitionIssue = DefinitionIssue(code, severity, path, message, hint)
+
+    override fun equals(other: Any?): Boolean = equalParts(other, DefinitionIssue::parts)
+
+    override fun hashCode(): Int = parts().partsHash()
+
+    override fun toString(): String = parts().describe("DefinitionIssue")
+
+    private fun parts(): ValueParts = listOf("code" to code, "severity" to severity, "path" to path, "message" to message, "hint" to hint)
 }
 
 public class FormDefinitionError internal constructor(

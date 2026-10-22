@@ -4,7 +4,11 @@ import dev.formhaus.core.cldr.calendars
 import dev.formhaus.core.cldr.withDefault
 import dev.formhaus.core.json.JsonObject
 import dev.formhaus.core.json.JsonValue
+import dev.formhaus.core.json.ValueParts
+import dev.formhaus.core.json.describe
+import dev.formhaus.core.json.equalParts
 import dev.formhaus.core.json.mutableStringMapOf
+import dev.formhaus.core.json.partsHash
 import dev.formhaus.core.model.FieldOption
 import dev.formhaus.core.model.FormDefinition
 import dev.formhaus.core.model.FormField
@@ -59,14 +63,20 @@ public data class ItemPath internal constructor(
     public val field: String,
 )
 
-@ConsistentCopyVisibility
-public data class RecallDependency internal constructor(
+public class RecallDependency internal constructor(
     public val key: String,
     public val isGroup: Boolean,
-)
+) {
+    override fun equals(other: Any?): Boolean = equalParts(other, RecallDependency::parts)
 
-@ConsistentCopyVisibility
-public data class RecalledTexts internal constructor(
+    override fun hashCode(): Int = parts().partsHash()
+
+    override fun toString(): String = parts().describe("RecallDependency")
+
+    private fun parts(): ValueParts = listOf("key" to key, "isGroup" to isGroup)
+}
+
+public class RecalledTexts internal constructor(
     public val title: String?,
     public val description: String?,
     public val label: String?,
@@ -80,6 +90,21 @@ public data class RecalledTexts internal constructor(
         json["helperText"]?.stringValue,
         json["placeholder"]?.stringValue,
     )
+
+    override fun equals(other: Any?): Boolean = equalParts(other, RecalledTexts::parts)
+
+    override fun hashCode(): Int = parts().partsHash()
+
+    override fun toString(): String = parts().describe("RecalledTexts")
+
+    private fun parts(): ValueParts =
+        listOf(
+            "title" to title,
+            "description" to description,
+            "label" to label,
+            "helperText" to helperText,
+            "placeholder" to placeholder,
+        )
 }
 
 @RendererApi

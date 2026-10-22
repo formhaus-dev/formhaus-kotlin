@@ -11,11 +11,6 @@ public final class dev/formhaus/core/definitionvalidation/CheckDefinitionOptions
 }
 
 public final class dev/formhaus/core/definitionvalidation/DefinitionIssue {
-	public final fun component1-SGZMid8 ()Ljava/lang/String;
-	public final fun component2 ()Ldev/formhaus/core/definitionvalidation/DefinitionIssue$Severity;
-	public final fun component3 ()Ljava/lang/String;
-	public final fun component4 ()Ljava/lang/String;
-	public final fun component5 ()Ljava/lang/String;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getCode-SGZMid8 ()Ljava/lang/String;
 	public final fun getHint ()Ljava/lang/String;
@@ -210,10 +205,6 @@ public abstract class dev/formhaus/core/engine/FormEvent {
 
 public final class dev/formhaus/core/engine/FormEvent$FieldError : dev/formhaus/core/engine/FormEvent {
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Ldev/formhaus/core/engine/FormEvent$FieldError;
-	public static synthetic fun copy$default (Ldev/formhaus/core/engine/FormEvent$FieldError;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Ldev/formhaus/core/engine/FormEvent$FieldError;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getError ()Ljava/lang/String;
 	public final fun getFieldKey ()Ljava/lang/String;
@@ -223,9 +214,6 @@ public final class dev/formhaus/core/engine/FormEvent$FieldError : dev/formhaus/
 
 public final class dev/formhaus/core/engine/FormEvent$FieldHidden : dev/formhaus/core/engine/FormEvent {
 	public fun <init> (Ljava/lang/String;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;)Ldev/formhaus/core/engine/FormEvent$FieldHidden;
-	public static synthetic fun copy$default (Ldev/formhaus/core/engine/FormEvent$FieldHidden;Ljava/lang/String;ILjava/lang/Object;)Ldev/formhaus/core/engine/FormEvent$FieldHidden;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getFieldKey ()Ljava/lang/String;
 	public fun hashCode ()I
@@ -234,9 +222,6 @@ public final class dev/formhaus/core/engine/FormEvent$FieldHidden : dev/formhaus
 
 public final class dev/formhaus/core/engine/FormEvent$FieldShown : dev/formhaus/core/engine/FormEvent {
 	public fun <init> (Ljava/lang/String;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;)Ldev/formhaus/core/engine/FormEvent$FieldShown;
-	public static synthetic fun copy$default (Ldev/formhaus/core/engine/FormEvent$FieldShown;Ljava/lang/String;ILjava/lang/Object;)Ldev/formhaus/core/engine/FormEvent$FieldShown;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getFieldKey ()Ljava/lang/String;
 	public fun hashCode ()I
@@ -252,9 +237,6 @@ public final class dev/formhaus/core/engine/FormEvent$FormReset : dev/formhaus/c
 
 public final class dev/formhaus/core/engine/FormEvent$FormSubmitFailed : dev/formhaus/core/engine/FormEvent {
 	public fun <init> (Ldev/formhaus/core/engine/SubmitFailureReason;)V
-	public final fun component1 ()Ldev/formhaus/core/engine/SubmitFailureReason;
-	public final fun copy (Ldev/formhaus/core/engine/SubmitFailureReason;)Ldev/formhaus/core/engine/FormEvent$FormSubmitFailed;
-	public static synthetic fun copy$default (Ldev/formhaus/core/engine/FormEvent$FormSubmitFailed;Ldev/formhaus/core/engine/SubmitFailureReason;ILjava/lang/Object;)Ldev/formhaus/core/engine/FormEvent$FormSubmitFailed;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getReason ()Ldev/formhaus/core/engine/SubmitFailureReason;
 	public fun hashCode ()I
@@ -270,9 +252,6 @@ public final class dev/formhaus/core/engine/FormEvent$FormSubmitSucceeded : dev/
 
 public final class dev/formhaus/core/engine/FormEvent$FormSubmitted : dev/formhaus/core/engine/FormEvent {
 	public fun <init> (I)V
-	public final fun component1 ()I
-	public final fun copy (I)Ldev/formhaus/core/engine/FormEvent$FormSubmitted;
-	public static synthetic fun copy$default (Ldev/formhaus/core/engine/FormEvent$FormSubmitted;IILjava/lang/Object;)Ldev/formhaus/core/engine/FormEvent$FormSubmitted;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getFieldCount ()I
 	public fun hashCode ()I
@@ -288,9 +267,6 @@ public final class dev/formhaus/core/engine/FormEvent$FormViewed : dev/formhaus/
 
 public final class dev/formhaus/core/engine/FormEvent$StepCompleted : dev/formhaus/core/engine/FormEvent {
 	public fun <init> (Ljava/lang/String;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;)Ldev/formhaus/core/engine/FormEvent$StepCompleted;
-	public static synthetic fun copy$default (Ldev/formhaus/core/engine/FormEvent$StepCompleted;Ljava/lang/String;ILjava/lang/Object;)Ldev/formhaus/core/engine/FormEvent$StepCompleted;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getStepId ()Ljava/lang/String;
 	public fun hashCode ()I
@@ -299,11 +275,6 @@ public final class dev/formhaus/core/engine/FormEvent$StepCompleted : dev/formha
 
 public final class dev/formhaus/core/engine/FormEvent$StepRedirected : dev/formhaus/core/engine/FormEvent {
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ldev/formhaus/core/engine/StepRedirectReason;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Ljava/lang/String;
-	public final fun component3 ()Ldev/formhaus/core/engine/StepRedirectReason;
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ldev/formhaus/core/engine/StepRedirectReason;)Ldev/formhaus/core/engine/FormEvent$StepRedirected;
-	public static synthetic fun copy$default (Ldev/formhaus/core/engine/FormEvent$StepRedirected;Ljava/lang/String;Ljava/lang/String;Ldev/formhaus/core/engine/StepRedirectReason;ILjava/lang/Object;)Ldev/formhaus/core/engine/FormEvent$StepRedirected;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getReason ()Ldev/formhaus/core/engine/StepRedirectReason;
 	public final fun getRequestedStepId ()Ljava/lang/String;
@@ -314,9 +285,6 @@ public final class dev/formhaus/core/engine/FormEvent$StepRedirected : dev/formh
 
 public final class dev/formhaus/core/engine/FormEvent$StepSkipped : dev/formhaus/core/engine/FormEvent {
 	public fun <init> (Ljava/lang/String;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;)Ldev/formhaus/core/engine/FormEvent$StepSkipped;
-	public static synthetic fun copy$default (Ldev/formhaus/core/engine/FormEvent$StepSkipped;Ljava/lang/String;ILjava/lang/Object;)Ldev/formhaus/core/engine/FormEvent$StepSkipped;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getStepId ()Ljava/lang/String;
 	public fun hashCode ()I
@@ -325,10 +293,6 @@ public final class dev/formhaus/core/engine/FormEvent$StepSkipped : dev/formhaus
 
 public final class dev/formhaus/core/engine/FormEvent$StepViewed : dev/formhaus/core/engine/FormEvent {
 	public fun <init> (Ljava/lang/String;I)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()I
-	public final fun copy (Ljava/lang/String;I)Ldev/formhaus/core/engine/FormEvent$StepViewed;
-	public static synthetic fun copy$default (Ldev/formhaus/core/engine/FormEvent$StepViewed;Ljava/lang/String;IILjava/lang/Object;)Ldev/formhaus/core/engine/FormEvent$StepViewed;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getStepId ()Ljava/lang/String;
 	public final fun getStepIndex ()I
@@ -383,11 +347,6 @@ public final class dev/formhaus/core/engine/FormSnapshotKt {
 
 public final class dev/formhaus/core/engine/GoToStepResult {
 	public fun <init> (Ljava/lang/String;ZLdev/formhaus/core/engine/StepRedirectReason;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Z
-	public final fun component3 ()Ldev/formhaus/core/engine/StepRedirectReason;
-	public final fun copy (Ljava/lang/String;ZLdev/formhaus/core/engine/StepRedirectReason;)Ldev/formhaus/core/engine/GoToStepResult;
-	public static synthetic fun copy$default (Ldev/formhaus/core/engine/GoToStepResult;Ljava/lang/String;ZLdev/formhaus/core/engine/StepRedirectReason;ILjava/lang/Object;)Ldev/formhaus/core/engine/GoToStepResult;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getReached ()Z
 	public final fun getReason ()Ldev/formhaus/core/engine/StepRedirectReason;
@@ -495,12 +454,6 @@ public final class dev/formhaus/core/engine/RecallOptions {
 
 public final class dev/formhaus/core/engine/StepChangeContext {
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ldev/formhaus/core/engine/StepChangeReason;Ldev/formhaus/core/json/StringMap;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Ljava/lang/String;
-	public final fun component3 ()Ldev/formhaus/core/engine/StepChangeReason;
-	public final fun component4 ()Ldev/formhaus/core/json/StringMap;
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ldev/formhaus/core/engine/StepChangeReason;Ldev/formhaus/core/json/StringMap;)Ldev/formhaus/core/engine/StepChangeContext;
-	public static synthetic fun copy$default (Ldev/formhaus/core/engine/StepChangeContext;Ljava/lang/String;Ljava/lang/String;Ldev/formhaus/core/engine/StepChangeReason;Ldev/formhaus/core/json/StringMap;ILjava/lang/Object;)Ldev/formhaus/core/engine/StepChangeContext;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getFromStepId ()Ljava/lang/String;
 	public final fun getReason ()Ldev/formhaus/core/engine/StepChangeReason;
@@ -523,10 +476,6 @@ public final class dev/formhaus/core/engine/StepChangeReason : java/lang/Enum {
 
 public final class dev/formhaus/core/engine/StepProgress {
 	public fun <init> (II)V
-	public final fun component1 ()I
-	public final fun component2 ()I
-	public final fun copy (II)Ldev/formhaus/core/engine/StepProgress;
-	public static synthetic fun copy$default (Ldev/formhaus/core/engine/StepProgress;IIILjava/lang/Object;)Ldev/formhaus/core/engine/StepProgress;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getCurrent ()I
 	public final fun getTotal ()I
@@ -551,9 +500,6 @@ public abstract class dev/formhaus/core/engine/SubmitFailureReason {
 
 public final class dev/formhaus/core/engine/SubmitFailureReason$Error : dev/formhaus/core/engine/SubmitFailureReason {
 	public fun <init> (Ljava/lang/Integer;)V
-	public final fun component1 ()Ljava/lang/Integer;
-	public final fun copy (Ljava/lang/Integer;)Ldev/formhaus/core/engine/SubmitFailureReason$Error;
-	public static synthetic fun copy$default (Ldev/formhaus/core/engine/SubmitFailureReason$Error;Ljava/lang/Integer;ILjava/lang/Object;)Ldev/formhaus/core/engine/SubmitFailureReason$Error;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getStatus ()Ljava/lang/Integer;
 	public fun hashCode ()I
@@ -593,10 +539,6 @@ public final class dev/formhaus/core/engine/SubmitResult$Rejected : dev/formhaus
 	public fun <init> ()V
 	public fun <init> (Ldev/formhaus/core/json/StringMap;Ljava/util/List;)V
 	public synthetic fun <init> (Ldev/formhaus/core/json/StringMap;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1 ()Ldev/formhaus/core/json/StringMap;
-	public final fun component2 ()Ljava/util/List;
-	public final fun copy (Ldev/formhaus/core/json/StringMap;Ljava/util/List;)Ldev/formhaus/core/engine/SubmitResult$Rejected;
-	public static synthetic fun copy$default (Ldev/formhaus/core/engine/SubmitResult$Rejected;Ldev/formhaus/core/json/StringMap;Ljava/util/List;ILjava/lang/Object;)Ldev/formhaus/core/engine/SubmitResult$Rejected;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getErrors ()Ldev/formhaus/core/json/StringMap;
 	public final fun getFormErrors ()Ljava/util/List;
@@ -620,8 +562,6 @@ public final class dev/formhaus/core/i18n/LocalizedKt {
 }
 
 public final class dev/formhaus/core/i18n/MissingKeys {
-	public final fun component1 ()Ljava/util/List;
-	public final fun component2 ()Ljava/util/List;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getLabels ()Ljava/util/List;
 	public final fun getMessages ()Ljava/util/List;
@@ -635,11 +575,6 @@ public final class dev/formhaus/core/i18n/MissingKeysKt {
 }
 
 public final class dev/formhaus/core/i18n/TextSlot {
-	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Ljava/lang/String;
-	public final fun component3 ()Ljava/lang/String;
-	public final fun component4 ()Ljava/util/List;
-	public final fun component5 ()Ljava/lang/String;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAddress ()Ljava/lang/String;
 	public final fun getHash ()Ljava/lang/String;
@@ -1017,9 +952,6 @@ public final class dev/formhaus/core/renderer/EngineValuesKt {
 }
 
 public final class dev/formhaus/core/renderer/ErrorEntry {
-	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Ljava/lang/String;
-	public final fun component3 ()Ljava/lang/String;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getId ()Ljava/lang/String;
 	public final fun getKey ()Ljava/lang/String;
@@ -1031,9 +963,6 @@ public final class dev/formhaus/core/renderer/ErrorEntry {
 }
 
 public final class dev/formhaus/core/renderer/ErrorGroup {
-	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Ljava/lang/String;
-	public final fun component3 ()Ljava/util/List;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getEntries ()Ljava/util/List;
 	public final fun getId ()Ljava/lang/String;
@@ -1043,21 +972,6 @@ public final class dev/formhaus/core/renderer/ErrorGroup {
 }
 
 public final class dev/formhaus/core/renderer/FormActionsState {
-	public final fun component1 ()Ldev/formhaus/core/model/FormAction;
-	public final fun component10 ()Z
-	public final fun component11 ()Z
-	public final fun component12 ()Z
-	public final fun component13 ()Ljava/lang/String;
-	public final fun component14 ()Z
-	public final fun component15 ()Ljava/lang/String;
-	public final fun component2 ()Ldev/formhaus/core/model/FormAction;
-	public final fun component3 ()Ldev/formhaus/core/model/FormAction;
-	public final fun component4 ()Ldev/formhaus/core/model/FormAction;
-	public final fun component5 ()Ldev/formhaus/core/model/FormAction;
-	public final fun component6 ()Z
-	public final fun component7 ()Z
-	public final fun component8 ()Z
-	public final fun component9 ()Ljava/lang/String;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getBackAction ()Ldev/formhaus/core/model/FormAction;
 	public final fun getBackLabel ()Ljava/lang/String;
@@ -1155,8 +1069,6 @@ public final class dev/formhaus/core/renderer/OptionTextsKt {
 }
 
 public final class dev/formhaus/core/renderer/RecallDependency {
-	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Z
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getKey ()Ljava/lang/String;
 	public fun hashCode ()I
@@ -1177,11 +1089,6 @@ public final class dev/formhaus/core/renderer/RecalledKt {
 }
 
 public final class dev/formhaus/core/renderer/RecalledTexts {
-	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Ljava/lang/String;
-	public final fun component3 ()Ljava/lang/String;
-	public final fun component4 ()Ljava/lang/String;
-	public final fun component5 ()Ljava/lang/String;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getDescription ()Ljava/lang/String;
 	public final fun getHelperText ()Ljava/lang/String;
@@ -1219,10 +1126,6 @@ public final class dev/formhaus/core/renderer/StepStateKt {
 public final class dev/formhaus/core/renderer/TestIdTarget {
 	public fun <init> (Ldev/formhaus/core/renderer/TestIdTarget$Kind;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
 	public synthetic fun <init> (Ldev/formhaus/core/renderer/TestIdTarget$Kind;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1 ()Ldev/formhaus/core/renderer/TestIdTarget$Kind;
-	public final fun component2 ()Ljava/lang/String;
-	public final fun component3 ()Ljava/lang/String;
-	public final fun component4 ()Ljava/lang/String;
 	public final fun copy (Ldev/formhaus/core/renderer/TestIdTarget$Kind;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Ldev/formhaus/core/renderer/TestIdTarget;
 	public static synthetic fun copy$default (Ldev/formhaus/core/renderer/TestIdTarget;Ldev/formhaus/core/renderer/TestIdTarget$Kind;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Ldev/formhaus/core/renderer/TestIdTarget;
 	public fun equals (Ljava/lang/Object;)Z
@@ -1263,8 +1166,6 @@ public final class dev/formhaus/core/server/SubmissionOptions {
 }
 
 public final class dev/formhaus/core/server/SubmissionResult {
-	public final fun component1 ()Ldev/formhaus/core/json/StringMap;
-	public final fun component2 ()Ldev/formhaus/core/json/StringMap;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getErrors ()Ldev/formhaus/core/json/StringMap;
 	public final fun getValues ()Ldev/formhaus/core/json/StringMap;

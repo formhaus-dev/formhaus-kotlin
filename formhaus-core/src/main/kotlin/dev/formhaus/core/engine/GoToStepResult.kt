@@ -1,12 +1,24 @@
 package dev.formhaus.core.engine
 
+import dev.formhaus.core.json.ValueParts
+import dev.formhaus.core.json.describe
+import dev.formhaus.core.json.equalParts
+import dev.formhaus.core.json.partsHash
 import dev.formhaus.core.model.FormStep
 
-public data class GoToStepResult(
+public class GoToStepResult(
     public val stepId: String?,
     public val reached: Boolean,
     public val reason: StepRedirectReason?,
-)
+) {
+    override fun equals(other: Any?): Boolean = equalParts(other, GoToStepResult::parts)
+
+    override fun hashCode(): Int = parts().partsHash()
+
+    override fun toString(): String = parts().describe("GoToStepResult")
+
+    private fun parts(): ValueParts = listOf("stepId" to stepId, "reached" to reached, "reason" to reason)
+}
 
 private fun redirect(
     known: Boolean,
