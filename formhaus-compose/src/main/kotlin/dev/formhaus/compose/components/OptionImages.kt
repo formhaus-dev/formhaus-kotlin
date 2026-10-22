@@ -5,80 +5,78 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.launch
-
-internal class ImageEntry {
-    var image: ImageBitmap? by mutableStateOf(null)
-    var loading = false
-    var bytes = 0
-}
+import kotlinx.coroutines.async
 
 internal open class ImageCache(
     private val maxCount: Int,
     private val maxBytes: Int,
     private val loader: suspend (String) -> Bitmap?,
 ) {
-    private val entries = HashMap<String, ImageEntry>()
-    private val order = ArrayDeque<String>()
+    private class Entry(
+        val image: ImageBitmap,
+        val bytes: Int,
+    )
+
+    private val entries = LinkedHashMap<String, Entry>(INITIAL_CAPACITY, LOAD_FACTOR, true)
+    private val pending = HashMap<String, Deferred<ImageBitmap?>>()
     private var bytes = 0
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
-    fun entry(source: String): ImageEntry = entries.getOrPut(source, ::ImageEntry)
-
     fun cached(source: String): ImageBitmap? = entries[source]?.image
 
-    fun loaded(source: String): ImageBitmap? = if (loadable(source)) entry(source).image else null
-
     fun prefetch(sources: List<String>) {
-        sources.filter(::isInline).forEach(::load)
+        sources.filter(::isInline).forEach(::request)
     }
 
-    fun load(source: String) {
-        if (!loadable(source)) return
-        val entry = entry(source)
-        if (entry.image != null || entry.loading) return
-        entry.loading = true
-        scope.launch {
-            image(source)
-            entry.loading = false
-        }
+    fun request(source: String): Deferred<ImageBitmap?> {
+        cached(source)?.let { return CompletableDeferred(it) }
+        if (!loadable(source)) return CompletableDeferred(null)
+        pending[source]?.let { return it }
+        val job =
+            scope.async(start = CoroutineStart.LAZY) {
+                try {
+                    fetch(source)
+                } finally {
+                    pending.remove(source)
+                }
+            }
+        pending[source] = job
+        job.start()
+        return job
     }
 
-    suspend fun image(source: String): ImageBitmap? {
-        val entry = entry(source)
-        entry.image?.let { return it }
-        val bitmap = loader(source)
-        if (bitmap == null) {
-            if (entries[source] === entry && entry.image == null) entries.remove(source)
-            return null
-        }
-        if (entry.image == null) store(bitmap.asImageBitmap(), bitmap.allocationByteCount, source, entry)
-        return entry.image
+    suspend fun image(source: String): ImageBitmap? = cached(source) ?: if (loadable(source)) fetch(source) else null
+
+    private suspend fun fetch(source: String): ImageBitmap? {
+        val bitmap = loader(source) ?: return null
+        return cached(source) ?: store(source, bitmap)
     }
 
     private fun loadable(source: String): Boolean = isInline(source) || remoteImageUrl(source) != null
 
     private fun store(
-        image: ImageBitmap,
-        size: Int,
         source: String,
-        entry: ImageEntry,
-    ) {
-        entry.image = image
-        entry.bytes = size
-        bytes += size
-        order.addLast(source)
-        while ((order.size > maxCount || bytes > maxBytes) && order.size > 1) {
-            val evicted = entries.remove(order.removeFirst()) ?: continue
-            bytes -= evicted.bytes
-            evicted.image = null
+        bitmap: Bitmap,
+    ): ImageBitmap {
+        val entry = Entry(bitmap.asImageBitmap(), bitmap.allocationByteCount)
+        entries[source] = entry
+        bytes += entry.bytes
+        val oldest = entries.entries.iterator()
+        while ((entries.size > maxCount || bytes > maxBytes) && entries.size > 1) {
+            bytes -= oldest.next().value.bytes
+            oldest.remove()
         }
+        return entry.image
     }
 }
 
@@ -86,7 +84,10 @@ internal object OptionImages : ImageCache(256, 48 * 1024 * 1024, ::loadImage)
 
 @Composable
 internal fun ImageCache.shown(source: String): ImageBitmap? {
-    val image = loaded(source)
-    LaunchedEffect(source, image == null) { if (image == null) load(source) }
-    return image
+    var held by remember(source) { mutableStateOf(cached(source)) }
+    LaunchedEffect(source) { if (held == null) held = request(source).await() }
+    return held
 }
+
+private const val INITIAL_CAPACITY = 16
+private const val LOAD_FACTOR = 0.75f
