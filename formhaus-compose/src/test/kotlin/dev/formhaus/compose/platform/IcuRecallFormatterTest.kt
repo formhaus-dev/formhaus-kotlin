@@ -33,4 +33,13 @@ class IcuRecallFormatterTest {
         assertTrue(IcuRecallFormatter.dateTime(date, FormatStyle.LONG, null, Locale.forLanguageTag("ja-JP-u-ca-japanese")).contains("令和8"))
         assertTrue(IcuRecallFormatter.dateTime(date, null, FormatStyle.SHORT, Locale.US).startsWith("2:30"))
     }
+
+    @Test
+    fun datesFollowTheRegionalCalendarPreferenceLikeIntl() {
+        assertTrue(IcuRecallFormatter.dateTime(date, FormatStyle.LONG, null, Locale.forLanguageTag("th-TH")).contains("2569"))
+        assertTrue(IcuRecallFormatter.dateTime(date, FormatStyle.LONG, FormatStyle.SHORT, Locale.forLanguageTag("th-TH")).contains("2569"))
+        val persian = IcuRecallFormatter.dateTime(date, FormatStyle.LONG, null, Locale.forLanguageTag("fa-IR"))
+        assertTrue(persian, persian.contains("۱۴۰۵"))
+        assertTrue(IcuRecallFormatter.dateTime(date, FormatStyle.LONG, null, Locale.forLanguageTag("th-TH-u-ca-gregory")).contains("2026"))
+    }
 }

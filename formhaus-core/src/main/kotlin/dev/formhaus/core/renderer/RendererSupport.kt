@@ -1,5 +1,7 @@
 package dev.formhaus.core.renderer
 
+import dev.formhaus.core.cldr.calendars
+import dev.formhaus.core.cldr.withDefault
 import dev.formhaus.core.json.JsonObject
 import dev.formhaus.core.json.JsonValue
 import dev.formhaus.core.json.mutableStringMapOf
@@ -8,6 +10,7 @@ import dev.formhaus.core.model.FormDefinition
 import dev.formhaus.core.model.FormField
 import dev.formhaus.core.model.FormNode
 import dev.formhaus.core.model.FormStep
+import java.util.Locale
 import kotlin.math.floor
 
 public fun FieldOption(
@@ -78,6 +81,9 @@ public data class RecalledTexts internal constructor(
         json["placeholder"]?.stringValue,
     )
 }
+
+@RendererApi
+public fun Locale.withPreferredCalendar(): Locale = withDefault("ca", calendars[this])
 
 @RendererApi
 public fun clampedInt(

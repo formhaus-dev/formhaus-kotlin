@@ -46,7 +46,7 @@ public class FormEngine(
 ) {
     public val seed: String = options.seed?.takeIf { it.isNotEmpty() } ?: options.research?.seed() ?: ""
     private val listeners = Listeners()
-    private val ownerThread = OwnerThread(options.debugChecks)
+    private val ownerThread = OwnerThread(options.checksOn)
     internal val core: EngineCore
 
     public constructor(definition: JsonValue, values: JsonObject = MutableJsonObject(), options: FormEngineOptions = FormEngineOptions()) :

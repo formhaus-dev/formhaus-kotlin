@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+### formhaus-core
+
+- **Breaking:** `FormEngineOptions.debugChecks` is a `Boolean?`. `null`, the default, keeps the checks off.
+- New renderer API `Locale.withPreferredCalendar()` adds the calendar CLDR prefers for the locale, such as Buddhist for `th-TH` and Persian for `fa-IR`.
+
 ## 0.1.0
 
 ### formhaus-core

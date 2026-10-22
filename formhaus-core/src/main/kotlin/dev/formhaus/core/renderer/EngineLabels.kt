@@ -24,7 +24,7 @@ public fun FormEngine.label(
     source: LabelSource?,
     params: JsonObject = noParams,
 ): String {
-    if (options.debugChecks) reportMissingLabel(key, source, definition, options)
+    if (options.checksOn) reportMissingLabel(key, source, definition, options)
     return labelFor(key, params, source, definitionLabels)
 }
 

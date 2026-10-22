@@ -130,7 +130,8 @@ public class FormEngineOptions(
     public val seed: String? = null,
     public val research: FormResearch? = null,
     public val hiddenValues: HiddenValues = HiddenValues.CLEAR,
-    public val debugChecks: Boolean = false,
+    public val debugChecks: Boolean? = null,
 ) {
+    internal val checksOn: Boolean get() = debugChecks == true
     internal val recallFormat: RecallFormatFn? by lazy { formatRecall ?: recallFormatter?.let(::recallFormat) }
 }

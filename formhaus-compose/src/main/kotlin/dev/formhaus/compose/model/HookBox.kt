@@ -29,7 +29,7 @@ internal class HookBox(
             seed = options.seed,
             research = options.research,
             hiddenValues = options.hiddenValues,
-            debugChecks = options.debugChecks || debuggable,
+            debugChecks = options.debugChecks ?: debuggable,
         )
     }
 }

@@ -40,7 +40,7 @@ internal fun reportWarnings(
     options: FormEngineOptions,
 ) {
     val issues = checkDefinition(JsonValue.Object(definition.json), CheckDefinitionOptions(options.validators.keys))
-    val debugIssues = if (options.debugChecks) unorderedWarning(definition, options) else emptyList()
+    val debugIssues = if (options.checksOn) unorderedWarning(definition, options) else emptyList()
     for (issue in issues + debugIssues) deliver(issue, options)
 }
 
@@ -73,7 +73,7 @@ internal fun reportMissingLabel(
 }
 
 internal fun missingMessageReporter(options: FormEngineOptions): MissingMessageFn? {
-    if (!options.debugChecks || options.messages.catalog == null) return null
+    if (!options.checksOn || options.messages.catalog == null) return null
     return { key -> reportMissing(IssueCode.MISSING_MESSAGE_KEY, key.rawValue, "messages", options) }
 }
 

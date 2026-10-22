@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import java.util.Locale
 
 @OptIn(RendererApi::class)
 class RendererSupportTest {
@@ -101,5 +102,16 @@ class RendererSupportTest {
         assertNotEquals(FieldOption("a", "A", "Aa").imageKey, FieldOption("a", "A", "BB").imageKey)
         assertNull(FieldOption("a", "A").imageKey)
         assertTrue(field("""{"key":"a","type":"text","validation":{"required":"yes"}}""").isRequired)
+    }
+
+    @Test
+    fun `locales take the calendar CLDR prefers for them unless they name one`() {
+        fun calendar(tag: String) = Locale.forLanguageTag(tag).withPreferredCalendar().getUnicodeLocaleType("ca")
+        assertEquals("buddhist", calendar("th-TH"))
+        assertEquals("buddhist", calendar("th"))
+        assertEquals("persian", calendar("fa-IR"))
+        assertEquals("gregory", calendar("en-US"))
+        assertEquals("gregory", calendar("th-TH-u-ca-gregory"))
+        assertEquals("japanese", calendar("ja-JP-u-ca-japanese"))
     }
 }

@@ -7,6 +7,7 @@ import android.icu.util.Calendar
 import android.icu.util.TimeZone
 import android.icu.util.ULocale
 import dev.formhaus.core.engine.RecallFormatter
+import dev.formhaus.core.renderer.withPreferredCalendar
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.time.format.FormatStyle
@@ -39,7 +40,7 @@ internal object IcuRecallFormatter : RecallFormatter {
         timeStyle: FormatStyle?,
         locale: Locale,
     ): String {
-        val ulocale = ULocale.forLocale(locale)
+        val ulocale = ULocale.forLocale(locale.withPreferredCalendar())
         val calendar = Calendar.getInstance(TimeZone.GMT_ZONE, ulocale)
         val format = DateFormat.getDateTimeInstance(calendar, style(dateStyle), style(timeStyle), ulocale)
         format.timeZone = TimeZone.GMT_ZONE

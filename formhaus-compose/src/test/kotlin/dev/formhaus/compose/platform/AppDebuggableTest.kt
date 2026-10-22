@@ -27,14 +27,24 @@ private val definition =
 class AppDebuggableTest {
     private val context = ApplicationProvider.getApplicationContext<Context>()
 
-    private fun offThreadWriteFails(debuggable: Boolean): Boolean {
+    private fun offThreadWriteFails(
+        debuggable: Boolean,
+        debugChecks: Boolean? = null,
+    ): Boolean {
         context.applicationInfo.flags =
             if (debuggable) {
                 context.applicationInfo.flags or ApplicationInfo.FLAG_DEBUGGABLE
             } else {
                 context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE.inv()
             }
-        val form = ownedFormModel(context, definition, MutableJsonObject(), FormEngineOptions(), FormRendererOptions()) { _, _ -> null }
+        val form =
+            ownedFormModel(
+                context,
+                definition,
+                MutableJsonObject(),
+                FormEngineOptions(debugChecks = debugChecks),
+                FormRendererOptions(),
+            ) { _, _ -> null }
         var failed = false
         thread { failed = runCatching { form.engine.setValue("x", JsonValue.String("a")) }.isFailure }.join()
         form.close()
@@ -49,5 +59,11 @@ class AppDebuggableTest {
     @Test
     fun aReleaseAppLeavesThemOff() {
         assertFalse(offThreadWriteFails(debuggable = false))
+    }
+
+    @Test
+    fun anExplicitChoiceOfTheAppWinsOverTheDebuggableFlag() {
+        assertFalse(offThreadWriteFails(debuggable = true, debugChecks = false))
+        assertTrue(offThreadWriteFails(debuggable = false, debugChecks = true))
     }
 }
