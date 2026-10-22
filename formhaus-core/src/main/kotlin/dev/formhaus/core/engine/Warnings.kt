@@ -1,7 +1,9 @@
 package dev.formhaus.core.engine
 
+import dev.formhaus.core.definitionvalidation.CheckDefinitionOptions
 import dev.formhaus.core.definitionvalidation.DefinitionIssue
 import dev.formhaus.core.definitionvalidation.IssueCode
+import dev.formhaus.core.definitionvalidation.checkDefinition
 import dev.formhaus.core.definitionvalidation.warning
 import dev.formhaus.core.i18n.hasText
 import dev.formhaus.core.json.JsonValue
@@ -26,8 +28,8 @@ internal fun deliver(issue: DefinitionIssue, options: FormEngineOptions) {
 }
 
 internal fun reportWarnings(definition: FormDefinition, options: FormEngineOptions) {
-    if (!debugChecks) return
-    for (issue in unorderedWarning(definition, options)) deliver(issue, options)
+    val issues = checkDefinition(JsonValue.Object(definition.json), CheckDefinitionOptions(options.validators.keys))
+    for (issue in issues + if (debugChecks) unorderedWarning(definition, options) else emptyList()) deliver(issue, options)
 }
 
 private fun reportMissing(code: IssueCode, key: String, catalog: String, options: FormEngineOptions) {

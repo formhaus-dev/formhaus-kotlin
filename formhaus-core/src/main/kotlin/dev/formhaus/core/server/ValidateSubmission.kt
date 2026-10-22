@@ -110,6 +110,9 @@ private fun withSkipped(source: JsonObject, prepared: Prepared): JsonObject {
     return values
 }
 
+public fun validateSubmission(definition: JsonValue, values: JsonValue, options: SubmissionOptions = SubmissionOptions()): SubmissionResult =
+    validateSubmission(FormDefinition(definition), values, options)
+
 public fun validateSubmission(definition: FormDefinition, values: JsonValue, options: SubmissionOptions = SubmissionOptions()): SubmissionResult =
     CallBudget.run { submissionResult(definition, values, options) }
 

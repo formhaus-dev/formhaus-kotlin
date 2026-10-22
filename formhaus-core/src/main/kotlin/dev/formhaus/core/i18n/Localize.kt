@@ -1,5 +1,6 @@
 package dev.formhaus.core.i18n
 
+import dev.formhaus.core.definitionvalidation.FormDefinitionError
 import dev.formhaus.core.engine.templateTokens
 import dev.formhaus.core.json.JsonValue
 import dev.formhaus.core.json.MutableJsonObject
@@ -17,6 +18,13 @@ internal fun lookup(overlay: JsonValue?, path: List<String>): String? {
     var node = overlay
     for (key in path) node = node?.objectValue?.get(key)
     return node?.stringValue?.takeUnless { it.isBlankText }
+}
+
+public fun localize(input: JsonValue, overlay: JsonValue, lang: String? = null): Localized {
+    val parsed = FormDefinition(input)
+    val errors = translationErrors(parsed)
+    if (errors.isNotEmpty()) throw FormDefinitionError(errors)
+    return applyOverlay(parsed, overlay, lang)
 }
 
 internal fun applyOverlay(parsed: FormDefinition, overlay: JsonValue, lang: String? = null): Localized {

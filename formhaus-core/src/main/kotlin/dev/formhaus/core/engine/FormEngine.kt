@@ -48,6 +48,9 @@ public class FormEngine(
     private val listeners = Listeners()
     internal val core: EngineCore
 
+    public constructor(definition: JsonValue, values: JsonObject = MutableJsonObject(), options: FormEngineOptions = FormEngineOptions()) :
+        this(FormDefinition(definition), values, options)
+
     init {
         reportWarnings(definition, options)
         core = EngineCore(
@@ -163,6 +166,8 @@ public class FormEngine(
     public suspend fun submit(handler: SubmitHandler): Boolean = reportErrors { submitForm(handler) }
 
     public fun reset(values: JsonObject? = null): Unit = core.reset(values)
+
+    public fun replaceDefinition(definition: JsonValue): Unit = replaceDefinition(FormDefinition(definition))
 
     public fun replaceDefinition(definition: FormDefinition) {
         reportWarnings(definition, options)

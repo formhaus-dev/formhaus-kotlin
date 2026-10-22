@@ -1,5 +1,7 @@
 package dev.formhaus.core.model
 
+import dev.formhaus.core.definitionvalidation.FormDefinitionError
+import dev.formhaus.core.definitionvalidation.definitionErrors
 import dev.formhaus.core.json.JsonObject
 import dev.formhaus.core.json.JsonValue
 import dev.formhaus.core.json.MutableJsonObject
@@ -30,6 +32,8 @@ public class FormStep internal constructor(internal val json: JsonObject, ordina
 }
 
 public class FormDefinition internal constructor(internal val json: JsonObject) {
+    public constructor(json: JsonValue) : this(checkedRoot(json))
+
     private val ordinals = Ordinals()
     public val id: String = json["id"]?.stringValue ?: ""
     public val submit: FormAction = FormAction(json["submit"]?.objectValue ?: MutableJsonObject())
@@ -57,6 +61,15 @@ public class FormDefinition internal constructor(internal val json: JsonObject) 
         public const val SUPPORTED_FORMAT_VERSION: String = "1.6"
     }
 }
+
+private fun checkedRoot(json: JsonValue): JsonObject {
+    val errors = definitionErrors(json)
+    val root = json.objectValue
+    if (errors.isNotEmpty() || root == null) throw FormDefinitionError(errors)
+    return root
+}
+
+public fun parseDefinition(json: JsonValue): FormDefinition = FormDefinition(json)
 
 internal fun formatParts(version: JsonValue?): Pair<Double, Double> {
     val text = version?.takeUnless { it.isNull }?.let(::jsString) ?: "1.0"
