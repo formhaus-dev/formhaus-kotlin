@@ -1,24 +1,28 @@
 package dev.formhaus.core.engine
 
+import dev.formhaus.core.definitionvalidation.FormDefinitionError
+import dev.formhaus.core.json.JsonValue
 import dev.formhaus.core.renderer.RendererApi
 import dev.formhaus.core.renderer.errorGroups
-import dev.formhaus.core.support.definition
 import dev.formhaus.core.support.engine
 import dev.formhaus.core.support.jsonObject
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 @OptIn(RendererApi::class)
 class CoreAdditionsTest {
     @Test
-    fun `replaceDefinition keeps answers and fills new defaults`() {
+    fun `replaceDefinition takes JSON and rejects an invalid definition`() {
         val engine = engine("""{"id":"f","submit":{"label":"S"},"fields":[{"key":"a","type":"text","label":"A"}]}""", """{"a":"x"}""")
         engine.replaceDefinition(
-            definition(
+            JsonValue.parse(
                 """{"id":"f","submit":{"label":"S"},"fields":[
                     {"key":"a","type":"text","label":"A"},{"key":"b","type":"text","label":"B","defaultValue":"y"}]}""",
             ),
         )
+        assertEquals(jsonObject("""{"a":"x","b":"y"}"""), engine.values)
+        assertThrows<FormDefinitionError> { engine.replaceDefinition(JsonValue.parse("""{"id":"f"}""")) }
         assertEquals(jsonObject("""{"a":"x","b":"y"}"""), engine.values)
     }
 
