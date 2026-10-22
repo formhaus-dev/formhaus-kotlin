@@ -85,7 +85,7 @@ class FileValueTest {
             form.start()
             val context = field(form)
             assertEquals(reference, context.reference)
-            assertEquals(reference, context.fileValueText)
+            assertEquals(referenceName(reference), context.fileValueText)
             context.setValue(JsonValue.Null)
             assertNull(field(form).reference)
             assertEquals(JsonValue.Null, form.engine.getSubmitValues()["doc"] ?: JsonValue.Null)
@@ -240,6 +240,15 @@ class FileValueTest {
         assertTrue(long.endsWith(".pdf"))
         assertTrue(long.toByteArray().size <= 200)
         assertFalse(long.dropLast(4).last().isHighSurrogate())
+    }
+
+    @Test
+    fun referencesWithASchemeShowTheirLastPathSegment() {
+        assertEquals("a.pdf", referenceName("file:///Users/x/a.pdf"))
+        assertEquals("cv.pdf", referenceName("https://cdn.example.com/files/cv.pdf?v=2"))
+        assertEquals("upload-123", referenceName("upload-123"))
+        assertEquals("content://media/external/file/42", referenceName("content://media/external/file/42"))
+        assertEquals("https://cdn.example.com", referenceName("https://cdn.example.com"))
     }
 
     @Test

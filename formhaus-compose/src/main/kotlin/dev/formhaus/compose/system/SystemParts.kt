@@ -32,6 +32,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import dev.formhaus.compose.components.FormhausIcons
 import dev.formhaus.compose.containers.GroupNode
+import dev.formhaus.compose.containers.showsBackButton
 import dev.formhaus.compose.containers.summaryFocus
 import dev.formhaus.compose.form.ActionsContext
 import dev.formhaus.compose.form.FormhausField
@@ -192,7 +193,7 @@ internal fun SystemActions(context: ActionsContext) {
                 }
             }
         }
-        if (state.showBack) {
+        if (context.showsBackButton) {
             OutlinedButton(context::back, Modifier.fillMaxWidth().formhausTestId(context.testIds.back), enabled = !context.busy) {
                 Text(state.backLabel)
             }

@@ -20,25 +20,31 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import dev.formhaus.compose.form.BackPlacement
 import dev.formhaus.compose.form.FormBehavior
 import dev.formhaus.compose.form.FormhausForm
 import dev.formhaus.compose.form.LocalFormBehavior
 import dev.formhaus.compose.form.LocalFormComponents
 import dev.formhaus.compose.form.TitleDisplayMode
+import dev.formhaus.compose.model.FormModel
 import dev.formhaus.compose.model.FormRendererOptions
 import dev.formhaus.compose.model.TestIds
+import dev.formhaus.compose.model.back
 import dev.formhaus.compose.theme.FormhausTheme
 import dev.formhaus.compose.theme.palette
 import dev.formhaus.core.engine.SubmitResult
 import dev.formhaus.core.json.JsonObject
 import dev.formhaus.core.json.toJsonString
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Composable
 fun SampleScreen(
@@ -47,7 +53,24 @@ fun SampleScreen(
 ) {
     var chosen by rememberSaveable(sample.id) { mutableStateOf(sample.look.name) }
     val look = (Look.all + sample.look).first { it.name == chosen }
-    SampleScaffold(sample.definition.title ?: sample.title, look, onBack, { chosen = it.name }) { SampleForm(sample) }
+    var sent by remember(sample.id) { mutableStateOf<JsonObject?>(null) }
+    val model =
+        remember(sample.id) {
+            FormModel(
+                sample.definition,
+                engineOptions = sample.engineOptions,
+                options = FormRendererOptions(labels = sample.labels, testIds = TestIds.Automatic),
+            ) { submitted, _ ->
+                delay(SUBMIT_DELAY)
+                sent = submitted
+                SubmitResult.Ok
+            }
+        }
+    DisposableEffect(model) { onDispose { model.close() } }
+    val values = sent
+    SampleScaffold(sample.definition.title ?: sample.title, look, model.takeIf { values == null }, onBack, { chosen = it.name }) {
+        if (values == null) FormhausForm(model) else Text(values.toJsonString())
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -55,6 +78,7 @@ fun SampleScreen(
 fun SampleScaffold(
     title: String,
     look: Look,
+    model: FormModel?,
     onBack: () -> Unit,
     onLook: (Look) -> Unit,
     insets: WindowInsets = WindowInsets.safeDrawing,
@@ -64,10 +88,16 @@ fun SampleScaffold(
     val material = look === Look.material
     val background = if (material) MaterialTheme.colorScheme.surface else palette.background
     val foreground = if (material) MaterialTheme.colorScheme.onSurface else palette.text
+    val scope = rememberCoroutineScope()
+    val stepBack = model?.takeIf { look.appBarBack && it.actions.showBack }
     FormhausTheme(look.theme) {
         CompositionLocalProvider(
             LocalFormComponents provides look.components,
-            LocalFormBehavior provides FormBehavior(titleDisplayMode = TitleDisplayMode.OFF),
+            LocalFormBehavior provides
+                FormBehavior(
+                    titleDisplayMode = TitleDisplayMode.OFF,
+                    backPlacement = if (look.appBarBack) BackPlacement.APP_BAR else BackPlacement.AUTOMATIC,
+                ),
         ) {
             Scaffold(
                 containerColor = background,
@@ -75,7 +105,12 @@ fun SampleScaffold(
                 topBar = {
                     TopAppBar(
                         title = { Text(title) },
-                        navigationIcon = { IconButton(onBack) { Icon(DemoIcons.arrowBack, "Back") } },
+                        navigationIcon = {
+                            IconButton(
+                                { if (stepBack == null) onBack() else scope.launch { stepBack.back() } },
+                                enabled = stepBack?.disabled != true,
+                            ) { Icon(DemoIcons.arrowBack, stepBack?.actions?.backLabel ?: "Back") }
+                        },
                         actions = { LookMenu(look, onLook) },
                         windowInsets = insets.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal),
                         colors =
@@ -112,25 +147,6 @@ private fun LookMenu(
                 )
             }
         }
-    }
-}
-
-@Composable
-private fun SampleForm(sample: Sample) {
-    var sent by remember(sample.id) { mutableStateOf<JsonObject?>(null) }
-    val values = sent
-    if (values != null) {
-        Text(values.toJsonString())
-        return
-    }
-    FormhausForm(
-        definition = sample.definition,
-        engineOptions = sample.engineOptions,
-        renderer = FormRendererOptions(labels = sample.labels, testIds = TestIds.Automatic),
-    ) { submitted, _ ->
-        delay(SUBMIT_DELAY)
-        sent = submitted
-        SubmitResult.Ok
     }
 }
 

@@ -142,8 +142,12 @@ private fun StepMarks(
     steps: List<StepStatus>,
     current: Int,
 ) {
-    val spacing = Arrangement.spacedBy(LocalFormhausTokens.current.spacing.s7)
-    FlowRow(horizontalArrangement = spacing, verticalArrangement = spacing, itemVerticalAlignment = Alignment.CenterVertically) {
+    val spacing = LocalFormhausTokens.current.spacing
+    FlowRow(
+        horizontalArrangement = Arrangement.spacedBy(spacing.s7),
+        verticalArrangement = Arrangement.spacedBy(spacing.s3),
+        itemVerticalAlignment = Alignment.CenterVertically,
+    ) {
         steps.forEachIndexed { index, step -> StepMark(step, index + 1 == current) }
     }
 }

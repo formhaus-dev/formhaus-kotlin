@@ -34,7 +34,7 @@ internal fun FormActionsSlot(model: FormModel) {
     val context = ActionsContext(model)
     val custom = LocalFormComponents.current.slots.actions
     if (custom != null) custom(context) else FormActionsBar(context)
-    StepBackHandler(context, LocalFormBehavior.current.backPlacement == BackPlacement.AUTOMATIC && custom == null)
+    StepBackHandler(context, LocalFormBehavior.current.backPlacement != BackPlacement.BOTTOM && custom == null)
 }
 
 @Composable
@@ -45,6 +45,9 @@ internal fun StepBackHandler(
     if (!automatic || LocalOnBackPressedDispatcherOwner.current == null) return
     BackHandler(context.state.showBack && !context.busy) { context.back() }
 }
+
+internal val ActionsContext.showsBackButton: Boolean
+    @Composable get() = state.showBack && LocalFormBehavior.current.backPlacement != BackPlacement.APP_BAR
 
 @Composable
 public fun FormActionsBar(
@@ -71,7 +74,7 @@ private fun RowActions(context: ActionsContext) {
     val state = context.state
     val first =
         when {
-            state.showBack -> FormButtonVariant.of(state.backAction, FormButtonVariant.SECONDARY)
+            context.showsBackButton -> FormButtonVariant.of(state.backAction, FormButtonVariant.SECONDARY)
             state.cancelAction != null -> FormButtonVariant.of(state.cancelAction, FormButtonVariant.TEXT)
             state.showSkip -> FormButtonVariant.of(state.skipAction, FormButtonVariant.TEXT)
             else -> null
@@ -110,7 +113,7 @@ private fun BackButton(
     modifier: Modifier,
 ) {
     val state = context.state
-    if (!state.showBack) return
+    if (!context.showsBackButton) return
     FormButton(
         state.backLabel,
         FormButtonVariant.of(state.backAction, FormButtonVariant.SECONDARY),

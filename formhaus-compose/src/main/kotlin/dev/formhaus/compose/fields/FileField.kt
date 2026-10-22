@@ -34,7 +34,7 @@ public fun FileField(context: FieldContext) {
                 Icon(FormhausIcons.paperclip, null, Modifier.size(tokens.controls.indicator), tint = colors.textMuted)
             }
             Text(
-                context.fileName ?: context.reference ?: context.placeholder ?: context.text("chooseFile"),
+                context.fileName ?: context.referenceName ?: context.placeholder ?: context.text("chooseFile"),
                 Modifier.weight(1f),
                 color =
                     when {
@@ -54,7 +54,9 @@ internal val FieldContext.fileName: String? get() = UploadStore.owned(text, mode
 
 internal val FieldContext.reference: String? get() = if (text.isEmpty() || fileName != null) null else text
 
-internal val FieldContext.fileValueText: String get() = fileName ?: reference ?: text("chooseFile")
+internal val FieldContext.referenceName: String? get() = reference?.let(::referenceName)
+
+internal val FieldContext.fileValueText: String get() = fileName ?: referenceName ?: text("chooseFile")
 
 internal fun FieldContext.replaceFile(file: File?) {
     val previous = text.takeIf { fileName != null }

@@ -26,12 +26,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dev.formhaus.demo.materialSymbol
 
-val screenWidth = 412.dp
-val screenHeight = 915.dp
+val screenWidth = 393.dp
+val screenHeight = 852.dp
 val statusBarHeight = 40.dp
 val navigationBarHeight = 24.dp
-val frameWidth = 464.dp
-val frameHeight = 956.dp
+val frameWidth = 436.dp
+val frameHeight = 898.dp
 val systemBars = WindowInsets(top = statusBarHeight, bottom = navigationBarHeight)
 
 private val bezel = 12.dp

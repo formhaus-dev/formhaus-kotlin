@@ -52,7 +52,7 @@ internal fun SystemForm(
     CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onSurface) {
         SystemPage(model, modifier, shift)
     }
-    StepBackHandler(actions, behavior.backPlacement == BackPlacement.AUTOMATIC && slots.actions == null)
+    StepBackHandler(actions, behavior.backPlacement != BackPlacement.BOTTOM && slots.actions == null)
     SystemErrorAlert(model)
 }
 

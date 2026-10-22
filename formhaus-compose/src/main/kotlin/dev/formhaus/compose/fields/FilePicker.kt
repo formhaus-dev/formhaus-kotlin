@@ -70,6 +70,11 @@ private fun Context.displayName(uri: Uri): String {
     return named ?: uri.lastPathSegment ?: "file"
 }
 
+internal fun referenceName(value: String): String {
+    if (!value.contains("://") || value.startsWith("content://", ignoreCase = true)) return value
+    return Uri.parse(value).lastPathSegment?.takeIf { it.isNotEmpty() } ?: value
+}
+
 internal fun acceptedTypes(accept: String?): List<String> {
     val types =
         accept

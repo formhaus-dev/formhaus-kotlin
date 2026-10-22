@@ -35,7 +35,7 @@ private const val VALUES =
 
 @RunWith(ParameterizedRobolectricTestRunner::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
-@Config(qualifiers = "w464dp-h956dp-xxhdpi")
+@Config(qualifiers = "w436dp-h898dp-xxhdpi")
 class ReadmeImagesTest(
     private val name: String,
     private val look: Look,
@@ -54,7 +54,7 @@ class ReadmeImagesTest(
         compose.setContent {
             MaterialTheme(lightColorScheme()) {
                 DeviceFrame(Modifier.testTag(FRAME)) {
-                    SampleScaffold(model.definition.title.orEmpty(), look, {}, {}, systemBars) { FormhausForm(model) }
+                    SampleScaffold(model.definition.title.orEmpty(), look, model, {}, {}, systemBars) { FormhausForm(model) }
                 }
             }
         }

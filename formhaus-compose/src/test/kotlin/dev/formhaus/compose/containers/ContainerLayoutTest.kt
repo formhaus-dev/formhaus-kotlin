@@ -23,6 +23,8 @@ import dev.formhaus.compose.model.submit
 import dev.formhaus.compose.theme.FormhausTheme
 import dev.formhaus.compose.theme.FormhausTokens
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -87,6 +89,13 @@ class ContainerLayoutTest {
 
     @Test
     fun theBottomPlacementStacksTheSameWay() = assertStacked(BackPlacement.BOTTOM)
+
+    @Test
+    fun theAppBarPlacementLeavesTheBackButtonOut() {
+        val frames = actionFrames(null, 390.dp, BackPlacement.APP_BAR).frames
+        assertNull(frames["actions/back"])
+        assertNotNull(frames["actions/primary"])
+    }
 
     @Test
     fun regularWidthPutsBackOnTheLeftAndThePrimaryAtItsOwnSizeOnTheRight() {

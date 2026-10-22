@@ -102,7 +102,7 @@ val galleryEntries: List<GalleryEntry> =
         GalleryEntry(
             "file",
             """{"key": "cv", "type": "file", "label": "CV", "accept": ".pdf", "placeholder": "PDF, up to 5 MB"}""",
-            "\"file:///tmp/ada-lovelace-cv.pdf\"",
+            "\"ada-lovelace-cv.pdf\"",
         ),
         GalleryEntry(
             "scale",
