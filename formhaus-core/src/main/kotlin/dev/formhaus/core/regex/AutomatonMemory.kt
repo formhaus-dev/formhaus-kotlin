@@ -118,6 +118,11 @@ internal class AutomatonShard(
         }
     }
 
+    fun release() {
+        evict(sparingRecent = false)
+        memory.release()
+    }
+
     fun evict(sparingRecent: Boolean): Boolean {
         if (!lock.compareAndSet(false, true)) return false
         try {

@@ -8,6 +8,10 @@ internal class AutomatonCache(
 
     val bytes: Int get() = shards.sumOf { it.bytes }
 
+    fun release() {
+        shards.forEach(AutomatonShard::release)
+    }
+
     fun matches(
         text: CharArray,
         context: MatchContext,

@@ -34,8 +34,10 @@ internal class PatternCache(
         if (source in entries || size > byteLimit) return
         val oldest = entries.values.iterator()
         while (oldest.hasNext() && (entries.size >= limit || used + size > byteLimit)) {
-            used -= oldest.next().bytes
+            val evicted = oldest.next()
+            used -= evicted.bytes
             oldest.remove()
+            evicted.pattern?.release()
         }
         entries[source] = Entry(pattern, size)
         used += size

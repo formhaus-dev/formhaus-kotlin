@@ -57,6 +57,12 @@ internal class CompiledPattern(
 
     val bytes: Int get() = program.size * INSTRUCTION_BYTES
 
+    fun release() {
+        automaton?.release()
+        scanners.forEach { it?.release() }
+        unanchored?.takeIf { it.isInitialized() }?.value?.release()
+    }
+
     fun test(text: String): Boolean? {
         val units = text.toCharArray()
         if (!prefilter.admits(units)) return false
