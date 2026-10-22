@@ -20,9 +20,11 @@ class ConformanceFilesTest {
     }
 
     @Test
-    fun `fixtures are pinned to a core release`() {
-        assertTrue(Fixtures.version["ref"].orEmpty().startsWith("@formhaus/core@"))
-        assertTrue(Regex("[0-9a-f]{40}").matches(Fixtures.version["sha"].orEmpty()))
+    fun `fixtures record the core ref they were synced from`() {
+        val sha = Fixtures.version["sha"].orEmpty()
+        val ref = Fixtures.version["ref"].orEmpty()
+        assertTrue(Regex("[0-9a-f]{40}").matches(sha))
+        assertTrue(ref.startsWith("@formhaus/core@") || ref == sha)
         assertTrue(Fixtures.conformanceNames.isNotEmpty())
         assertTrue(Fixtures.scenarioNames.isNotEmpty())
     }

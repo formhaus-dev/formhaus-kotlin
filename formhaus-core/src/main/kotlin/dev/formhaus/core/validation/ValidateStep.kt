@@ -68,7 +68,7 @@ internal fun validateShown(
     val errors = MutableStringMap<String>()
     for (field in shownFields(fields, scope, checks.limits)) {
         validateFieldValue(field, values[field.key], values, checks.options)?.let { errors[field.key] = it }
-        if (field.isGroup) validateItems(field, values, scope, checks, errors)
+        if (field.isGroup && typeError(field, values[field.key]) == null) validateItems(field, values, scope, checks, errors)
     }
     return errors
 }
