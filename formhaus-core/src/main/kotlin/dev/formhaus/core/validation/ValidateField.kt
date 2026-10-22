@@ -25,19 +25,35 @@ private fun isEmptyValue(
     field: FormField,
 ): Boolean = isBlank(value) || (value == JsonValue.Bool(false) && field.type in booleanTypes)
 
+internal val defaultOptions: ValidateOptions = ValidateOptions()
+
+private val defaultResolver: ResolveMessage = namedResolver(messageResolver(null))
+
+private class Bound(
+    rule: String,
+) {
+    val min = "min$rule"
+    val max = "max$rule"
+    val minMessage = "min${rule}Message"
+    val maxMessage = "max${rule}Message"
+}
+
+private val valueBound = Bound("")
+private val lengthBound = Bound("Length")
+
 private fun boundError(
     size: Double,
-    rule: String,
+    bound: Bound,
     rules: FieldValidation,
     message: (String, JsonObject) -> String,
 ): String? {
-    val min = rules.json["min$rule"]?.numberValue
+    val min = rules.json[bound.min]?.numberValue
     if (min != null && size < min) {
-        return rules.message("min${rule}Message") ?: message("min", stringMapOf("min" to JsonValue.Number(min)))
+        return rules.message(bound.minMessage) ?: message("min", stringMapOf("min" to JsonValue.Number(min)))
     }
-    val max = rules.json["max$rule"]?.numberValue
+    val max = rules.json[bound.max]?.numberValue
     if (max != null && size > max) {
-        return rules.message("max${rule}Message") ?: message("max", stringMapOf("max" to JsonValue.Number(max)))
+        return rules.message(bound.maxMessage) ?: message("max", stringMapOf("max" to JsonValue.Number(max)))
     }
     return null
 }
@@ -54,9 +70,11 @@ private fun patternError(
 internal fun rejects(
     pattern: JsRegex,
     text: String,
-): Boolean =
-    text.length > MAX_STRING_LENGTH || CallBudget.current.value?.admitsPatternTest() == false ||
-        pattern.test(text) != true
+): Boolean {
+    if (text.length > MAX_STRING_LENGTH) return true
+    val call = CallBudget.current.value
+    return call?.admitsPatternTest() == false || pattern.test(text, call) != true
+}
 
 private fun sizeError(
     value: JsonValue,
@@ -66,13 +84,13 @@ private fun sizeError(
 ): String? =
     when (value) {
         is JsonValue.Number -> {
-            boundError(value.value, "", rules) { name, params -> resolve(MessageKey(name), params, field) }
+            boundError(value.value, valueBound, rules) { name, params -> resolve(MessageKey(name), params, field) }
         }
 
         is JsonValue.String -> {
             boundError(
                 value.value.length.toDouble(),
-                "Length",
+                lengthBound,
                 rules,
             ) { name, params -> resolve(MessageKey("${name}Length"), params, field) }
         }
@@ -87,7 +105,7 @@ private fun sizeError(
                 }
             boundError(
                 value.items.size.toDouble(),
-                "Length",
+                lengthBound,
                 bounds,
             ) { name, params -> resolve(MessageKey("${name}Items"), params, field) }
         }
@@ -101,7 +119,7 @@ public fun validateFieldValue(
     field: FormField,
     input: JsonValue?,
     allValues: JsonObject,
-    options: ValidateOptions = ValidateOptions(),
+    options: ValidateOptions = defaultOptions,
 ): String? = CallBudget.run { fieldValueError(field, input, allValues, options.validators, options.messages) }
 
 internal fun fieldValueError(
@@ -114,7 +132,7 @@ internal fun fieldValueError(
 ): String? {
     val value = trimValue(field, input)
     val rules = field.validation ?: FieldValidation(noParams)
-    val resolve = namedResolver(messageResolver(messages))
+    val resolve = if (messages == null) defaultResolver else namedResolver(messageResolver(messages))
     if (value == null || isEmptyValue(value, field)) return emptyValueError(field, rules, allValues, required, resolve)
     clientTypeError(field, value, resolve)?.takeIf { it.isNotEmpty() }?.let { return it }
     val issue =

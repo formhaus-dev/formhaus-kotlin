@@ -18,13 +18,13 @@ import dev.formhaus.core.visibility.shownFields
 public fun validateStep(
     step: FormStep,
     values: JsonObject,
-    options: ValidateOptions = ValidateOptions(),
+    options: ValidateOptions = defaultOptions,
 ): FieldErrors = validateFields(step.fields, values, options)
 
 public fun validateFields(
     fields: List<FormNode>,
     values: JsonObject,
-    options: ValidateOptions = ValidateOptions(),
+    options: ValidateOptions = defaultOptions,
 ): FieldErrors =
     CallBudget.run {
         validateShown(fields, values, values, ShownChecks(options.validators, options.messages, ListLimits.STANDARD))
