@@ -1,5 +1,7 @@
 package dev.formhaus.compose.model
 
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import dev.formhaus.core.renderer.TestIdTarget
 
 public sealed interface TestIds {
@@ -40,3 +42,5 @@ internal val FormModel.actionTestIds: ActionTestIds
             back = testId(TestIdTarget.Kind.BACK),
             cancel = testId(TestIdTarget.Kind.CANCEL),
         )
+
+internal fun Modifier.formhausTestId(id: String?): Modifier = if (id == null) this else testTag(id)
