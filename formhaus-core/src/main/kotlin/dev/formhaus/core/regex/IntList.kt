@@ -29,7 +29,7 @@ internal class IntList(
         add(upper)
     }
 
-    fun removeLast(): Int = values[--size]
+    fun pop(): Int = values[--size]
 
     fun truncate(length: Int) {
         size = length

@@ -51,7 +51,7 @@ private fun findCycles(graph: DependencyGraph): List<List<String>> {
             val position = frame.next++
             if (position >= neighbors.size) {
                 visiting[frame.node] = false
-                stack.removeLast()
+                stack.removeAt(stack.lastIndex)
                 continue
             }
             val neighbor = neighbors[position]

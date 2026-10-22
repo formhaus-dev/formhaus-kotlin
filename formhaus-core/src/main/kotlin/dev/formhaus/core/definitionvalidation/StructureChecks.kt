@@ -62,7 +62,7 @@ private class StepReachability(
         val seen = HashSet<Int>()
         val queue = ArrayList(successors(steps, indexes, start))
         while (queue.isNotEmpty()) {
-            val index = queue.removeLast()
+            val index = queue.removeAt(queue.lastIndex)
             if (!seen.add(index)) continue
             queue.addAll(successors(steps, indexes, index))
             if (isConditional(steps[index]) && index + 1 < steps.size) queue.add(index + 1)

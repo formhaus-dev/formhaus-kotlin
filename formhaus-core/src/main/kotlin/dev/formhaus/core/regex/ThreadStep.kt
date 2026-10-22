@@ -72,7 +72,7 @@ internal class ThreadStep(
         for (index in pcs.indices.reversed()) stack.add(pcs[index])
         var visited = 0
         while (!stack.isEmpty()) {
-            val pc = stack.removeLast()
+            val pc = stack.pop()
             if (seen[pc] == generation) continue
             seen[pc] = generation
             visited++

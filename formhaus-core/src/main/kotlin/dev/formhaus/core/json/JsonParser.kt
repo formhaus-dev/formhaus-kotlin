@@ -41,13 +41,13 @@ private class Frames {
     }
 
     fun closeArray(): JsonValue {
-        isArray.removeLast()
-        return JsonValue.Array(arrays.removeLast())
+        isArray.removeAt(isArray.lastIndex)
+        return JsonValue.Array(arrays.removeAt(arrays.lastIndex))
     }
 
     fun closeObject(): JsonValue {
-        isArray.removeLast()
-        return JsonValue.Object(objects.removeLast().also { it.establishKeyOrder() })
+        isArray.removeAt(isArray.lastIndex)
+        return JsonValue.Object(objects.removeAt(objects.lastIndex).also { it.establishKeyOrder() })
     }
 }
 
@@ -79,7 +79,7 @@ internal class JsonParser(
                     if (byte != ']') throw fail("expected ',' or ']'")
                     value = frames.closeArray()
                 } else {
-                    frames.objects.last().appendParsed(frames.keys.removeLast(), value)
+                    frames.objects.last().appendParsed(frames.keys.removeAt(frames.keys.lastIndex), value)
                     if (byte == ',') {
                         frames.keys.add(parseKey())
                         continue@parsing

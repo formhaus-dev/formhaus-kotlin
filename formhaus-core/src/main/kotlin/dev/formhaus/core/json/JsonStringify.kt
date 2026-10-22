@@ -40,7 +40,7 @@ internal fun jsString(value: JsonValue?): String {
     val output = StringBuilder()
     val pending = arrayListOf<Piece>(Piece.Value(value))
     while (pending.isNotEmpty()) {
-        when (val piece = pending.removeLast()) {
+        when (val piece = pending.removeAt(pending.lastIndex)) {
             is Piece.Text -> {
                 output.append(piece.text)
             }
@@ -62,7 +62,7 @@ internal fun jsonStringify(value: JsonValue?): String {
     val output = StringBuilder()
     val pending = arrayListOf<Piece>(Piece.Value(value))
     while (pending.isNotEmpty()) {
-        when (val piece = pending.removeLast()) {
+        when (val piece = pending.removeAt(pending.lastIndex)) {
             is Piece.Text -> output.append(piece.text)
             is Piece.Value -> stringifyValue(piece.value, output, pending)
         }

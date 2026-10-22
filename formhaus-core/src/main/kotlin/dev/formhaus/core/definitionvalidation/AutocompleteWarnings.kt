@@ -83,9 +83,9 @@ private fun isAutofillToken(value: String): Boolean {
                 .split(' '),
         )
     if (words.size == 1 && (words.first() == "on" || words.first() == "off")) return true
-    if (words.firstOrNull()?.let(::isSectionName) == true) words.removeFirst()
-    if (words.firstOrNull() == "shipping" || words.firstOrNull() == "billing") words.removeFirst()
-    if (words.size > 1 && words.last() == "webauthn") words.removeLast()
+    if (words.firstOrNull()?.let(::isSectionName) == true) words.removeAt(0)
+    if (words.firstOrNull() == "shipping" || words.firstOrNull() == "billing") words.removeAt(0)
+    if (words.size > 1 && words.last() == "webauthn") words.removeAt(words.lastIndex)
     return when (words.size) {
         1 -> words[0] in fieldNames || words[0] in contactNames
         2 -> words[0] in contactTypes && words[1] in contactNames
