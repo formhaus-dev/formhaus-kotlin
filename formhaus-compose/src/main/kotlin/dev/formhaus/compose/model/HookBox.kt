@@ -30,6 +30,8 @@ internal class HookBox(
             research = options.research,
             hiddenValues = options.hiddenValues,
             debugChecks = options.debugChecks ?: debuggable,
+            locale = options.locale,
+            onValidate = { values, context -> current.onValidate?.invoke(values, context) },
         )
     }
 }

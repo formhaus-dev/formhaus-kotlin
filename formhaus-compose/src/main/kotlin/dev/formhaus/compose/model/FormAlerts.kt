@@ -8,8 +8,9 @@ import androidx.compose.runtime.setValue
 import dev.formhaus.core.engine.FormEngine
 import dev.formhaus.core.json.FieldErrors
 import dev.formhaus.core.renderer.ErrorGroup
+import dev.formhaus.core.renderer.ErrorSummaryOptions
 import dev.formhaus.core.renderer.LabelSource
-import dev.formhaus.core.renderer.errorGroups
+import dev.formhaus.core.renderer.errorSummary
 import dev.formhaus.core.renderer.errorsVersion
 
 @Stable
@@ -51,7 +52,7 @@ internal class FormAlerts(
             lastErrors = errors
             lastStructureVersion = structureVersion
             lastValuesVersion = valuesVersion
-            errorGroups = engine.errorGroups(labels)
+            errorGroups = engine.errorSummary(ErrorSummaryOptions(labels = labels)).groups
             val stepErrors = engine.stepErrors
             stepErrorCounts = stepErrors.keys.associateWith { stepErrors[it].orEmpty().size }
         }
