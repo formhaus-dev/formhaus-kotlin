@@ -4,6 +4,7 @@
 
 <p align="center">
   <a href="https://github.com/formhaus-dev/formhaus-kotlin/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/formhaus-dev/formhaus-kotlin/ci.yml?branch=main&label=tests" alt="Tests"></a>
+  <a href="https://central.sonatype.com/namespace/dev.formhaus"><img src="https://img.shields.io/maven-central/v/dev.formhaus/formhaus-core?label=Maven%20Central" alt="Maven Central"></a>
   <img src="https://img.shields.io/badge/Kotlin-2.4-blue" alt="Kotlin 2.4">
   <img src="https://img.shields.io/badge/JDK-17%2B-blue" alt="JDK 17+">
   <img src="https://img.shields.io/badge/Android-minSdk%2026-blue" alt="Android minSdk 26">
