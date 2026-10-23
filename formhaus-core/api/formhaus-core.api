@@ -179,12 +179,13 @@ public final class dev/formhaus/core/engine/FormEngine {
 
 public final class dev/formhaus/core/engine/FormEngineOptions {
 	public fun <init> ()V
-	public fun <init> (Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Ldev/formhaus/core/json/StringMap;Ldev/formhaus/core/validation/MessageSource;Ljava/lang/String;Lkotlin/jvm/functions/Function3;Ldev/formhaus/core/engine/RecallFormatter;Ljava/lang/String;Ldev/formhaus/core/engine/FormResearch;Ldev/formhaus/core/engine/HiddenValues;Ljava/lang/Boolean;)V
-	public synthetic fun <init> (Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Ldev/formhaus/core/json/StringMap;Ldev/formhaus/core/validation/MessageSource;Ljava/lang/String;Lkotlin/jvm/functions/Function3;Ldev/formhaus/core/engine/RecallFormatter;Ljava/lang/String;Ldev/formhaus/core/engine/FormResearch;Ldev/formhaus/core/engine/HiddenValues;Ljava/lang/Boolean;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Ldev/formhaus/core/json/StringMap;Ldev/formhaus/core/validation/MessageSource;Ljava/lang/String;Lkotlin/jvm/functions/Function3;Ldev/formhaus/core/engine/RecallFormatter;Ljava/lang/String;Ldev/formhaus/core/engine/FormResearch;Ldev/formhaus/core/engine/HiddenValues;Ljava/lang/Boolean;Ljava/util/List;Lkotlin/jvm/functions/Function3;)V
+	public synthetic fun <init> (Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Ldev/formhaus/core/json/StringMap;Ldev/formhaus/core/validation/MessageSource;Ljava/lang/String;Lkotlin/jvm/functions/Function3;Ldev/formhaus/core/engine/RecallFormatter;Ljava/lang/String;Ldev/formhaus/core/engine/FormResearch;Ldev/formhaus/core/engine/HiddenValues;Ljava/lang/Boolean;Ljava/util/List;Lkotlin/jvm/functions/Function3;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun getDebugChecks ()Ljava/lang/Boolean;
 	public final fun getFormatRecall ()Lkotlin/jvm/functions/Function3;
 	public final fun getHiddenValues ()Ldev/formhaus/core/engine/HiddenValues;
 	public final fun getLang ()Ljava/lang/String;
+	public final fun getLocale ()Ljava/util/List;
 	public final fun getMessages ()Ldev/formhaus/core/validation/MessageSource;
 	public final fun getOnAfterStepChange ()Lkotlin/jvm/functions/Function2;
 	public final fun getOnAfterSubmit ()Lkotlin/jvm/functions/Function3;
@@ -192,6 +193,7 @@ public final class dev/formhaus/core/engine/FormEngineOptions {
 	public final fun getOnBeforeSubmit ()Lkotlin/jvm/functions/Function2;
 	public final fun getOnFormEvent ()Lkotlin/jvm/functions/Function1;
 	public final fun getOnStepValidate ()Lkotlin/jvm/functions/Function3;
+	public final fun getOnValidate ()Lkotlin/jvm/functions/Function3;
 	public final fun getOnWarning ()Lkotlin/jvm/functions/Function1;
 	public final fun getRecallFormatter ()Ldev/formhaus/core/engine/RecallFormatter;
 	public final fun getResearch ()Ldev/formhaus/core/engine/FormResearch;
@@ -551,6 +553,58 @@ public abstract interface class dev/formhaus/core/engine/SubmitStatusError {
 	public abstract fun getStatus ()Ljava/lang/Integer;
 }
 
+public final class dev/formhaus/core/engine/ValidateContext {
+	public fun <init> (Ljava/lang/String;Ljava/util/List;Z)V
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getFields ()Ljava/util/List;
+	public final fun getStepId ()Ljava/lang/String;
+	public final fun getSubmit ()Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/formhaus/core/i18n/CatalogIssues {
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getMissing ()Ljava/util/List;
+	public final fun getUnknown ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/formhaus/core/i18n/LocaleCatalog {
+	public static final field Companion Ldev/formhaus/core/i18n/LocaleCatalog$Companion;
+	public fun <init> (Ljava/lang/String;Ljava/util/Map;Ljava/util/Map;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/util/Map;Ljava/util/Map;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getLabels ()Ljava/util/Map;
+	public final fun getLocale ()Ljava/lang/String;
+	public final fun getMessages ()Ljava/util/Map;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/formhaus/core/i18n/LocaleCatalog$Companion {
+	public final fun bundled (Ljava/lang/String;)Ldev/formhaus/core/i18n/LocaleCatalog;
+	public final fun fromJson (Ldev/formhaus/core/json/JsonValue;)Ldev/formhaus/core/i18n/LocaleCatalog;
+	public final fun getBundledTags ()Ljava/util/List;
+}
+
+public final class dev/formhaus/core/i18n/LocaleChainKt {
+	public static final fun checkCatalog (Ldev/formhaus/core/json/JsonValue;)Ldev/formhaus/core/i18n/CatalogIssues;
+	public static final fun localeChain (Ljava/lang/String;)Ljava/util/List;
+}
+
+public abstract interface class dev/formhaus/core/i18n/LocaleText {
+}
+
+public final class dev/formhaus/core/i18n/LocaleText$Plain : dev/formhaus/core/i18n/LocaleText {
+	public fun <init> (Ljava/lang/String;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getText ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class dev/formhaus/core/i18n/Localized {
 	public final fun getDefinition ()Ldev/formhaus/core/model/FormDefinition;
 	public final fun getLabels ()Ldev/formhaus/core/json/JsonValue;
@@ -573,6 +627,20 @@ public final class dev/formhaus/core/i18n/MissingKeys {
 public final class dev/formhaus/core/i18n/MissingKeysKt {
 	public static final fun missingKeys (Ldev/formhaus/core/validation/MessageSource;Ldev/formhaus/core/renderer/LabelSource;)Ldev/formhaus/core/i18n/MissingKeys;
 	public static synthetic fun missingKeys$default (Ldev/formhaus/core/validation/MessageSource;Ldev/formhaus/core/renderer/LabelSource;ILjava/lang/Object;)Ldev/formhaus/core/i18n/MissingKeys;
+}
+
+public final class dev/formhaus/core/i18n/PluralForms : dev/formhaus/core/i18n/LocaleText {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getFew ()Ljava/lang/String;
+	public final fun getMany ()Ljava/lang/String;
+	public final fun getOne ()Ljava/lang/String;
+	public final fun getOther ()Ljava/lang/String;
+	public final fun getTwo ()Ljava/lang/String;
+	public final fun getZero ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class dev/formhaus/core/i18n/TextSlot {
@@ -936,7 +1004,6 @@ public final class dev/formhaus/core/renderer/AutocompleteKt {
 
 public final class dev/formhaus/core/renderer/EngineLabelsKt {
 	public static final fun actionsState (Ldev/formhaus/core/engine/FormEngine;Ldev/formhaus/core/renderer/LabelSource;)Ldev/formhaus/core/renderer/FormActionsState;
-	public static final fun errorGroups (Ldev/formhaus/core/engine/FormEngine;Ldev/formhaus/core/renderer/LabelSource;)Ljava/util/List;
 	public static final fun itemTitle (Ldev/formhaus/core/engine/FormEngine;Ldev/formhaus/core/model/FormField;ILdev/formhaus/core/renderer/LabelSource;)Ljava/lang/String;
 	public static final fun label (Ldev/formhaus/core/engine/FormEngine;Ljava/lang/String;Ldev/formhaus/core/renderer/LabelSource;Ldev/formhaus/core/json/StringMap;)Ljava/lang/String;
 	public static synthetic fun label$default (Ldev/formhaus/core/engine/FormEngine;Ljava/lang/String;Ldev/formhaus/core/renderer/LabelSource;Ldev/formhaus/core/json/StringMap;ILjava/lang/Object;)Ljava/lang/String;
@@ -973,6 +1040,31 @@ public final class dev/formhaus/core/renderer/ErrorGroup {
 	public final fun getEntries ()Ljava/util/List;
 	public final fun getId ()Ljava/lang/String;
 	public final fun getTitle ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/formhaus/core/renderer/ErrorSummary {
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCount ()I
+	public final fun getGroups ()Ljava/util/List;
+	public final fun getTopLevelErrors ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/formhaus/core/renderer/ErrorSummaryKt {
+	public static final fun errorSummary (Ldev/formhaus/core/engine/FormEngine;Ldev/formhaus/core/renderer/ErrorSummaryOptions;)Ldev/formhaus/core/renderer/ErrorSummary;
+	public static synthetic fun errorSummary$default (Ldev/formhaus/core/engine/FormEngine;Ldev/formhaus/core/renderer/ErrorSummaryOptions;ILjava/lang/Object;)Ldev/formhaus/core/renderer/ErrorSummary;
+}
+
+public final class dev/formhaus/core/renderer/ErrorSummaryOptions {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;Ldev/formhaus/core/renderer/LabelSource;)V
+	public synthetic fun <init> (Ljava/lang/String;Ldev/formhaus/core/renderer/LabelSource;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getIdPrefix ()Ljava/lang/String;
+	public final fun getLabels ()Ldev/formhaus/core/renderer/LabelSource;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }

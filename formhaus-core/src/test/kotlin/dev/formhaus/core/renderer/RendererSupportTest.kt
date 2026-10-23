@@ -79,10 +79,10 @@ class RendererSupportTest {
 
     @Test
     fun `error entries join labels by punctuation`() {
-        assertEquals("Name? Taken", ErrorEntry("a", "Name?", "Taken").text)
-        assertEquals("City: Missing", ErrorEntry("b", "City", "Missing").text)
-        assertEquals("Zip： Bad", ErrorEntry("c", "Zip：", "Bad").text)
-        assertEquals(": Empty", ErrorEntry("d", "", "Empty").text)
+        assertEquals("Name? Taken", ErrorEntry("a", "a", "Name?", "Taken").text)
+        assertEquals("City: Missing", ErrorEntry("b", "b", "City", "Missing").text)
+        assertEquals("Zip： Bad", ErrorEntry("c", "c", "Zip：", "Bad").text)
+        assertEquals(": Empty", ErrorEntry("d", "d", "", "Empty").text)
     }
 
     @Test
@@ -93,8 +93,8 @@ class RendererSupportTest {
         assertEquals(TestIdTarget(TestIdTarget.Kind.FIELD, "f", "plan").hashCode(), target.hashCode())
         assertNotEquals(target, option)
         assertEquals("TestIdTarget(kind=FIELD, definitionId=f, key=plan, value=null)", target.toString())
-        assertEquals(ErrorEntry("a", "A", "Empty"), ErrorEntry("a", "A", "Empty"))
-        assertNotEquals(ErrorEntry("a", "A", "Empty"), ErrorEntry("a", "A", "Short"))
+        assertEquals(ErrorEntry("a", "a", "A", "Empty"), ErrorEntry("a", "a", "A", "Empty"))
+        assertNotEquals(ErrorEntry("a", "a", "A", "Empty"), ErrorEntry("a", "a", "A", "Short"))
     }
 
     @Test

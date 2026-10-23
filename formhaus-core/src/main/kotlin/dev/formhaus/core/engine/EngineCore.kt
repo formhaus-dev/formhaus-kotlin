@@ -1,5 +1,6 @@
 package dev.formhaus.core.engine
 
+import dev.formhaus.core.i18n.LocaleCatalog
 import dev.formhaus.core.json.JsonObject
 import dev.formhaus.core.json.MutableJsonObject
 import dev.formhaus.core.json.MutableStringMap
@@ -22,10 +23,11 @@ internal class EngineCore(
     private val messageSource: MessageSource? = null,
     keep: Boolean = false,
     private val missingMessage: MissingMessageFn? = null,
+    private val locale: List<LocaleCatalog> = emptyList(),
 ) {
     var definition: FormDefinition = definition
         private set
-    var messages: ResolveMessage = watchedResolver(messageSource, definition, missingMessage)
+    var messages: ResolveMessage = watchedResolver(messageSource, definition, missingMessage, locale)
         private set
     var visibility = VisibilityState(definition, keep)
         private set
@@ -69,7 +71,7 @@ internal class EngineCore(
     ) {
         definition = next
         definitionGeneration += 1
-        messages = watchedResolver(messageSource, next, missingMessage)
+        messages = watchedResolver(messageSource, next, missingMessage, locale)
         visibility = VisibilityState(next, visibility.keep)
         replaceValues(startValues(visibility, initialValues, errors))
     }

@@ -45,7 +45,7 @@ public typealias RecallFormatFn = (RecallAnswer, FormField, String) -> String
 
 private val stampTypes = listOf("date", "time", "datetime")
 private const val LOCALE_LIMIT = 32
-private const val MAXIMUM_SIGNIFICANT_DIGITS = 21
+internal const val MAXIMUM_SIGNIFICANT_DIGITS = 21
 private val locales = BoundedCache<String, Locale>(LOCALE_LIMIT)
 private val languages: Set<String> by lazy { Locale.getAvailableLocales().mapTo(HashSet()) { it.language.lowercase() } }
 private val asciiLetters = ('a'..'z') + ('A'..'Z')

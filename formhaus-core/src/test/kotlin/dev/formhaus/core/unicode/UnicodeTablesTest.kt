@@ -81,7 +81,7 @@ class UnicodeTablesTest {
                 "" to false,
             )
         for ((label, closing) in expected) {
-            assertEquals(if (closing) "$label x" else "$label: x", ErrorEntry("k", label, "x").text, label)
+            assertEquals(if (closing) "$label x" else "$label: x", ErrorEntry("k", "k", label, "x").text, label)
         }
     }
 

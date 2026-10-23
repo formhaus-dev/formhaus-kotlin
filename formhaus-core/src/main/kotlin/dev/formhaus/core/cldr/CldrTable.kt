@@ -34,6 +34,7 @@ internal class CldrTable<T : Any>(
 
 internal val numberingSystems by lazy { CldrTable(NUMBERING_SYSTEMS, FALLBACK_NUMBERING_SYSTEMS) { it } }
 internal val calendars by lazy { CldrTable(CALENDARS, FALLBACK_CALENDARS) { it } }
+internal val likelyRegions by lazy { CldrTable(LIKELY_REGIONS, FALLBACK_LIKELY_REGIONS) { it } }
 
 internal fun Locale.withDefault(
     key: String,

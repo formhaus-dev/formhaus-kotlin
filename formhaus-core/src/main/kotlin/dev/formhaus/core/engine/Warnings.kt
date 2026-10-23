@@ -5,7 +5,9 @@ import dev.formhaus.core.definitionvalidation.DefinitionIssue
 import dev.formhaus.core.definitionvalidation.IssueCode
 import dev.formhaus.core.definitionvalidation.checkDefinition
 import dev.formhaus.core.definitionvalidation.warning
+import dev.formhaus.core.i18n.LocaleCatalog
 import dev.formhaus.core.i18n.hasText
+import dev.formhaus.core.i18n.messageText
 import dev.formhaus.core.json.JsonValue
 import dev.formhaus.core.model.FormDefinition
 import dev.formhaus.core.renderer.LabelSource
@@ -69,6 +71,7 @@ internal fun reportMissingLabel(
 ) {
     val catalog = source.catalog ?: return
     if (hasText(catalog, key) || definition.labels?.let { hasText(it, key) } == true) return
+    if (options.locale.any { key in it.labels }) return
     reportMissing(IssueCode.MISSING_LABEL_KEY, key, "labels", options)
 }
 
@@ -81,13 +84,15 @@ internal fun watchedResolver(
     source: MessageSource?,
     definition: FormDefinition,
     missing: MissingMessageFn?,
+    locale: List<LocaleCatalog>,
 ): ResolveMessage {
-    val resolve = messageResolver(source, MessageSource.Catalog(definition.messages ?: JsonValue.Null))
+    val catalogs = MessageSource.Function { key, params, _ -> locale.messageText(key, params) }
+    val resolve = messageResolver(source, MessageSource.Catalog(definition.messages ?: JsonValue.Null), catalogs)
     val catalog = source.catalog
     if (missing == null || catalog == null) return resolve
     val own = definition.messages ?: JsonValue.Null
     return { key, params, field ->
-        if (!hasText(catalog, key.rawValue) && !hasText(own, key.rawValue)) missing(key)
+        if (!hasText(catalog, key.rawValue) && !hasText(own, key.rawValue) && locale.none { key in it.messages }) missing(key)
         resolve(key, params, field)
     }
 }

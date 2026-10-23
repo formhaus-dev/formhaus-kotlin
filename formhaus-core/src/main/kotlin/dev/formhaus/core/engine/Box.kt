@@ -32,6 +32,7 @@ internal suspend fun FormEngine.submitForm(
     val core = core
     if (core.submitting || core.stepValidating) return false
     if (!keepSkipped) core.includeCurrentStep()
+    core.clearFormErrors()
     var succeeded = false
     val epoch = core.validationEpoch
     val operation = core.beginOperation()
@@ -89,6 +90,11 @@ private suspend fun FormEngine.approveSubmission(
     stale: () -> Boolean,
 ): JsonObject? {
     if (stale() || invalid(stale)) return null
+    val onValidate = options.onValidate
+    if (onValidate != null && !passesValidate(onValidate, checked, stale, submit = true)) {
+        if (!stale()) core.emit(FormEvent.FormSubmitFailed(SubmitFailureReason.Validation))
+        return null
+    }
     val before = options.onBeforeSubmit ?: return checked
     val allowed = suspended { before(checked) }
     if (stale() || allowed == false || invalid(stale)) return null

@@ -5,7 +5,7 @@ import dev.formhaus.core.json.stringMapOf
 import dev.formhaus.core.renderer.RendererApi
 import dev.formhaus.core.renderer.autocomplete
 import dev.formhaus.core.renderer.dividerBefore
-import dev.formhaus.core.renderer.errorGroups
+import dev.formhaus.core.renderer.errorSummary
 import dev.formhaus.core.renderer.itemTitle
 import dev.formhaus.core.support.definition
 import dev.formhaus.core.support.engine
@@ -124,7 +124,7 @@ class RecallTest {
         val group = engine.definition.allFields.last()
         assertEquals("Bo #1 of Guests of {index}", engine.itemTitle(group, 0, null))
         engine.validate()
-        val errors = engine.errorGroups(null)
+        val errors = engine.errorSummary().groups
         assertEquals("Form for {index}", errors.first().title)
         assertEquals(
             "Name of  ( #2 of Guests of {index})",

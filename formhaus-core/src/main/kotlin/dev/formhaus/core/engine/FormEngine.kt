@@ -69,6 +69,7 @@ public class FormEngine(
                 options.messages,
                 options.hiddenValues == HiddenValues.KEEP,
                 missingMessageReporter(options),
+                options.locale,
             )
         restored?.let(core::restore)
         core.emitEvent = options.onFormEvent
