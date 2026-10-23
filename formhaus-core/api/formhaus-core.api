@@ -81,6 +81,7 @@ public final class dev/formhaus/core/definitionvalidation/IssueCode$Companion {
 	public final fun getINVALID_PATTERN-SGZMid8 ()Ljava/lang/String;
 	public final fun getINVALID_SCALE-SGZMid8 ()Ljava/lang/String;
 	public final fun getINVALID_TYPE-SGZMid8 ()Ljava/lang/String;
+	public final fun getMATRIX_OPTIONS_MISMATCH-SGZMid8 ()Ljava/lang/String;
 	public final fun getMIN_GREATER_THAN_MAX-SGZMid8 ()Ljava/lang/String;
 	public final fun getMISSING_COMPONENT-SGZMid8 ()Ljava/lang/String;
 	public final fun getMISSING_LABEL-SGZMid8 ()Ljava/lang/String;

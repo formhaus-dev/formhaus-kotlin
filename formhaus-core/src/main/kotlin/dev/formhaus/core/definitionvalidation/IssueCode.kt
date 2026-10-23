@@ -75,5 +75,6 @@ public value class IssueCode(
         public val EXCLUSIVE_DEFAULT_VALUE: IssueCode = IssueCode("exclusive-default-value")
         public val EXCLUSIVE_WITH_MIN_LENGTH: IssueCode = IssueCode("exclusive-with-min-length")
         public val RANDOMIZE_NOT_APPLICABLE: IssueCode = IssueCode("randomize-not-applicable")
+        public val MATRIX_OPTIONS_MISMATCH: IssueCode = IssueCode("matrix-options-mismatch")
     }
 }

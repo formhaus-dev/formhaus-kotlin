@@ -41,6 +41,7 @@ class CorpusCheckTest {
             "check-group-scope",
             "check-image-urls",
             "check-matrix",
+            "check-matrix-options",
             "check-missing-required",
             "check-null-lists",
             "check-numeric-id",
