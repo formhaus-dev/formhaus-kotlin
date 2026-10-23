@@ -16,10 +16,8 @@
 </p>
 
 <p align="center">
-  <a href="https://formhaus.dev/guide/">Documentation</a> ·
-  <a href="https://formhaus.dev/playground">Playground</a> ·
-  <a href="https://github.com/formhaus-dev/formhaus">TypeScript core</a> ·
-  <a href="#demo-app">Demo</a>
+  <a href="https://formhaus.dev/guide/android">Documentation</a> ·
+  <a href="https://formhaus.dev/playground">Playground</a>
 </p>
 
 ## Install
@@ -377,33 +375,13 @@ Case folding, Unicode properties and the formats for recalled lists, numbers and
 
 ## Performance
 
-Patterns run on a native ECMAScript 2025 regex engine with `new RegExp(p).test(s)` semantics. Patterns without backreferences match in time linear in the input, and every match has a step budget, so no pattern can hang the app.
+Patterns run on a native ECMAScript 2025 regex engine, so a pattern matches the same values as in the browser. Patterns without backreferences match in time linear in the input, and every match has a step budget, so no pattern can hang the app.
 
-- An email pattern check takes 59 ns, and 6.4 µs on a 10,000 character value.
-- `(a+)+$` on 9,999 `a` and `!` takes 68 ns. `java.util.regex` takes 434 ms.
-- A label that recalls four answers resolves in 1.0 µs.
+- An email pattern check takes 59 ns.
 - A form with 3,000 picture options renders in 16 ms, and a selection takes 2.6 ms.
 - Typing one character into a text field takes 6.5 ms, including layout and drawing.
 
-Measured on an Apple M5 Pro with macOS 26.6 and JDK 17. Regex, recall and engine rows are JMH medians. Render rows are medians of 20 runs in Robolectric with native graphics, at 360 by 900 dp. Each regex row is one `validateFieldValue` call with a `pattern` rule. Long inputs have 10,000 code units.
-
-| Benchmark | V8 | java.util.regex | Formhaus |
-| --- | ---: | ---: | ---: |
-| match email, short | 23 ns | 36 ns | 59 ns |
-| match email, long | 5.9 µs | 5.3 µs | 6.4 µs |
-| match phone, short | 26 ns | 26 ns | 59 ns |
-| match IBAN, long | 54 ns | 110 ns | 100 ns |
-| match password (3 lookaheads), long | 14 µs | 25 µs | 39 µs |
-| match quoted (backreference), long | 17 µs | 9.9 µs | 18 µs |
-| `(a+)+$` on 9,999 `a` and `!` | > 5 s | 434 ms | 68 ns |
-| `(a\|aa)+$` on 9,999 `a` and `!` | > 5 s | stack overflow | 70 ns |
-| `(x+x+)+y` on 10,000 `x` | > 5 s | > 5 s | 1.1 µs |
-| `[a-z]{0,4001}1` on 6,000 `b` and `1` | 12 ms | 51 ms | 1.8 µs |
-| `[ab]*a[ab]{12}$` on 10,000 random `a` and `b` | 2.4 µs | 55 µs | 0.11 µs |
-| compile email ✓ | 0.11 µs | 0.20 µs | 2.9 µs |
-| compile password (3 lookaheads) ✓ | 0.13 µs | 0.24 µs | 8.0 µs |
-
-✓ A pattern compiles once and is then served from the 256-pattern cache, so this is a one-time cost when a form first renders. A compile row uses a new pattern on every call, so it includes the first match. `java.util.regex` does not follow ECMAScript semantics and is shown only for scale. Run `scripts/benchmarks.sh` for the full set.
+Measured on an Apple M5 Pro with JDK 17. Run `scripts/benchmarks.sh` for the full set.
 
 ## Demo app
 
