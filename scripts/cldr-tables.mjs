@@ -84,6 +84,17 @@ function likelyRegion(tag) {
   return region ? `${language}-${region}` : ''
 }
 
+function languageAliases() {
+  const codes = []
+  for (const a of letters) for (const b of letters) codes.push(a + b, ...[...letters].map((c) => a + b + c))
+  const aliases = new Map()
+  for (const code of codes) {
+    const replacement = canonical(code)
+    if (replacement !== code) aliases.set(replacement, [...(aliases.get(replacement) ?? []), code])
+  }
+  return [...aliases].map(([replacement, owners]) => owners.join(' ') + fieldSeparator + replacement).join(entrySeparator)
+}
+
 function candidates() {
   const languages = languageCodes()
   const regions = regionCodes()
@@ -187,7 +198,7 @@ function fixture() {
 }
 
 function pluralFixture() {
-  const locales = ['en', 'de', 'es', 'fr', 'fr-CA', 'it', 'pt', 'pt-BR', 'ja', 'zh-CN', 'ru', 'uk', 'not a tag']
+  const locales = ['en', 'de', 'es', 'fr', 'fr-CA', 'it', 'pt', 'pt-BR', 'pt-PT', 'pt-AO', 'ja', 'zh-CN', 'ru', 'uk', 'not a tag']
   const values = [
     ...Array.from({ length: 32 }, (_, index) => index), 100, 101, 102, 104, 105, 111, 112, 114, 121, 122, 125, 1000, 1001,
     999999, 1000000, 1000001, 2000000, 21000000, 1e15, 0.5, 1.5, 2.25, 11.5, 1.0001, 1.0005, 0.0004, 1000000.5, -1, -2, -5,
@@ -221,6 +232,7 @@ const fallback = 'en'
 const encoded = Object.entries(tables).map(([name, value]) => [name, value(fallback), table(tags, value, fallback)])
 const unregioned = tags.filter(([tag]) => !new Intl.Locale(tag).region)
 encoded.push(['LIKELY_REGIONS', likelyRegion('xx'), table(unregioned, likelyRegion, 'xx')])
+encoded.push(['LANGUAGE_ALIASES', '', languageAliases()])
 
 for (const file of readdirSync(directory)) {
   if (/^Cldr\d+Tables\.kt$/u.test(file)) rmSync(join(directory, file))

@@ -1,14 +1,7 @@
 package dev.formhaus.core.i18n
 
+import dev.formhaus.core.cldr.languageAliases
 import dev.formhaus.core.cldr.likelyRegions
-import dev.formhaus.core.json.JsonValue
-import dev.formhaus.core.json.ValueParts
-import dev.formhaus.core.json.describe
-import dev.formhaus.core.json.equalParts
-import dev.formhaus.core.json.isBlankText
-import dev.formhaus.core.json.partsHash
-import dev.formhaus.core.json.stringMapOf
-import dev.formhaus.core.validation.defaultMessageKeys
 import java.util.IllformedLocaleException
 import java.util.Locale
 
@@ -17,15 +10,25 @@ private fun canonicalTag(tag: String): String? {
     val cut = subtags.withIndex().indexOfFirst { (index, subtag) -> index > 0 && subtag.length == 1 }
     val head = if (cut < 0) subtags else subtags.subList(0, cut)
     if (head.first().length < 2) return null
-    return try {
-        Locale
-            .Builder()
-            .setLanguageTag(head.joinToString("-"))
-            .build()
-            .toLanguageTag()
-    } catch (_: IllformedLocaleException) {
-        null
-    }
+    val locale =
+        try {
+            Locale.Builder().setLanguageTag(head.joinToString("-")).build()
+        } catch (_: IllformedLocaleException) {
+            return null
+        }
+    return if (locale.hasExtensions()) null else dealiased(locale).toLanguageTag()
+}
+
+private fun dealiased(locale: Locale): Locale {
+    val alias = languageAliases[locale.language].takeIf { it.isNotEmpty() } ?: return locale
+    val replacement = Locale.forLanguageTag(alias)
+    return Locale
+        .Builder()
+        .setLocale(locale)
+        .setLanguage(replacement.language)
+        .setScript(locale.script.ifEmpty { replacement.script })
+        .setRegion(locale.country.ifEmpty { replacement.country })
+        .build()
 }
 
 private fun likelyTag(tag: String): String? {
@@ -42,44 +45,4 @@ public fun localeChain(tag: String): List<String> {
         likelyTag(canonical)?.let { chain.add(maxOf(chain.size - 1, 1), it) }
     }
     return (chain.filter { it != "en" } + "en").distinct()
-}
-
-public class CatalogIssues internal constructor(
-    public val missing: List<String>,
-    public val unknown: List<String>,
-) {
-    override fun equals(other: Any?): Boolean = equalParts(other, CatalogIssues::parts)
-
-    override fun hashCode(): Int = parts().partsHash()
-
-    override fun toString(): String = parts().describe("CatalogIssues")
-
-    private fun parts(): ValueParts = listOf("missing" to missing, "unknown" to unknown)
-}
-
-private val catalogParts = listOf("locale", "messages", "labels")
-private val JsonValue?.isMissingText: Boolean get() = this?.stringValue?.isBlankText != false
-
-public fun checkCatalog(catalog: JsonValue?): CatalogIssues {
-    val missing = ArrayList<String>()
-    val unknown = ArrayList<String>()
-    val root = catalog?.objectValue ?: stringMapOf()
-    if (root["locale"].isMissingText) missing.add("locale")
-    unknown += root.keys.filter { it !in catalogParts }
-    for ((part, known) in listOf("messages" to defaultMessageKeys.map { it.rawValue }, "labels" to defaultLabelKeys)) {
-        val block = root[part]?.objectValue ?: stringMapOf()
-        for (key in known) {
-            val text = block[key]
-            val forms = text?.objectValue
-            if (forms == null) {
-                if (text.isMissingText) missing.add("$part.$key")
-                continue
-            }
-            if (forms["other"].isMissingText) missing.add("$part.$key.other")
-            unknown +=
-                forms.filter { (form, value) -> form !in pluralCategories || value.stringValue == null }.map { "$part.$key.${it.first}" }
-        }
-        unknown += block.keys.filter { it !in known }.map { "$part.$it" }
-    }
-    return CatalogIssues(missing, unknown)
 }

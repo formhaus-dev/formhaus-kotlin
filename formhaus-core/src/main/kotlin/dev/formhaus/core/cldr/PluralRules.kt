@@ -56,7 +56,8 @@ internal fun pluralCategory(
         "en", "de" -> if (operands.isOneInteger) "one" else "other"
         "it" -> romance(operands.isOneInteger, operands)
         "es" -> romance(operands.decimal.compareTo(BigDecimal.ONE) == 0, operands)
-        "fr", "pt" -> romance(operands.integer <= BigInteger.ONE, operands)
+        "pt" -> romance(if (locale.country == "PT") operands.isOneInteger else operands.integer <= BigInteger.ONE, operands)
+        "fr" -> romance(operands.integer <= BigInteger.ONE, operands)
         "ru", "uk" -> eastSlavic(operands)
         else -> "other"
     }
