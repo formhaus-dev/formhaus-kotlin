@@ -23,24 +23,12 @@
 
 ## Install
 
-Releases are served from JitPack. Add the repository in `settings.gradle.kts`:
-
-```kotlin
-dependencyResolutionManagement {
-    repositories {
-        google()
-        mavenCentral()
-        maven("https://jitpack.io")
-    }
-}
-```
-
-Then add the packages you need:
+Releases are published to Maven Central:
 
 ```kotlin
 dependencies {
-    implementation("com.github.formhaus-dev.formhaus-kotlin:formhaus-core:v0.2.0")
-    implementation("com.github.formhaus-dev.formhaus-kotlin:formhaus-compose:v0.2.0")
+    implementation("dev.formhaus:formhaus-core:0.2.1")
+    implementation("dev.formhaus:formhaus-compose:0.2.1")
 }
 ```
 
@@ -52,7 +40,7 @@ dependencies {
 
 `formhaus-core` has one dependency, `kotlinx-coroutines-core`, and no Android or Compose artifacts, so it also runs on a server. There is no JavaScript runtime.
 
-To work from a local clone, run `./gradlew publishToMavenLocal` and depend on `dev.formhaus:formhaus-core:0.2.0`, `dev.formhaus:formhaus-compose:0.2.0` or `dev.formhaus:formhaus-research:0.2.0` with `mavenLocal()` in your repositories.
+To work from a local clone, run `./gradlew publishToMavenLocal` and add `mavenLocal()` to your repositories.
 
 ## Requirements
 
@@ -171,7 +159,7 @@ suspend fun fill() {
 A `radio`, `multiselect` or `select` field with `"randomize": true` shows its options in a random order per respondent. Add `formhaus-research` and pass `Research()`:
 
 ```kotlin
-implementation("com.github.formhaus-dev.formhaus-kotlin:formhaus-research:v0.2.0")
+implementation("dev.formhaus:formhaus-research:0.2.1")
 ```
 
 ```kotlin

@@ -8,7 +8,7 @@ android {
     defaultConfig {
         applicationId = "dev.formhaus.demo"
         versionCode = 1
-        versionName = "0.2.0"
+        versionName = "0.2.1"
     }
 }
 

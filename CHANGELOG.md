@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.1
+
+### Packaging
+
+- Published to Maven Central as `dev.formhaus:formhaus-core`, `dev.formhaus:formhaus-compose` and `dev.formhaus:formhaus-research`.
+
 ## 0.2.0
 
 ### formhaus-core
