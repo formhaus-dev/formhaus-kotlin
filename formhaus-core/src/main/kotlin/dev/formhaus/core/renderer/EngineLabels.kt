@@ -24,7 +24,7 @@ private fun FormEngine.resolvedLabel(
         params,
         source,
         definition.labels?.let(LabelSource::Catalog),
-        LabelSource.Function { name, values -> options.locale.labelText(name, values) },
+        LabelSource.Function { name, values -> core.locale.labelText(name, values) },
     )
 
 @RendererApi
@@ -33,7 +33,7 @@ public fun FormEngine.label(
     source: LabelSource?,
     params: JsonObject = noParams,
 ): String {
-    if (options.checksOn) reportMissingLabel(key, source, definition, options)
+    if (options.checksOn) reportMissingLabel(key, source, definition, options, core.locale)
     return resolvedLabel(key, source, params)
 }
 

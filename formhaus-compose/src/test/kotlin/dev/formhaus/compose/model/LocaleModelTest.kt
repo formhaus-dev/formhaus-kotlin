@@ -4,8 +4,10 @@ import dev.formhaus.core.engine.FormEngineOptions
 import dev.formhaus.core.i18n.LocaleCatalog
 import dev.formhaus.core.json.stringMapOf
 import dev.formhaus.core.model.FormDefinition
+import dev.formhaus.core.renderer.onValidate
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Rule
 import org.junit.Test
 
@@ -34,6 +36,7 @@ class LocaleModelTest {
         runTest {
             var down = true
             val form = stepsModel(FormEngineOptions(), """{"name": "Ada"}""")
+            assertNull(form.engine.onValidate)
             form.updateHandlers(
                 engineOptions =
                     FormEngineOptions(onValidate = { _, context ->
@@ -48,5 +51,7 @@ class LocaleModelTest {
             form.next()
             assertEquals("when", form.structure.currentStep?.id)
             assertEquals(emptyList<String>(), form.topLevelErrors)
+            form.updateHandlers(engineOptions = FormEngineOptions())
+            assertNull(form.engine.onValidate)
         }
 }

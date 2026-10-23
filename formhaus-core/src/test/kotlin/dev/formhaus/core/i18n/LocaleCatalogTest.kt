@@ -134,6 +134,18 @@ class LocaleCatalogTest {
         }
 
     @Test
+    fun `reads the locale when it changes after the engine was created`() {
+        val engine = engine(form(4), """{"name":"a"}""")
+        assertEquals("Minimum length is 4", engine.validate()["name"])
+        var notified = 0
+        engine.subscribe { notified += 1 }
+        engine.locale = listOf(ru)
+        assertEquals(1, notified)
+        assertEquals("Не менее 4 символов", engine.validate()["name"])
+        assertEquals("Далее", engine.label("continue", null))
+    }
+
+    @Test
     fun `ignores catalogs without a matching text`() {
         val broken = LocaleCatalog.fromJson(JsonValue.parse("""{"locale":"ru","messages":{"minLength":{"one":"x"}},"labels":{}}"""))
         assertEquals("Не менее 4 символов", minLengthError(4, listOfNotNull(broken, ru)))

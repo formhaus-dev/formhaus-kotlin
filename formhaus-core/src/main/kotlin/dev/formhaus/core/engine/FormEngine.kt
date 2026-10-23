@@ -1,5 +1,6 @@
 package dev.formhaus.core.engine
 
+import dev.formhaus.core.i18n.LocaleCatalog
 import dev.formhaus.core.json.FieldErrors
 import dev.formhaus.core.json.JsonObject
 import dev.formhaus.core.json.JsonValue
@@ -73,6 +74,7 @@ public class FormEngine(
             )
         restored?.let(core::restore)
         core.emitEvent = options.onFormEvent
+        core.onValidate = options.onValidate
         core.onChange = listeners::fire
     }
 
@@ -91,6 +93,14 @@ public class FormEngine(
     public val isFirstStep: Boolean get() = core.isFirstStep
     public val isLastStep: Boolean get() = core.isLastStep
     public val canGoNext: Boolean get() = core.canGoNext
+
+    public var locale: List<LocaleCatalog>
+        get() = core.locale
+        set(value) =
+            mutating("locale") {
+                core.locale = value
+                core.notify()
+            }
 
     public val topLevelErrors: List<String>
         get() {

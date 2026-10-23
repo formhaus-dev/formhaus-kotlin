@@ -135,6 +135,7 @@ public final class dev/formhaus/core/engine/FormEngine {
 	public final fun getDefinition ()Ldev/formhaus/core/model/FormDefinition;
 	public final fun getErrors ()Ldev/formhaus/core/json/StringMap;
 	public final fun getFieldLoading ()Ldev/formhaus/core/json/StringMap;
+	public final fun getLocale ()Ljava/util/List;
 	public final fun getProgress ()Ldev/formhaus/core/engine/StepProgress;
 	public final fun getSeed ()Ljava/lang/String;
 	public final fun getStepErrors ()Ldev/formhaus/core/json/StringMap;
@@ -167,6 +168,7 @@ public final class dev/formhaus/core/engine/FormEngine {
 	public final fun setErrors (Ldev/formhaus/core/json/StringMap;)V
 	public final fun setFieldLoading (Ljava/lang/String;Z)V
 	public final fun setItemValue (Ljava/lang/String;ILjava/lang/String;Ldev/formhaus/core/json/JsonValue;)V
+	public final fun setLocale (Ljava/util/List;)V
 	public final fun setValue (Ljava/lang/String;Ldev/formhaus/core/json/JsonValue;)V
 	public final fun skip (Lkotlin/jvm/functions/Function3;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun skip$default (Ldev/formhaus/core/engine/FormEngine;Lkotlin/jvm/functions/Function3;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
@@ -571,6 +573,10 @@ public final class dev/formhaus/core/i18n/CatalogIssues {
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class dev/formhaus/core/i18n/CatalogIssuesKt {
+	public static final fun checkCatalog (Ldev/formhaus/core/json/JsonValue;)Ldev/formhaus/core/i18n/CatalogIssues;
+}
+
 public final class dev/formhaus/core/i18n/LocaleCatalog {
 	public static final field Companion Ldev/formhaus/core/i18n/LocaleCatalog$Companion;
 	public fun <init> (Ljava/lang/String;Ljava/util/Map;Ljava/util/Map;)V
@@ -590,7 +596,6 @@ public final class dev/formhaus/core/i18n/LocaleCatalog$Companion {
 }
 
 public final class dev/formhaus/core/i18n/LocaleChainKt {
-	public static final fun checkCatalog (Ldev/formhaus/core/json/JsonValue;)Ldev/formhaus/core/i18n/CatalogIssues;
 	public static final fun localeChain (Ljava/lang/String;)Ljava/util/List;
 }
 
@@ -1012,9 +1017,11 @@ public final class dev/formhaus/core/renderer/EngineLabelsKt {
 public final class dev/formhaus/core/renderer/EngineRevisionsKt {
 	public static final fun getDefinitionRevision (Ldev/formhaus/core/engine/FormEngine;)I
 	public static final fun getErrorsVersion (Ldev/formhaus/core/engine/FormEngine;)I
+	public static final fun getOnValidate (Ldev/formhaus/core/engine/FormEngine;)Lkotlin/jvm/functions/Function3;
 	public static final fun getRestarts (Ldev/formhaus/core/engine/FormEngine;)I
 	public static final fun getSending (Ldev/formhaus/core/engine/FormEngine;)Z
 	public static final fun getVersion (Ldev/formhaus/core/engine/FormEngine;)I
+	public static final fun setOnValidate (Ldev/formhaus/core/engine/FormEngine;Lkotlin/jvm/functions/Function3;)V
 }
 
 public final class dev/formhaus/core/renderer/EngineValuesKt {

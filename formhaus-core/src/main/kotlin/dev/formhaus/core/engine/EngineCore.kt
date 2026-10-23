@@ -23,11 +23,11 @@ internal class EngineCore(
     private val messageSource: MessageSource? = null,
     keep: Boolean = false,
     private val missingMessage: MissingMessageFn? = null,
-    private val locale: List<LocaleCatalog> = emptyList(),
+    var locale: List<LocaleCatalog> = emptyList(),
 ) {
     var definition: FormDefinition = definition
         private set
-    var messages: ResolveMessage = watchedResolver(messageSource, definition, missingMessage, locale)
+    var messages: ResolveMessage = watchedResolver(messageSource, definition, missingMessage, ::locale)
         private set
     var visibility = VisibilityState(definition, keep)
         private set
@@ -63,6 +63,7 @@ internal class EngineCore(
         private set
     var keptCache: KeptCache? = null
     var emitEvent: ((FormEvent) -> Unit)? = null
+    var onValidate: ValidateFn? = null
     var onChange: (() -> Unit)? = null
 
     fun load(
@@ -71,7 +72,7 @@ internal class EngineCore(
     ) {
         definition = next
         definitionGeneration += 1
-        messages = watchedResolver(messageSource, next, missingMessage, locale)
+        messages = watchedResolver(messageSource, next, missingMessage, ::locale)
         visibility = VisibilityState(next, visibility.keep)
         replaceValues(startValues(visibility, initialValues, errors))
     }

@@ -12,6 +12,15 @@ private fun EngineCore.validateNodes(submit: Boolean): List<FormNode> =
         else -> definition.fields.orEmpty()
     }
 
+private fun EngineCore.shownPaths(submit: Boolean): List<String> {
+    val paths = ArrayList<String>()
+    val state = values.json
+    visitShown(validateNodes(submit), getSubmitValues(), visibility.conditionValues(state), visibility.limits(state)) { path, _, _ ->
+        paths.add(path)
+    }
+    return paths
+}
+
 internal fun EngineCore.clearFormErrors() {
     topLevelErrors = serverFormErrors
 }
@@ -23,15 +32,7 @@ internal suspend fun FormEngine.passesValidate(
     submit: Boolean,
 ): Boolean {
     val core = core
-    val fields = ArrayList<String>()
-    val state = core.values.json
-    visitShown(core.validateNodes(submit), core.getSubmitValues(), core.visibility.conditionValues(state), core.visibility.limits(state)) {
-        path,
-        _,
-        _,
-        ->
-        fields.add(path)
-    }
+    val fields = core.shownPaths(submit)
     val result = suspended { validate(values, ValidateContext(core.currentStep?.id, fields, submit)) }
     if (stale()) return false
     if (result == null || result.isEmpty()) return true

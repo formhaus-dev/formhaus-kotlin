@@ -58,6 +58,10 @@ internal class FormAlerts(
         }
     }
 
+    fun invalidate() {
+        lastStructureVersion = -1
+    }
+
     fun reportActionError(message: String?) {
         actionError = message
         if (message != null) alertVersion += 1

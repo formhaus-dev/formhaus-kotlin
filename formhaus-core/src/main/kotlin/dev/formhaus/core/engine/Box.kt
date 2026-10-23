@@ -90,7 +90,7 @@ private suspend fun FormEngine.approveSubmission(
     stale: () -> Boolean,
 ): JsonObject? {
     if (stale() || invalid(stale)) return null
-    val onValidate = options.onValidate
+    val onValidate = core.onValidate
     if (onValidate != null && !passesValidate(onValidate, checked, stale, submit = true)) {
         if (!stale()) core.emit(FormEvent.FormSubmitFailed(SubmitFailureReason.Validation))
         return null

@@ -26,6 +26,7 @@ import dev.formhaus.core.renderer.formatTemplate
 import dev.formhaus.core.renderer.itemsHaveContent
 import dev.formhaus.core.renderer.label
 import dev.formhaus.core.renderer.nodeId
+import dev.formhaus.core.renderer.onValidate
 import dev.formhaus.core.renderer.restarts
 import dev.formhaus.core.renderer.sending
 import dev.formhaus.core.renderer.value
@@ -119,6 +120,7 @@ public class FormModel private constructor(
     public var valuesVersion: Int by mutableIntStateOf(0)
         private set
     private var loadingState by mutableStateOf(false)
+    private var localeVersion by mutableIntStateOf(0)
     public var loading: Boolean
         get() = loadingState
         set(value) {
@@ -157,7 +159,7 @@ public class FormModel private constructor(
         key: String,
         params: JsonObject = MutableJsonObject(),
     ): String {
-        val text = engine.label(key, options.labels, params)
+        val text = localeVersion.let { engine.label(key, options.labels, params) }
         val fallback = upcomingLabels[key]
         return if (text.isEmpty() && fallback != null) formatTemplate(fallback, params) else text
     }
@@ -196,7 +198,15 @@ public class FormModel private constructor(
         options: FormRendererOptions? = null,
         onSubmit: SubmitHandler? = null,
     ) {
-        if (engineOptions != null) hooks?.current = engineOptions
+        if (engineOptions != null && hooks != null) {
+            hooks.current = engineOptions
+            engine.onValidate = hooks.onValidate
+        }
+        if (engineOptions != null && engineOptions.locale != engine.locale) {
+            localeVersion += 1
+            alerts.invalidate()
+            engine.locale = engineOptions.locale
+        }
         if (options != null) this.options = options
         if (onSubmit != null) submitHandler = onSubmit
     }

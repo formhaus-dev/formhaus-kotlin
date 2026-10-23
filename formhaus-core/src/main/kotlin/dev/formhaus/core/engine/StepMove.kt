@@ -160,7 +160,7 @@ private suspend fun FormEngine.approve(
             return false
         }
     }
-    val onValidate = options.onValidate
+    val onValidate = core.onValidate
     if (move.validating && onValidate != null && !passesValidate(onValidate, context.values, stale, submit = false)) return false
     val before = options.onBeforeStepChange
     if (before != null) {

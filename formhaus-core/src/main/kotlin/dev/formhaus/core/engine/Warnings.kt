@@ -68,10 +68,11 @@ internal fun reportMissingLabel(
     source: LabelSource?,
     definition: FormDefinition,
     options: FormEngineOptions,
+    locale: List<LocaleCatalog>,
 ) {
     val catalog = source.catalog ?: return
     if (hasText(catalog, key) || definition.labels?.let { hasText(it, key) } == true) return
-    if (options.locale.any { key in it.labels }) return
+    if (locale.any { key in it.labels }) return
     reportMissing(IssueCode.MISSING_LABEL_KEY, key, "labels", options)
 }
 
@@ -84,15 +85,15 @@ internal fun watchedResolver(
     source: MessageSource?,
     definition: FormDefinition,
     missing: MissingMessageFn?,
-    locale: List<LocaleCatalog>,
+    locale: () -> List<LocaleCatalog>,
 ): ResolveMessage {
-    val catalogs = MessageSource.Function { key, params, _ -> locale.messageText(key, params) }
+    val catalogs = MessageSource.Function { key, params, _ -> locale().messageText(key, params) }
     val resolve = messageResolver(source, MessageSource.Catalog(definition.messages ?: JsonValue.Null), catalogs)
     val catalog = source.catalog
     if (missing == null || catalog == null) return resolve
     val own = definition.messages ?: JsonValue.Null
     return { key, params, field ->
-        if (!hasText(catalog, key.rawValue) && !hasText(own, key.rawValue) && locale.none { key in it.messages }) missing(key)
+        if (!hasText(catalog, key.rawValue) && !hasText(own, key.rawValue) && locale().none { key in it.messages }) missing(key)
         resolve(key, params, field)
     }
 }
