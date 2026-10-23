@@ -120,4 +120,4 @@ Run the heavy tests and the benchmarks before a release and after changes to the
 1. Sync the fixtures to a tagged `@formhaus/core` release with `./scripts/sync-fixtures.sh @formhaus/core@X.Y.Z`.
 2. Run the heavy tests.
 3. Set the version in `build-logic/src/main/kotlin/formhaus.publishing.gradle.kts`, add the release to `CHANGELOG.md` and update the install snippets in `README.md`.
-4. Tag `main` with `v` and the version, such as `v0.2.0`, and push the tag. JitPack builds the three libraries from `jitpack.yml`.
+4. Tag `main` with `v` and the version, such as `v0.2.1`, and push the tag. The release workflow publishes the three libraries to Maven Central, and JitPack builds them from `jitpack.yml`.

@@ -18,6 +18,7 @@ lifecycle = "2.11.0"
 kotlinx-benchmark = "0.5.0"
 jmh = "1.37"
 kover = "0.9.11"
+maven-publish = "0.37.0"
 
 [libraries]
 kotlin-build-tools-api = { module = "org.jetbrains.kotlin:kotlin-build-tools-api", version.ref = "kotlin" }
@@ -60,3 +61,4 @@ roborazzi = { id = "io.github.takahirom.roborazzi", version.ref = "roborazzi" }
 kotlin-allopen = { id = "org.jetbrains.kotlin.plugin.allopen", version.ref = "kotlin" }
 kotlinx-benchmark = { id = "org.jetbrains.kotlinx.benchmark", version.ref = "kotlinx-benchmark" }
 kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }
+maven-publish = { id = "com.vanniktech.maven.publish", version.ref = "maven-publish" }

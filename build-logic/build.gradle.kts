@@ -19,6 +19,7 @@ dependencies {
             animalsniffer,
             roborazzi,
             kover,
+            maven.publish,
         ).forEach { implementation(it.artifact()) }
     }
     implementation(libs.kotlin.build.tools.api)
