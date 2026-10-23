@@ -44,7 +44,6 @@ private fun assign(
 }
 
 internal class DomIds(
-    private val formId: String?,
     definition: FormDefinition,
 ) {
     private val scopes: Map<String, Map<String, String>>
@@ -66,11 +65,15 @@ internal class DomIds(
         scope: String,
     ): String = scopes[scope]?.get(key) ?: clean(key)
 
-    fun field(key: String): String = "${formId?.takeIf { it.isNotEmpty() }?.let(::clean) ?: "fh"}-${nodeId(key, "")}"
+    fun field(
+        formId: String?,
+        key: String,
+    ): String = "${formId?.takeIf { it.isNotEmpty() }?.let(::clean) ?: "fh"}-${nodeId(key, "")}"
 
     fun item(
+        formId: String?,
         group: String,
         index: Int,
         field: String,
-    ): String = "${field(group)}--$index--${nodeId(field, ".$group")}"
+    ): String = "${field(formId, group)}--$index--${nodeId(field, ".$group")}"
 }

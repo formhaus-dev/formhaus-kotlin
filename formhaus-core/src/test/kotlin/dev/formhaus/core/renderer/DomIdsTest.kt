@@ -3,9 +3,23 @@ package dev.formhaus.core.renderer
 import dev.formhaus.core.support.definition
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
+import org.junit.jupiter.api.Assertions.assertSame
 import org.junit.jupiter.api.Test
 
 class DomIdsTest {
+    private class Ids(
+        private val formId: String?,
+        private val ids: DomIds,
+    ) {
+        fun field(key: String) = ids.field(formId, key)
+
+        fun item(
+            group: String,
+            index: Int,
+            field: String,
+        ) = ids.item(formId, group, index, field)
+    }
+
     private fun text(key: String) = """{"key":"$key","type":"text","label":"$key"}"""
 
     private fun group(
@@ -16,7 +30,7 @@ class DomIdsTest {
     private fun ids(
         nodes: List<String>,
         formId: String? = "form",
-    ) = DomIds(formId, definition("""{"id":"f","submit":{"label":"S"},"fields":[${nodes.joinToString(",")}]}"""))
+    ) = Ids(formId, definition("""{"id":"f","submit":{"label":"S"},"fields":[${nodes.joinToString(",")}]}""").domIds)
 
     @Test
     fun `keeps the id of keys that collide with no other key`() {
@@ -62,5 +76,11 @@ class DomIdsTest {
         val plain = ids(listOf(text("crew-0"), group("crew", listOf("name")), group("crews", listOf("name"))), "f")
         assertEquals("f-crew--0--name", plain.item("crew", 0, "name"))
         assertEquals("f-crews--0--name", plain.item("crews", 0, "name"))
+    }
+
+    @Test
+    fun `assigns the ids once per definition`() {
+        val definition = definition("""{"id":"f","submit":{"label":"S"},"fields":[${text("a")}]}""")
+        assertSame(definition.domIds, definition.domIds)
     }
 }

@@ -86,7 +86,8 @@ private fun FormEngine.errorGroups(options: ErrorSummaryOptions): List<ErrorGrou
     if (errors.isEmpty()) return emptyList()
     val values = core.values.json
     val visibility = core.visibility
-    val ids = DomIds(options.idPrefix, definition)
+    val ids = definition.domIds
+    val prefix = options.idPrefix
     val source = options.labels
     val sections =
         if (isMultiStep) {
@@ -102,7 +103,7 @@ private fun FormEngine.errorGroups(options: ErrorSummaryOptions): List<ErrorGrou
                 val message = errors[key] ?: return@mapNotNull null
                 val name = recalled(raw, if (item == null) null else key).label.orEmpty()
                 val label = item?.let { "$name (${itemTitle(it.group, it.index, source)})" } ?: name
-                val id = item?.let { ids.item(it.group.key, it.index, it.field.key) } ?: ids.field(key)
+                val id = item?.let { ids.item(prefix, it.group.key, it.index, it.field.key) } ?: ids.field(prefix, key)
                 ErrorEntry(key, id, label, message)
             }
         if (entries.isEmpty()) return@mapIndexedNotNull null
