@@ -20,6 +20,8 @@ tasks.test {
     maxHeapSize = "1g"
 }
 
-listOf("testFixturesApiElements", "testFixturesRuntimeElements").forEach { name ->
-    (components["java"] as AdhocComponentWithVariants).withVariantsFromConfiguration(configurations[name]) { skip() }
+afterEvaluate {
+    configurations.filter { it.name.startsWith("testFixtures") && it.name.endsWith("Elements") }.forEach {
+        (components["java"] as AdhocComponentWithVariants).withVariantsFromConfiguration(it) { skip() }
+    }
 }
