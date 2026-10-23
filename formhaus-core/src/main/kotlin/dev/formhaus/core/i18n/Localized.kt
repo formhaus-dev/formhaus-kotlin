@@ -14,14 +14,18 @@ public class Localized internal constructor(
     public val labels: JsonValue,
 )
 
+private fun addresses(path: List<String>): List<List<String>> =
+    if (path.firstOrNull() == "steps" && path.getOrNull(2) == "fields") listOf(path, path.drop(2)) else listOf(path)
+
 internal fun lookup(
     overlay: JsonValue?,
     path: List<String>,
-): String? {
-    var node = overlay
-    for (key in path) node = node?.objectValue?.get(key)
-    return node?.stringValue?.takeUnless { it.isBlankText }
-}
+): String? =
+    addresses(path).firstNotNullOfOrNull { address ->
+        var node = overlay
+        for (key in address) node = node?.objectValue?.get(key)
+        node?.stringValue?.takeUnless { it.isBlankText }
+    }
 
 public fun localize(
     input: JsonValue,

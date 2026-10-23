@@ -19,6 +19,8 @@ internal class CldrTable<T : Any>(
 
     operator fun get(locale: Locale): T = keys(locale).firstNotNullOfOrNull(values::get) ?: fallback
 
+    operator fun get(tag: String): T = values[tag] ?: fallback
+
     private fun keys(locale: Locale): List<String> {
         val language = locale.language
         val script = locale.script.takeIf { it.isNotEmpty() }
@@ -34,6 +36,8 @@ internal class CldrTable<T : Any>(
 
 internal val numberingSystems by lazy { CldrTable(NUMBERING_SYSTEMS, FALLBACK_NUMBERING_SYSTEMS) { it } }
 internal val calendars by lazy { CldrTable(CALENDARS, FALLBACK_CALENDARS) { it } }
+internal val likelyRegions by lazy { CldrTable(LIKELY_REGIONS, FALLBACK_LIKELY_REGIONS) { it } }
+internal val languageAliases by lazy { CldrTable(LANGUAGE_ALIASES, FALLBACK_LANGUAGE_ALIASES) { it } }
 
 internal fun Locale.withDefault(
     key: String,

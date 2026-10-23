@@ -61,7 +61,7 @@ The copy in `formhaus-core/src/test/resources/fixtures/conformance` is synced, n
 ./scripts/sync-fixtures.sh <git-ref> [path-to-formhaus-repo]
 ```
 
-`fixtures/VERSION` records the ref and the resolved sha. The definition corpus runs `checkDefinition`, overlays, text slots, value cases and recall cases. Every scenario in `fixtures/conformance/scenarios` runs through `FormEngine` as its own test.
+`fixtures/VERSION` records the ref and the resolved sha. The same script copies the locale catalogs of `@formhaus/core` to `formhaus-core/src/main/resources/dev/formhaus/core/locales`, with their own `VERSION`. The definition corpus runs `checkDefinition`, overlays, text slots, value cases and recall cases. Every scenario in `fixtures/conformance/scenarios` runs through `FormEngine` as its own test.
 
 ## Generated data
 
@@ -72,7 +72,7 @@ node scripts/unicode-tables.mjs
 node scripts/cldr-tables.mjs
 ```
 
-`unicode-tables.mjs` writes the `unicode/Unicode<N>Tables.kt` file. `cldr-tables.mjs` writes `cldr/Cldr<N>Tables.kt` and the recall format fixture in `src/test/resources/cldr`.
+`unicode-tables.mjs` writes the `unicode/Unicode<N>Tables.kt` file. `cldr-tables.mjs` writes `cldr/Cldr<N>Tables.kt` and the recall format and plural rule fixtures in `src/test/resources/cldr`.
 
 `formhaus-core/src/test/resources/fixtures/regex/cases.json` holds the expected results of the regex engine, recorded with Node. To record them again:
 

@@ -176,3 +176,622 @@ internal const val CALENDARS: String =
     "fa ps lrc mzn uz-Arab uz-AF ckb-IR ps-Arab-PK lrc-Arab-IQ|persian\n" +
         "th shn-TH|buddhist\n" +
         "ps-PK lrc-IQ uz-Latn-AF uz-Cyrl-AF ckb-Arab-IR shn-Mymr-TH|gregory"
+
+internal const val FALLBACK_LIKELY_REGIONS: String = ""
+
+internal const val LIKELY_REGIONS: String =
+    "af|af-ZA\n" +
+        "ak|ak-GH\n" +
+        "am|am-ET\n" +
+        "ar|ar-EG\n" +
+        "as|as-IN\n" +
+        "az|az-AZ\n" +
+        "ba|ba-RU\n" +
+        "be|be-BY\n" +
+        "bg|bg-BG\n" +
+        "bm|bm-ML\n" +
+        "bn|bn-BD\n" +
+        "bo|bo-CN\n" +
+        "br|br-FR\n" +
+        "bs|bs-BA\n" +
+        "ca|ca-ES\n" +
+        "ce|ce-RU\n" +
+        "cs|cs-CZ\n" +
+        "cv|cv-RU\n" +
+        "cy|cy-GB\n" +
+        "da|da-DK\n" +
+        "de|de-DE\n" +
+        "dz|dz-BT\n" +
+        "ee|ee-GH\n" +
+        "el|el-GR\n" +
+        "en|en-US\n" +
+        "eo|eo-001\n" +
+        "es|es-ES\n" +
+        "et|et-EE\n" +
+        "eu|eu-ES\n" +
+        "fa|fa-IR\n" +
+        "ff|ff-SN\n" +
+        "fi|fi-FI\n" +
+        "fo|fo-FO\n" +
+        "fr|fr-FR\n" +
+        "fy|fy-NL\n" +
+        "ga|ga-IE\n" +
+        "gd|gd-GB\n" +
+        "gl|gl-ES\n" +
+        "gu|gu-IN\n" +
+        "gv|gv-IM\n" +
+        "ha|ha-NG\n" +
+        "he|he-IL\n" +
+        "hi|hi-IN\n" +
+        "hr|hr-HR\n" +
+        "hu|hu-HU\n" +
+        "hy|hy-AM\n" +
+        "ia|ia-001\n" +
+        "id|id-ID\n" +
+        "ie|ie-EE\n" +
+        "ig|ig-NG\n" +
+        "ii|ii-CN\n" +
+        "is|is-IS\n" +
+        "it|it-IT\n" +
+        "ja|ja-JP\n" +
+        "jv|jv-ID\n" +
+        "ka|ka-GE\n" +
+        "ki|ki-KE\n" +
+        "kk|kk-KZ\n" +
+        "kl|kl-GL\n" +
+        "km|km-KH\n" +
+        "kn|kn-IN\n" +
+        "ko|ko-KR\n" +
+        "ks|ks-IN\n" +
+        "ku|ku-TR\n" +
+        "kw|kw-GB\n" +
+        "ky|ky-KG\n" +
+        "lb|lb-LU\n" +
+        "lg|lg-UG\n" +
+        "ln|ln-CD\n" +
+        "lo|lo-LA\n" +
+        "lt|lt-LT\n" +
+        "lu|lu-CD\n" +
+        "lv|lv-LV\n" +
+        "mg|mg-MG\n" +
+        "mi|mi-NZ\n" +
+        "mk|mk-MK\n" +
+        "ml|ml-IN\n" +
+        "mn|mn-MN\n" +
+        "mr|mr-IN\n" +
+        "ms|ms-MY\n" +
+        "mt|mt-MT\n" +
+        "my|my-MM\n" +
+        "nb|nb-NO\n" +
+        "nd|nd-ZW\n" +
+        "ne|ne-NP\n" +
+        "nl|nl-NL\n" +
+        "nn|nn-NO\n" +
+        "no|no-NO\n" +
+        "oc|oc-FR\n" +
+        "om|om-ET\n" +
+        "or|or-IN\n" +
+        "os|os-GE\n" +
+        "pa|pa-IN\n" +
+        "pl|pl-PL\n" +
+        "ps|ps-AF\n" +
+        "pt|pt-BR\n" +
+        "qu|qu-PE\n" +
+        "rm|rm-CH\n" +
+        "rn|rn-BI\n" +
+        "ro|ro-RO\n" +
+        "ru|ru-RU\n" +
+        "rw|rw-RW\n" +
+        "sa|sa-IN\n" +
+        "sc|sc-IT\n" +
+        "sd|sd-PK\n" +
+        "se|se-NO\n" +
+        "sg|sg-CF\n" +
+        "si|si-LK\n" +
+        "sk|sk-SK\n" +
+        "sl|sl-SI\n" +
+        "sn|sn-ZW\n" +
+        "so|so-SO\n" +
+        "sq|sq-AL\n" +
+        "sr|sr-RS\n" +
+        "st|st-ZA\n" +
+        "su|su-ID\n" +
+        "sv|sv-SE\n" +
+        "sw|sw-TZ\n" +
+        "ta|ta-IN\n" +
+        "te|te-IN\n" +
+        "tg|tg-TJ\n" +
+        "th|th-TH\n" +
+        "ti|ti-ET\n" +
+        "tk|tk-TM\n" +
+        "tn|tn-ZA\n" +
+        "to|to-TO\n" +
+        "tr|tr-TR\n" +
+        "tt|tt-RU\n" +
+        "ug|ug-CN\n" +
+        "uk|uk-UA\n" +
+        "ur|ur-PK\n" +
+        "uz|uz-UZ\n" +
+        "vi|vi-VN\n" +
+        "wo|wo-SN\n" +
+        "xh|xh-ZA\n" +
+        "yi|yi-UA\n" +
+        "yo|yo-NG\n" +
+        "za|za-CN\n" +
+        "zh|zh-CN\n" +
+        "zu|zu-ZA\n" +
+        "agq|agq-CM\n" +
+        "ars|ars-SA\n" +
+        "asa|asa-TZ\n" +
+        "ast|ast-ES\n" +
+        "bas|bas-CM\n" +
+        "bem|bem-ZM\n" +
+        "bez|bez-TZ\n" +
+        "bgc|bgc-IN\n" +
+        "bho|bho-IN\n" +
+        "blo|blo-BJ\n" +
+        "brx|brx-IN\n" +
+        "bua|bua-RU\n" +
+        "ccp|ccp-BD\n" +
+        "ceb|ceb-PH\n" +
+        "cgg|cgg-UG\n" +
+        "chr|chr-US\n" +
+        "ckb|ckb-IQ\n" +
+        "csw|csw-CA\n" +
+        "dav|dav-KE\n" +
+        "dje|dje-NE\n" +
+        "doi|doi-IN\n" +
+        "dsb|dsb-DE\n" +
+        "dua|dua-CM\n" +
+        "dyo|dyo-SN\n" +
+        "ebu|ebu-KE\n" +
+        "ewo|ewo-CM\n" +
+        "fil|fil-PH\n" +
+        "fur|fur-IT\n" +
+        "gaa|gaa-GH\n" +
+        "gsw|gsw-CH\n" +
+        "guz|guz-KE\n" +
+        "haw|haw-US\n" +
+        "hsb|hsb-DE\n" +
+        "jgo|jgo-CM\n" +
+        "jmc|jmc-TZ\n" +
+        "kab|kab-DZ\n" +
+        "kam|kam-KE\n" +
+        "kde|kde-TZ\n" +
+        "kea|kea-CV\n" +
+        "kgp|kgp-BR\n" +
+        "khq|khq-ML\n" +
+        "kkj|kkj-CM\n" +
+        "kln|kln-KE\n" +
+        "kok|kok-IN\n" +
+        "ksb|ksb-TZ\n" +
+        "ksf|ksf-CM\n" +
+        "ksh|ksh-DE\n" +
+        "kxv|kxv-IN\n" +
+        "lag|lag-TZ\n" +
+        "lij|lij-IT\n" +
+        "lkt|lkt-US\n" +
+        "lmo|lmo-IT\n" +
+        "lrc|lrc-IR\n" +
+        "luo|luo-KE\n" +
+        "luy|luy-KE\n" +
+        "mai|mai-IN\n" +
+        "mas|mas-KE\n" +
+        "mer|mer-KE\n" +
+        "mfe|mfe-MU\n" +
+        "mgh|mgh-MZ\n" +
+        "mgo|mgo-CM\n" +
+        "mni|mni-IN\n" +
+        "mua|mua-CM\n" +
+        "mzn|mzn-IR\n" +
+        "naq|naq-NA\n" +
+        "nds|nds-DE\n" +
+        "nmg|nmg-CM\n" +
+        "nnh|nnh-CM\n" +
+        "nqo|nqo-GN\n" +
+        "nso|nso-ZA\n" +
+        "nus|nus-SS\n" +
+        "nyn|nyn-UG\n" +
+        "pcm|pcm-NG\n" +
+        "pms|pms-IT\n" +
+        "prg|prg-PL\n" +
+        "raj|raj-IN\n" +
+        "rof|rof-TZ\n" +
+        "rwk|rwk-TZ\n" +
+        "sah|sah-RU\n" +
+        "saq|saq-KE\n" +
+        "sat|sat-IN\n" +
+        "sbp|sbp-TZ\n" +
+        "scn|scn-IT\n" +
+        "seh|seh-MZ\n" +
+        "ses|ses-ML\n" +
+        "shi|shi-MA\n" +
+        "shn|shn-MM\n" +
+        "smn|smn-FI\n" +
+        "syr|syr-IQ\n" +
+        "szl|szl-PL\n" +
+        "teo|teo-UG\n" +
+        "tok|tok-001\n" +
+        "twq|twq-NE\n" +
+        "tyv|tyv-RU\n" +
+        "tzm|tzm-MA\n" +
+        "vai|vai-LR\n" +
+        "vec|vec-IT\n" +
+        "vmw|vmw-MZ\n" +
+        "vun|vun-TZ\n" +
+        "wae|wae-CH\n" +
+        "xnr|xnr-IN\n" +
+        "xog|xog-UG\n" +
+        "yav|yav-CM\n" +
+        "yrl|yrl-BR\n" +
+        "yue|yue-HK\n" +
+        "zgh|zgh-MA\n" +
+        "az-Arab|az-IR\n" +
+        "kk-Arab|kk-CN\n" +
+        "ku-Cyrl|ku-AM\n" +
+        "ku-Arab|ku-IQ\n" +
+        "ky-Arab|ky-CN\n" +
+        "ky-Latn|ky-TR\n" +
+        "mn-Mong|mn-CN\n" +
+        "pa-Arab|pa-PK\n" +
+        "sd-Deva|sd-IN\n" +
+        "tg-Arab|tg-PK\n" +
+        "ug-Cyrl|ug-KZ\n" +
+        "uz-Arab|uz-AF\n" +
+        "zh-Hant|zh-TW\n" +
+        "yue-Hans|yue-CN"
+
+internal const val FALLBACK_LANGUAGE_ALIASES: String = ""
+
+internal const val LANGUAGE_ALIASES: String =
+    "aam|aas\n" +
+        "aar|aa\n" +
+        "abk|ab\n" +
+        "adp dzo|dz\n" +
+        "afr|af\n" +
+        "agp|apf\n" +
+        "ais|ami\n" +
+        "ajp|apc\n" +
+        "ajt|aeb\n" +
+        "aju|jrb\n" +
+        "aka fat twi|ak\n" +
+        "alb als sqi|sq\n" +
+        "amh|am\n" +
+        "ara arb|ar\n" +
+        "arg|an\n" +
+        "arm hye|hy\n" +
+        "asd|snz\n" +
+        "asm|as\n" +
+        "aue|ktz\n" +
+        "ava|av\n" +
+        "ave|ae\n" +
+        "aym ayr|ay\n" +
+        "ayx|nun\n" +
+        "aze azj|az\n" +
+        "bak|ba\n" +
+        "bam|bm\n" +
+        "baq eus|eu\n" +
+        "baz|nvo\n" +
+        "bcc|bal\n" +
+        "bcl|bik\n" +
+        "bel|be\n" +
+        "ben|bn\n" +
+        "bgm|bcg\n" +
+        "bhk|fbl\n" +
+        "bic|bir\n" +
+        "bih|bho\n" +
+        "bis|bi\n" +
+        "bjd|drl\n" +
+        "bjq|bzc\n" +
+        "bkb|ebk\n" +
+        "blg snb|iba\n" +
+        "bod tib|bo\n" +
+        "bos|bs\n" +
+        "bre|br\n" +
+        "btb|beb\n" +
+        "bul|bg\n" +
+        "bur mya|my\n" +
+        "bxk|luy\n" +
+        "bxr|bua\n" +
+        "cat|ca\n" +
+        "ccq ybd|rki\n" +
+        "ces cze|cs\n" +
+        "cha|ch\n" +
+        "che|ce\n" +
+        "chi cmn zho|zh\n" +
+        "chu|cu\n" +
+        "chv|cv\n" +
+        "cjr|mom\n" +
+        "cka|cmr\n" +
+        "cld|syr\n" +
+        "cls san|sa\n" +
+        "cmk|xch\n" +
+        "cnr|sr-ME\n" +
+        "cor|kw\n" +
+        "cos|co\n" +
+        "coy nts|pij\n" +
+        "cqu|quh\n" +
+        "cre cwd|cr\n" +
+        "cym wel|cy\n" +
+        "daf|dnj\n" +
+        "dan|da\n" +
+        "dap|njz\n" +
+        "dek|sqm\n" +
+        "deu ger|de\n" +
+        "dgo|doi\n" +
+        "dhd|mwr\n" +
+        "dik|din\n" +
+        "diq|zza\n" +
+        "dit|dif\n" +
+        "div|dv\n" +
+        "djl|dze\n" +
+        "dkl|aqd\n" +
+        "drh khk mon|mn\n" +
+        "drr gli|kzk\n" +
+        "drw prs tnf|fa-AF\n" +
+        "dud|uth\n" +
+        "duj|dwu\n" +
+        "dut nld|nl\n" +
+        "dwl|dbt\n" +
+        "ekk est|et\n" +
+        "ell gre|el\n" +
+        "elp|amq\n" +
+        "emk|man\n" +
+        "eng|en\n" +
+        "epo|eo\n" +
+        "esk ipk|ik\n" +
+        "ewe|ee\n" +
+        "fao|fo\n" +
+        "fas per pes|fa\n" +
+        "fij|fj\n" +
+        "fin|fi\n" +
+        "fra fre|fr\n" +
+        "fry|fy\n" +
+        "fuc ful|ff\n" +
+        "gav|dev\n" +
+        "gaz orm|om\n" +
+        "gbc|wny\n" +
+        "gbo|grb\n" +
+        "geo kat|ka\n" +
+        "gfx mwj oun|vaj\n" +
+        "ggn|gvr\n" +
+        "ggo|esg\n" +
+        "ggr|gtu\n" +
+        "gio|aou\n" +
+        "gla|gd\n" +
+        "gle|ga\n" +
+        "glg|gl\n" +
+        "glv|gv\n" +
+        "gno|gon\n" +
+        "gom|kok\n" +
+        "grn gug|gn\n" +
+        "gti|nyc\n" +
+        "guj prp|gu\n" +
+        "guv|duz\n" +
+        "gya|gba\n" +
+        "hat|ht\n" +
+        "hau|ha\n" +
+        "hbs sh|sr-Latn\n" +
+        "hdn|hai\n" +
+        "hea|hmn\n" +
+        "heb iw|he\n" +
+        "her|hz\n" +
+        "him|srx\n" +
+        "hin|hi\n" +
+        "hmo|ho\n" +
+        "hrr|jal\n" +
+        "hrv scr|hr\n" +
+        "hun|hu\n" +
+        "ibi|opa\n" +
+        "ibo|ig\n" +
+        "ice isl|is\n" +
+        "ido|io\n" +
+        "iii|ii\n" +
+        "ike iku|iu\n" +
+        "ile|ie\n" +
+        "ill|ilm\n" +
+        "ilw|gal\n" +
+        "in ind|id\n" +
+        "ina|ia\n" +
+        "ita|it\n" +
+        "izi|eza\n" +
+        "jar|jgk\n" +
+        "jav jaw jw|jv\n" +
+        "jeg skk thx|oyb\n" +
+        "ji ydd yid|yi\n" +
+        "jpn|ja\n" +
+        "kal|kl\n" +
+        "kan|kn\n" +
+        "kas|ks\n" +
+        "kau knc|kr\n" +
+        "kaz|kk\n" +
+        "kdv|zkd\n" +
+        "kgc|tdf\n" +
+        "kgd|ncq\n" +
+        "kgh|kml\n" +
+        "kgm|plu\n" +
+        "khm|km\n" +
+        "kik|ki\n" +
+        "kin|rw\n" +
+        "kir|ky\n" +
+        "kmr kur|ku\n" +
+        "kng kon|kg\n" +
+        "koj|kwv\n" +
+        "kom kpv|kv\n" +
+        "kor|ko\n" +
+        "kpp|jkm\n" +
+        "krm|bmf\n" +
+        "ktr kzj kzt tdu|dtp\n" +
+        "kua|kj\n" +
+        "kvs|gdj\n" +
+        "kwq|yam\n" +
+        "kxe|tvd\n" +
+        "kxl|kru\n" +
+        "kzh|dgl\n" +
+        "lak|ksp\n" +
+        "lao|lo\n" +
+        "lat|la\n" +
+        "lav lvs|lv\n" +
+        "lbk|bnc\n" +
+        "leg|enl\n" +
+        "lii|raq\n" +
+        "lim|li\n" +
+        "lin|ln\n" +
+        "lit|lt\n" +
+        "llo|ngt\n" +
+        "lmm|rmx\n" +
+        "ltz|lb\n" +
+        "lub|lu\n" +
+        "lug|lg\n" +
+        "mac mkd|mk\n" +
+        "mah|mh\n" +
+        "mal|ml\n" +
+        "mao mri|mi\n" +
+        "mar|mr\n" +
+        "may msa zsm|ms\n" +
+        "meg|cir\n" +
+        "mgx|jbk\n" +
+        "mhr|chm\n" +
+        "mlg plt|mg\n" +
+        "mlt|mt\n" +
+        "mnt|wnn\n" +
+        "mo mol ron rum|ro\n" +
+        "mof|xnt\n" +
+        "mst myt|mry\n" +
+        "mup|raj\n" +
+        "mwd xrq|dmw\n" +
+        "myd|aog\n" +
+        "nad|xny\n" +
+        "nau|na\n" +
+        "nav|nv\n" +
+        "nbf|nru\n" +
+        "nbl|nr\n" +
+        "nbx|gll\n" +
+        "ncp|kdz\n" +
+        "nde|nd\n" +
+        "ndo|ng\n" +
+        "nep npi|ne\n" +
+        "nln|azd\n" +
+        "nlr|nrk\n" +
+        "nno|nn\n" +
+        "nns|nbr\n" +
+        "nnx|ngv\n" +
+        "nob|nb\n" +
+        "nom|cbr\n" +
+        "noo|dtd\n" +
+        "nor|no\n" +
+        "nte|eko\n" +
+        "nxu|bpp\n" +
+        "nya|ny\n" +
+        "oci|oc\n" +
+        "ojg oji|oj\n" +
+        "ori ory|or\n" +
+        "oss|os\n" +
+        "pan|pa\n" +
+        "pat|kxr\n" +
+        "pbu pus|ps\n" +
+        "pcr|adx\n" +
+        "pli|pi\n" +
+        "pmc|huw\n" +
+        "pmk|crr\n" +
+        "pmu|phr\n" +
+        "pnb|lah\n" +
+        "pol|pl\n" +
+        "por|pt\n" +
+        "ppa|bfy\n" +
+        "ppr|lcq\n" +
+        "pry|prt\n" +
+        "puz|pub\n" +
+        "que quz|qu\n" +
+        "rmr|emx\n" +
+        "rmy|rom\n" +
+        "roh|rm\n" +
+        "run|rn\n" +
+        "rus|ru\n" +
+        "sag|sg\n" +
+        "sap|aqt\n" +
+        "sca|hle\n" +
+        "scc srp|sr\n" +
+        "sgl|isk\n" +
+        "sin|si\n" +
+        "slk slo|sk\n" +
+        "slv|sl\n" +
+        "smd|kmb\n" +
+        "sme|se\n" +
+        "smo|sm\n" +
+        "sna|sn\n" +
+        "snd|sd\n" +
+        "som|so\n" +
+        "sot|st\n" +
+        "spa|es\n" +
+        "spy|kln\n" +
+        "src srd|sc\n" +
+        "ssw|ss\n" +
+        "sul|sgd\n" +
+        "sum|ulw\n" +
+        "sun|su\n" +
+        "swa swh|sw\n" +
+        "swc|sw-CD\n" +
+        "swe|sv\n" +
+        "szd|umi\n" +
+        "tah|ty\n" +
+        "tam|ta\n" +
+        "tat|tt\n" +
+        "tel|te\n" +
+        "tgg|bjp\n" +
+        "tgk|tg\n" +
+        "tgl tl|fil\n" +
+        "tha|th\n" +
+        "thc|tpo\n" +
+        "thw|ola\n" +
+        "tid|itd\n" +
+        "tie|ras\n" +
+        "tir|ti\n" +
+        "tkk|twm\n" +
+        "tlw|weo\n" +
+        "tmk|tdg\n" +
+        "tmp|tyj\n" +
+        "tne|kak\n" +
+        "ton|to\n" +
+        "tpw|tpn\n" +
+        "tsf|taj\n" +
+        "tsn|tn\n" +
+        "tso|ts\n" +
+        "ttq|tmh\n" +
+        "tuk|tk\n" +
+        "tur|tr\n" +
+        "uig|ug\n" +
+        "ukr|uk\n" +
+        "umu|del\n" +
+        "unp|wro\n" +
+        "uok|ema\n" +
+        "urd|ur\n" +
+        "uzb uzn|uz\n" +
+        "ven|ve\n" +
+        "vie|vi\n" +
+        "vol|vo\n" +
+        "wgw|wgb\n" +
+        "wit|nol\n" +
+        "wiw|nwo\n" +
+        "wln|wa\n" +
+        "wol|wo\n" +
+        "xba|cax\n" +
+        "xho|xh\n" +
+        "xia|acn\n" +
+        "xkh|waw\n" +
+        "xpe|kpe\n" +
+        "xsj|suj\n" +
+        "xsl|den\n" +
+        "xss|zko\n" +
+        "yen|ynq\n" +
+        "yiy|yrm\n" +
+        "yma|lrr\n" +
+        "ymt|mtm\n" +
+        "yor|yo\n" +
+        "yos|zom\n" +
+        "yuu|yug\n" +
+        "zai|zap\n" +
+        "zha zyb|za\n" +
+        "zir|scv\n" +
+        "zkb|kjh\n" +
+        "zul|zu"

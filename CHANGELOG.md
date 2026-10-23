@@ -1,5 +1,32 @@
 # Changelog
 
+## 0.4.0
+
+### formhaus-core
+
+- New `locale` option on `FormEngineOptions` takes a list of `LocaleCatalog`. Per key, `messages` wins over `definition.messages`, which wins over the catalogs in list order, which win over the built-in English. Labels follow the same order.
+- A catalog text can be `PluralForms`, picked by the CLDR plural rules of the catalog locale on `{count}`, `{min}` or `{max}`. That number is formatted for the same locale.
+- Plural rules cover `en`, `de`, `es`, `fr`, `it`, `pt`, `pt-PT`, `ja`, `zh`, `ru` and `uk`. Other languages use the `other` form.
+- New `FormEngine.locale` replaces the catalogs of a running engine. Labels and the next validation use the new catalogs.
+- Message and label catalogs for `es`, `fr`, `fr-CA`, `de`, `pt-BR`, `it`, `ja`, `zh-CN`, `ru` and `uk`, plus `en`, through `LocaleCatalog.bundled(tag)`. `LocaleCatalog.bundledTags` lists them.
+- New `LocaleCatalog.fromJson(json)` reads a catalog in the format of `@formhaus/core/locales/<tag>.json`.
+- New `localeChain(tag)` and `checkCatalog(json)`. `localeChain` adds the likely region, so `zh-Hans-CN` also tries `zh-CN`. It drops `-u-` and `-x-` extensions and replaces deprecated language codes, so `iw` tries `he`.
+- New types `LocaleCatalog`, `LocaleText`, `PluralForms` and `CatalogIssues`.
+- A multi-step overlay also accepts `fields.<key>` at the top level. `steps.<id>.fields.<key>` wins when both are set.
+- New `onValidate` engine option runs after the definition rules pass, on Continue after `onStepValidate` and on Submit before `onBeforeSubmit`. It gets the values and a `ValidateContext` with `stepId`, `fields` and `submit`, where `fields` lists the visible field paths in scope, and returns errors keyed by field path. Keys outside `fields` show as top-level errors.
+- An `onValidate` error on another step opens that step on Submit.
+- New types `ValidateFn` and `ValidateContext`.
+- Top-level errors from `onStepValidate` and `onValidate` clear on the next Continue, Back, Skip or Submit. Top-level errors from the submit handler and from `setErrors` stay.
+- New `FormEngine.errorSummary(ErrorSummaryOptions(idPrefix, labels))` returns the field errors grouped by step, the top-level errors and the field error count.
+- New types `ErrorSummary` and `ErrorSummaryOptions`.
+- **Breaking:** `FormEngine.errorGroups(labels)` is removed. Use `errorSummary(ErrorSummaryOptions(labels = labels)).groups`.
+- **Breaking:** `ErrorEntry.id` is the element id of the web renderers, such as `fh-email` or `fh-guests--1--name`, instead of the field key.
+
+### formhaus-compose
+
+- The `locale` and `onValidate` engine options reach `FormhausForm` and `FormModel`, and the built-in labels and error summary use the locale catalogs.
+- A new `locale` in `engineOptions` applies to a retained form, such as after a system language change.
+
 ## 0.3.0
 
 ### formhaus-core

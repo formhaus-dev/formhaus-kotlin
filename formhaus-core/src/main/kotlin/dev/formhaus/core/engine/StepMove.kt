@@ -26,6 +26,7 @@ internal fun EngineCore.plannedMove(
     if (!isMultiStep || stepValidating || submitting) return null
     if (!skipping && (if (forward) isLastStep else isFirstStep)) return null
     val step = currentStep ?: return null
+    clearFormErrors()
     val validating = forward && !skipping
     if (validating) includeCurrentStep()
     if (validating && hasStepErrors()) return null
@@ -159,6 +160,8 @@ private suspend fun FormEngine.approve(
             return false
         }
     }
+    val onValidate = core.onValidate
+    if (move.validating && onValidate != null && !passesValidate(onValidate, context.values, stale, submit = false)) return false
     val before = options.onBeforeStepChange
     if (before != null) {
         val allowed = suspended { before(context) }

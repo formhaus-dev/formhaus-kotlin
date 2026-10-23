@@ -7,6 +7,7 @@ import dev.formhaus.core.json.JsonValue
 import dev.formhaus.core.json.MutableJsonObject
 import dev.formhaus.core.json.jsNumber
 import dev.formhaus.core.json.jsString
+import dev.formhaus.core.renderer.DomIds
 
 public class FormStep internal constructor(
     internal val json: JsonObject,
@@ -66,6 +67,8 @@ public class FormDefinition internal constructor(
         get() = if (!steps.isNullOrEmpty()) steps.flatMap { it.fields } else fields.orEmpty()
 
     internal val allFields: List<FormField> get() = valueFields(topNodes)
+
+    internal val domIds: DomIds by lazy { DomIds(this) }
 
     public companion object {
         public const val SUPPORTED_FORMAT_VERSION: String = "1.6"

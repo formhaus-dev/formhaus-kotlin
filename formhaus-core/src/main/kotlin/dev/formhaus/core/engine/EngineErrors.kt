@@ -73,6 +73,7 @@ internal fun EngineCore.applyValidationErrors(
     found: FieldErrors,
     server: Boolean = false,
     formErrors: List<String> = emptyList(),
+    navigate: Boolean = server,
 ) {
     val bound = MutableStringMap<String>()
     val general = formErrors.toMutableList()
@@ -91,7 +92,7 @@ internal fun EngineCore.applyValidationErrors(
     }
     replaceErrors(serverErrors.merging(bound))
     topLevelErrors = if (server) general else serverFormErrors + general
-    notify(structureChanged = server && moveToFirstError(bound))
+    notify(structureChanged = navigate && moveToFirstError(bound))
 }
 
 internal fun EngineCore.moveToFirstError(found: FieldErrors): Boolean {

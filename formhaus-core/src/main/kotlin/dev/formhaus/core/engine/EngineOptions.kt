@@ -1,6 +1,7 @@
 package dev.formhaus.core.engine
 
 import dev.formhaus.core.definitionvalidation.DefinitionIssue
+import dev.formhaus.core.i18n.LocaleCatalog
 import dev.formhaus.core.json.FieldErrors
 import dev.formhaus.core.json.JsonObject
 import dev.formhaus.core.json.JsonValue
@@ -38,6 +39,20 @@ public class StepChangeContext(
     override fun toString(): String = parts().describe("StepChangeContext")
 
     private fun parts(): ValueParts = listOf("fromStepId" to fromStepId, "toStepId" to toStepId, "reason" to reason, "values" to values)
+}
+
+public class ValidateContext(
+    public val stepId: String?,
+    public val fields: List<String>,
+    public val submit: Boolean,
+) {
+    override fun equals(other: Any?): Boolean = equalParts(other, ValidateContext::parts)
+
+    override fun hashCode(): Int = parts().partsHash()
+
+    override fun toString(): String = parts().describe("ValidateContext")
+
+    private fun parts(): ValueParts = listOf("stepId" to stepId, "fields" to fields, "submit" to submit)
 }
 
 public sealed class SubmitResult {
@@ -112,6 +127,7 @@ public class FormLifecycleError internal constructor(
 internal fun errorMessage(error: Throwable): String = error.message ?: error.toString()
 
 public typealias StepValidateFn = suspend (String, JsonObject) -> FieldErrors?
+public typealias ValidateFn = suspend (JsonObject, ValidateContext) -> FieldErrors?
 public typealias BeforeStepChangeFn = suspend (StepChangeContext) -> Boolean?
 public typealias AfterStepChangeFn = suspend (StepChangeContext) -> Unit
 public typealias BeforeSubmitFn = suspend (JsonObject) -> Boolean?
@@ -159,6 +175,8 @@ public class FormEngineOptions(
     public val research: FormResearch? = null,
     public val hiddenValues: HiddenValues = HiddenValues.CLEAR,
     public val debugChecks: Boolean? = null,
+    public val locale: List<LocaleCatalog> = emptyList(),
+    public val onValidate: ValidateFn? = null,
 ) {
     internal val checksOn: Boolean get() = debugChecks == true
     internal val recallFormat: RecallFormatFn? by lazy { formatRecall ?: recallFormatter?.let(::recallFormat) }

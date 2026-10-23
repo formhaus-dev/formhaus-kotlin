@@ -2,21 +2,30 @@ package dev.formhaus.core.renderer
 
 import dev.formhaus.core.engine.FormEngine
 import dev.formhaus.core.engine.RecallItem
-import dev.formhaus.core.engine.errorKeys
 import dev.formhaus.core.engine.itemTemplate
 import dev.formhaus.core.engine.recalled
-import dev.formhaus.core.engine.recalledTitle
 import dev.formhaus.core.engine.reportMissingLabel
+import dev.formhaus.core.i18n.labelText
 import dev.formhaus.core.json.JsonObject
 import dev.formhaus.core.json.JsonValue
 import dev.formhaus.core.json.stringMapOf
 import dev.formhaus.core.model.FormField
-import dev.formhaus.core.model.FormNode
 import dev.formhaus.core.model.StepButton
 import dev.formhaus.core.validation.cut
 import dev.formhaus.core.validation.noParams
 
-private val FormEngine.definitionLabels: LabelSource? get() = definition.labels?.let(LabelSource::Catalog)
+private fun FormEngine.resolvedLabel(
+    key: String,
+    source: LabelSource?,
+    params: JsonObject,
+): String =
+    labelFor(
+        key,
+        params,
+        source,
+        definition.labels?.let(LabelSource::Catalog),
+        LabelSource.Function { name, values -> core.locale.labelText(name, values) },
+    )
 
 @RendererApi
 public fun FormEngine.label(
@@ -24,8 +33,8 @@ public fun FormEngine.label(
     source: LabelSource?,
     params: JsonObject = noParams,
 ): String {
-    if (options.checksOn) reportMissingLabel(key, source, definition, options)
-    return labelFor(key, params, source, definitionLabels)
+    if (options.checksOn) reportMissingLabel(key, source, definition, options, core.locale)
+    return resolvedLabel(key, source, params)
 }
 
 @RendererApi
@@ -33,7 +42,7 @@ private fun FormEngine.label(
     key: String,
     source: LabelSource?,
     shown: Boolean,
-): String = if (shown) label(key, source) else labelFor(key, noParams, source, definitionLabels)
+): String = if (shown) label(key, source) else resolvedLabel(key, source, noParams)
 
 @RendererApi
 public fun FormEngine.itemTitle(
@@ -49,42 +58,6 @@ public fun FormEngine.itemTitle(
         )
     group.itemLabel?.let { return itemTemplate(it, RecallItem(group.key, index), params) }
     return cut(label("itemLabel", source, params))
-}
-
-private class ErrorSection(
-    val id: String,
-    val title: String?,
-    val fields: List<FormNode>,
-)
-
-@RendererApi
-public fun FormEngine.errorGroups(source: LabelSource?): List<ErrorGroup> {
-    val errors = core.errors
-    if (errors.isEmpty()) return emptyList()
-    val values = core.values.json
-    val visibility = core.visibility
-    val sections =
-        if (isMultiStep) {
-            visibleSteps.map { ErrorSection(it.id, recalledTitle(it.json), it.fields) }
-        } else {
-            listOf(ErrorSection(definition.id, recalledTitle(definition.json), definition.fields.orEmpty()))
-        }
-    return sections.mapIndexedNotNull { index, section ->
-        val entries =
-            errorKeys(section.fields, errors, values).mapNotNull { key ->
-                val item = visibility.activeItem(key, values)
-                val raw = item?.field ?: visibility.activeField(key, values) ?: return@mapNotNull null
-                val message = errors[key] ?: return@mapNotNull null
-                val name = recalled(raw, if (item == null) null else key).label.orEmpty()
-                val label = item?.let { "$name (${itemTitle(it.group, it.index, source)})" } ?: name
-                ErrorEntry(key, label, message)
-            }
-        if (entries.isEmpty()) return@mapIndexedNotNull null
-        val title =
-            section.title?.takeIf { it.isNotEmpty() }
-                ?: label("stepTitle", source, stringMapOf("index" to JsonValue.Number(index + 1)))
-        ErrorGroup(section.id, title, entries)
-    }
 }
 
 @RendererApi

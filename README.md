@@ -26,8 +26,8 @@ Releases are published to Maven Central:
 
 ```kotlin
 dependencies {
-    implementation("dev.formhaus:formhaus-core:0.3.0")
-    implementation("dev.formhaus:formhaus-compose:0.3.0")
+    implementation("dev.formhaus:formhaus-core:0.4.0")
+    implementation("dev.formhaus:formhaus-compose:0.4.0")
 }
 ```
 
@@ -158,7 +158,7 @@ suspend fun fill() {
 A `radio`, `multiselect` or `select` field with `"randomize": true` shows its options in a random order per respondent. Add `formhaus-research` and pass `Research()`:
 
 ```kotlin
-implementation("dev.formhaus:formhaus-research:0.3.0")
+implementation("dev.formhaus:formhaus-research:0.4.0")
 ```
 
 ```kotlin
@@ -322,6 +322,55 @@ println(missing.messages)
 
 `Localized` holds the translated `definition` and the `messages` and `labels` catalogs. With `debugChecks` on and a `messages` catalog in `FormEngineOptions`, the engine reports `missing-message-key` through `onWarning` when a shown message is in neither the catalog nor the definition.
 
+Field texts live at `fields.<key>` of the overlay. In a multi-step form they can also live at `steps.<id>.fields.<key>`, which wins when both are set.
+
+### Languages
+
+`formhaus-core` ships message and label catalogs for `es`, `fr`, `fr-CA`, `de`, `pt-BR`, `it`, `ja`, `zh-CN`, `ru` and `uk`, plus `en`. Pass them as `locale`:
+
+```kotlin
+import dev.formhaus.core.i18n.LocaleCatalog
+import dev.formhaus.core.i18n.localeChain
+import java.util.Locale
+
+val catalogs = localeChain(Locale.getDefault().toLanguageTag()).mapNotNull(LocaleCatalog::bundled)
+
+FormhausForm(definition, engineOptions = FormEngineOptions(locale = catalogs)) { values, _ -> send(values) }
+```
+
+`localeChain(tag)` lists the tags to try, from the most specific one to `en`, and adds the likely region, so `zh-Hans-CN` also tries `zh-CN` and `pt` tries `pt-BR`. It drops `-u-` and `-x-` extensions, so `de-DE-u-fw-mon` tries `de-DE` and `de`. `engine.locale = catalogs` switches a running engine, and `FormhausForm` picks up a new `locale` in `engineOptions`. For each key, `messages` in `FormEngineOptions` and `labels` in `FormRendererOptions` win over the `messages` and `labels` of the definition, which win over the catalogs in list order, which win over the built-in English.
+
+A catalog text can be `PluralForms`, picked by the CLDR plural rules of the catalog locale on `{count}`, `{min}` or `{max}`. That number is formatted for the same locale. Plural rules cover the languages of the bundled catalogs and `pt-PT`; other languages use `other`.
+
+```kotlin
+import dev.formhaus.core.i18n.PluralForms
+import dev.formhaus.core.validation.MessageKey
+
+val minLength =
+    PluralForms(
+        other = "Не менее {min} символа",
+        one = "Не менее {min} символа",
+        few = "Не менее {min} символов",
+        many = "Не менее {min} символов",
+    )
+val ru = LocaleCatalog("ru", messages = mapOf(MessageKey.MIN_LENGTH to minLength))
+```
+
+`LocaleCatalog.fromJson(json)` reads a catalog in the format of `@formhaus/core/locales/<tag>.json`, and `checkCatalog(json)` lists its missing and unknown keys.
+
+## Errors
+
+`errorSummary()` returns the field errors grouped by step, the top-level errors and the field error count:
+
+```kotlin
+import dev.formhaus.core.renderer.errorSummary
+
+val summary = engine.errorSummary()
+val first = summary.groups.firstOrNull()?.entries?.firstOrNull()
+```
+
+Each entry has the field `key`, its `text` with the field label, and an `id` with the scheme of the web renderers. `ErrorSummaryOptions` takes an `idPrefix` and `labels`.
+
 ## FormEngineOptions
 
 | Option | Effect |
@@ -331,6 +380,8 @@ println(missing.messages)
 | `hiddenValues` | `HiddenValues.CLEAR` (default) drops the value of a field that a condition hides. `HiddenValues.KEEP` keeps it in `engine.values` and in submitted values. |
 | `debugChecks` | Makes calls from a thread other than the creating one throw, and reports missing message keys. With `FormhausForm(definition)`, `null`, the default, turns the checks on when the app is debuggable. |
 | `recallFormatter` | A `RecallFormatter` that formats recalled answers: lists, numbers, dates and times. The default follows CLDR 48. |
+| `locale` | `LocaleCatalog`s that translate messages and labels, in order. See [Languages](#languages). |
+| `onValidate` | Runs after the definition rules pass, on Continue after `onStepValidate` and on Submit before `onBeforeSubmit`. Returns errors keyed by field path. |
 
 The options class also takes `onBeforeStepChange`, `onAfterStepChange`, `onBeforeSubmit`, `onAfterSubmit`, `onStepValidate`, `onFormEvent`, `onWarning`, `validators`, `messages`, `lang` and `formatRecall`.
 
@@ -351,6 +402,21 @@ val engine = FormEngine(
 val order = engine.orderOptions("plan").map { it.value }
 ```
 
+`onValidate` gets the values and a `ValidateContext` with `stepId`, `fields`, the visible field paths in scope, and `submit`. Keys outside `fields` show as top-level errors, and an error on another step opens that step on Submit:
+
+```kotlin
+val engine = FormEngine(
+    definition,
+    options = FormEngineOptions(
+        onValidate = { values, context ->
+            if ("email" in context.fields && api.isTaken(values["email"])) stringMapOf("email" to "Taken") else null
+        },
+    ),
+)
+```
+
+Top-level errors from `onStepValidate` and `onValidate` clear on the next Continue, Back, Skip or Submit. Errors from the submit handler and `setErrors` stay.
+
 With `HiddenValues.KEEP`, conditions, validation and recall still treat hidden fields as unanswered, so they never block `next` or `submit`. Pass `SubmissionOptions(hiddenValues = HiddenValues.KEEP)` to `validateSubmission` as well, or the server drops them.
 
 ## Threading
@@ -361,6 +427,7 @@ With `HiddenValues.KEEP`, conditions, validation and recall still treat hidden f
 
 | formhaus-kotlin | @formhaus/core | Format |
 |---|---|---|
+| 0.4.0 | 1.3.0 | 1.6 |
 | 0.3.0 | 1.3.0 | 1.6 |
 | 0.2.1 | 1.2.2 | 1.6 |
 | 0.2.0 | 1.2.2 | 1.6 |

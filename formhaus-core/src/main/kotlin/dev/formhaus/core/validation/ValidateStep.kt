@@ -41,20 +41,20 @@ internal class ShownChecks(
     val options: ValidateOptions get() = ValidateOptions(validators, messages)
 }
 
-private fun validateItems(
-    group: FormField,
+internal fun visitShown(
+    fields: List<FormNode>,
     values: JsonObject,
     scope: JsonObject,
-    checks: ShownChecks,
-    errors: MutableStringMap<String>,
+    limits: ListLimits,
+    visit: (String, FormField, JsonObject) -> Unit,
 ) {
-    itemsOf(values[group.key]).forEachIndexed { index, item ->
-        val own = itemScope(group, item, values)
-        val shown = itemScope(group, item, scope)
-        for (field in group.items) {
-            if (!isVisible(field, shown, checks.limits)) continue
-            val error = validateFieldValue(field, own[field.key], own, checks.options) ?: continue
-            errors[itemPath(group.key, index, field.key)] = error
+    for (field in shownFields(fields, scope, limits)) {
+        visit(field.key, field, values)
+        if (!field.isGroup || typeError(field, values[field.key]) != null) continue
+        itemsOf(values[field.key]).forEachIndexed { index, item ->
+            val own = itemScope(field, item, values)
+            val shown = itemScope(field, item, scope)
+            for (rule in field.items) if (isVisible(rule, shown, limits)) visit(itemPath(field.key, index, rule.key), rule, own)
         }
     }
 }
@@ -66,9 +66,8 @@ internal fun validateShown(
     checks: ShownChecks,
 ): FieldErrors {
     val errors = MutableStringMap<String>()
-    for (field in shownFields(fields, scope, checks.limits)) {
-        validateFieldValue(field, values[field.key], values, checks.options)?.let { errors[field.key] = it }
-        if (field.isGroup && typeError(field, values[field.key]) == null) validateItems(field, values, scope, checks, errors)
+    visitShown(fields, values, scope, checks.limits) { path, field, own ->
+        validateFieldValue(field, own[field.key], own, checks.options)?.let { errors[path] = it }
     }
     return errors
 }

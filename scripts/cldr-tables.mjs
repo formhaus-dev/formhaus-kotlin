@@ -79,6 +79,22 @@ function grouping(tag) {
 const numbering = (tag) => new Intl.NumberFormat(tag).resolvedOptions().numberingSystem
 const calendar = (tag) => new Intl.DateTimeFormat(tag).resolvedOptions().calendar
 
+function likelyRegion(tag) {
+  const { language, region } = new Intl.Locale(tag).maximize()
+  return region ? `${language}-${region}` : ''
+}
+
+function languageAliases() {
+  const codes = []
+  for (const a of letters) for (const b of letters) codes.push(a + b, ...[...letters].map((c) => a + b + c))
+  const aliases = new Map()
+  for (const code of codes) {
+    const replacement = canonical(code)
+    if (replacement !== code) aliases.set(replacement, [...(aliases.get(replacement) ?? []), code])
+  }
+  return [...aliases].map(([replacement, owners]) => owners.join(' ') + fieldSeparator + replacement).join(entrySeparator)
+}
+
 function candidates() {
   const languages = languageCodes()
   const regions = regionCodes()
@@ -178,6 +194,29 @@ function fixture() {
       cases.push({ locale, type, value, expected: new Intl.DateTimeFormat(locale, options).format(date) })
     }
   }
+  return cases
+}
+
+function pluralFixture() {
+  const locales = ['en', 'de', 'es', 'fr', 'fr-CA', 'it', 'pt', 'pt-BR', 'pt-PT', 'pt-AO', 'ja', 'zh-CN', 'ru', 'uk', 'not a tag']
+  const values = [
+    ...Array.from({ length: 32 }, (_, index) => index), 100, 101, 102, 104, 105, 111, 112, 114, 121, 122, 125, 1000, 1001,
+    999999, 1000000, 1000001, 2000000, 21000000, 1e15, 0.5, 1.5, 2.25, 11.5, 1.0001, 1.0005, 0.0004, 1000000.5, -1, -2, -5,
+  ]
+  const tag = (locale) => {
+    try {
+      return supported(locale) ? locale : 'en'
+    } catch {
+      return 'en'
+    }
+  }
+  return locales.flatMap((locale) => {
+    const rules = new Intl.PluralRules(tag(locale))
+    return values.map((value) => ({ locale, value, expected: rules.select(value) }))
+  })
+}
+
+function fixtureJson(cases) {
   const lines = cases.map((item) => `  ${JSON.stringify(item)}`)
   return `{"cldr":"${version}","icu":"${process.versions.icu}","cases":[\n${lines.join(',\n')}\n]}\n`
 }
@@ -191,6 +230,9 @@ const tables = {
 }
 const fallback = 'en'
 const encoded = Object.entries(tables).map(([name, value]) => [name, value(fallback), table(tags, value, fallback)])
+const unregioned = tags.filter(([tag]) => !new Intl.Locale(tag).region)
+encoded.push(['LIKELY_REGIONS', likelyRegion('xx'), table(unregioned, likelyRegion, 'xx')])
+encoded.push(['LANGUAGE_ALIASES', '', languageAliases()])
 
 for (const file of readdirSync(directory)) {
   if (/^Cldr\d+Tables\.kt$/u.test(file)) rmSync(join(directory, file))
@@ -201,6 +243,7 @@ const body = encoded.map(
 )
 writeFileSync(output, [header, ...body].join('\n'))
 mkdirSync(fixtureDirectory, { recursive: true })
-writeFileSync(join(fixtureDirectory, 'recall-format.json'), fixture())
+writeFileSync(join(fixtureDirectory, 'recall-format.json'), fixtureJson(fixture()))
+writeFileSync(join(fixtureDirectory, 'plural-rules.json'), fixtureJson(pluralFixture()))
 const sizes = encoded.map(([name, , value]) => `${name} ${Buffer.byteLength(value)} bytes`)
 console.log(`wrote ${output} for CLDR ${version}: ${sizes.join(', ')}`)

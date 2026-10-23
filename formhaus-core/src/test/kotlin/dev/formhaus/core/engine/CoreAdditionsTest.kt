@@ -3,7 +3,7 @@ package dev.formhaus.core.engine
 import dev.formhaus.core.definitionvalidation.FormDefinitionError
 import dev.formhaus.core.json.JsonValue
 import dev.formhaus.core.renderer.RendererApi
-import dev.formhaus.core.renderer.errorGroups
+import dev.formhaus.core.renderer.errorSummary
 import dev.formhaus.core.support.engine
 import dev.formhaus.core.support.jsonObject
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -39,7 +39,7 @@ class CoreAdditionsTest {
                 {"id":"two","fields":[{"key":"b","type":"text","label":"City"},{"key":"c","type":"text","label":"Zip："}]}]}""",
             )
         engine.setErrors(errorsOf("""{"c":"Bad","a":"Taken","b":"Missing"}"""))
-        val groups = engine.errorGroups(null)
+        val groups = engine.errorSummary().groups
         assertEquals(listOf("one", "two"), groups.map { it.id })
         assertEquals(listOf("Contact", "Step 2"), groups.map { it.title })
         assertEquals(listOf("Name? Taken", "City: Missing", "Zip： Bad"), groups.flatMap { it.entries }.map { it.text })

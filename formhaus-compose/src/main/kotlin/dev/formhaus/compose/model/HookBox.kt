@@ -2,11 +2,16 @@ package dev.formhaus.compose.model
 
 import dev.formhaus.compose.platform.IcuRecallFormatter
 import dev.formhaus.core.engine.FormEngineOptions
+import dev.formhaus.core.engine.ValidateFn
 import dev.formhaus.core.validation.MessageSource
 
 internal class HookBox(
     var current: FormEngineOptions,
 ) {
+    private val forwardValidate: ValidateFn = { values, context -> current.onValidate?.invoke(values, context) }
+
+    val onValidate: ValidateFn? get() = forwardValidate.takeIf { current.onValidate != null }
+
     fun forwarding(
         renderer: FormRendererOptions,
         messages: MessageSource?,
@@ -30,6 +35,8 @@ internal class HookBox(
             research = options.research,
             hiddenValues = options.hiddenValues,
             debugChecks = options.debugChecks ?: debuggable,
+            locale = options.locale,
+            onValidate = onValidate,
         )
     }
 }
