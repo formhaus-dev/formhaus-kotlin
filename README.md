@@ -338,9 +338,9 @@ val catalogs = localeChain(Locale.getDefault().toLanguageTag()).mapNotNull(Local
 FormhausForm(definition, engineOptions = FormEngineOptions(locale = catalogs)) { values, _ -> send(values) }
 ```
 
-`localeChain(tag)` lists the tags to try, from the most specific one to `en`, and adds the likely region, so `zh-Hans-CN` also tries `zh-CN` and `pt` tries `pt-BR`. For each key, `messages` in `FormEngineOptions` and `labels` in `FormRendererOptions` win over the `messages` and `labels` of the definition, which win over the catalogs in list order, which win over the built-in English.
+`localeChain(tag)` lists the tags to try, from the most specific one to `en`, and adds the likely region, so `zh-Hans-CN` also tries `zh-CN` and `pt` tries `pt-BR`. It drops `-u-` and `-x-` extensions, so `de-DE-u-fw-mon` tries `de-DE` and `de`. `engine.locale = catalogs` switches a running engine, and `FormhausForm` picks up a new `locale` in `engineOptions`. For each key, `messages` in `FormEngineOptions` and `labels` in `FormRendererOptions` win over the `messages` and `labels` of the definition, which win over the catalogs in list order, which win over the built-in English.
 
-A catalog text can be `PluralForms`, picked by the CLDR plural rules of the catalog locale on `{count}`, `{min}` or `{max}`. That number is formatted for the same locale. Plural rules cover the languages of the bundled catalogs; other languages use `other`.
+A catalog text can be `PluralForms`, picked by the CLDR plural rules of the catalog locale on `{count}`, `{min}` or `{max}`. That number is formatted for the same locale. Plural rules cover the languages of the bundled catalogs and `pt-PT`; other languages use `other`.
 
 ```kotlin
 import dev.formhaus.core.i18n.PluralForms
