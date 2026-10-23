@@ -16,10 +16,8 @@
 </p>
 
 <p align="center">
-  <a href="https://formhaus.dev/guide/">Documentation</a> ·
-  <a href="https://formhaus.dev/playground">Playground</a> ·
-  <a href="https://github.com/formhaus-dev/formhaus">TypeScript core</a> ·
-  <a href="#demo-app">Demo</a>
+  <a href="https://formhaus.dev/guide/android">Documentation</a> ·
+  <a href="https://formhaus.dev/playground">Playground</a>
 </p>
 
 ## Install
