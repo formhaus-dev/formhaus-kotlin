@@ -26,8 +26,8 @@ Releases are published to Maven Central:
 
 ```kotlin
 dependencies {
-    implementation("dev.formhaus:formhaus-core:0.2.1")
-    implementation("dev.formhaus:formhaus-compose:0.2.1")
+    implementation("dev.formhaus:formhaus-core:0.3.0")
+    implementation("dev.formhaus:formhaus-compose:0.3.0")
 }
 ```
 
@@ -158,7 +158,7 @@ suspend fun fill() {
 A `radio`, `multiselect` or `select` field with `"randomize": true` shows its options in a random order per respondent. Add `formhaus-research` and pass `Research()`:
 
 ```kotlin
-implementation("dev.formhaus:formhaus-research:0.2.1")
+implementation("dev.formhaus:formhaus-research:0.3.0")
 ```
 
 ```kotlin
@@ -356,6 +356,15 @@ With `HiddenValues.KEEP`, conditions, validation and recall still treat hidden f
 ## Threading
 
 `FormEngine` is single-threaded. Create it and call it from one thread, such as the main thread, and do not share it. With `debugChecks = true`, a call from another thread throws `IllegalStateException` with both thread names. `FormhausForm(definition)` turns the checks on in a debuggable app unless `debugChecks` is `false`, so an engine call from a background thread throws there. A `FormModel` you create keeps them off unless you set `debugChecks = true`. `validateSubmission`, `checkDefinition`, `localize` and the JSON parser can run on any thread, also at the same time.
+
+## Compatibility
+
+| formhaus-kotlin | @formhaus/core | Format |
+|---|---|---|
+| 0.3.0 | 1.3.0 | 1.6 |
+| 0.2.1 | 1.2.2 | 1.6 |
+| 0.2.0 | 1.2.2 | 1.6 |
+| 0.1.0 | 1.2.2 | 1.6 |
 
 ## Conformance
 

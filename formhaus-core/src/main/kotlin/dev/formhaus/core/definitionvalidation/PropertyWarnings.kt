@@ -109,6 +109,25 @@ private fun randomizeWarnings(entry: FieldEntry): List<DefinitionIssue> {
     )
 }
 
+private fun optionValues(json: JsonObject): List<JsonValue>? =
+    if (json["optionsFrom"]?.isTruthy == true) {
+        null
+    } else {
+        json["options"]?.arrayValue?.map { it.objectValue?.get("value") ?: JsonValue.Null }
+    }
+
+private fun matrixWarnings(entry: FieldEntry): List<DefinitionIssue> {
+    val field = entry.field
+    val matrix = entry.parent?.takeIf { inMatrix(entry) } ?: return emptyList()
+    val columns = (matrix as? FormSection)?.fields?.firstOrNull()?.let { optionValues(it.json) } ?: return emptyList()
+    if (field.type != "radio" && field.type != "multiselect") return emptyList()
+    if ((optionValues(field.json) ?: columns) == columns) return emptyList()
+    val problem = "the option values of \"${field.key}\" differ from the columns of the matrix \"${matrix.key}\""
+    return listOf(
+        warning(IssueCode.MATRIX_OPTIONS_MISMATCH, "${entry.path}/options", problem, "Use the options of the first field in every row"),
+    )
+}
+
 private fun fieldWarnings(entry: FieldEntry): List<DefinitionIssue> {
     val field = entry.field
     val path = entry.path
@@ -124,7 +143,7 @@ private fun fieldWarnings(entry: FieldEntry): List<DefinitionIssue> {
         issues +=
             optionWarnings(field, option, "$path/options/$index")
     }
-    issues += randomizeWarnings(entry)
+    issues += randomizeWarnings(entry) + matrixWarnings(entry)
     field.validation?.let { issues += unknown(it.json, "$path/validation", Properties.validation) }
     if ("columns" in field.json && (!field.hasPictures || inMatrix(entry))) {
         val problem = "\"columns\" of \"${field.key}\" applies to radio and multiselect options with images outside a matrix"
