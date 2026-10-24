@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 
 class SubmissionBudgetTest {
-    private val heavy = "^(?:a?b?c?d?e?f?g?h?){10000}$"
+    private val heavy = "^[a-h]{0,10000}[a-h]{0,10000}$"
     private val heavyText = "a".repeat(9990) + "!"
 
     @Test
