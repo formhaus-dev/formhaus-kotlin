@@ -2,9 +2,12 @@ package dev.formhaus.core.definitionvalidation
 
 import dev.formhaus.core.json.JsonValue
 import dev.formhaus.core.regex.JsRegex
+import dev.formhaus.core.server.isQuadratic
+import dev.formhaus.core.support.Fixtures
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 class SlowPatternTest {
@@ -48,5 +51,17 @@ class SlowPatternTest {
                 )}"}}]}""",
             )
         assertEquals("Shorten it to 1000 characters or less.", checkDefinition(form).single().hint)
+    }
+
+    @Test
+    fun `edge patterns get the verdicts of core`() {
+        val rows = Fixtures.load(Fixtures.root.resolve("slow-patterns.json")).arrayValue.orEmpty()
+        assertTrue(rows.size > 300)
+        for (row in rows) {
+            val items = row.arrayValue.orEmpty()
+            val pattern = items[0].stringValue.orEmpty()
+            assertEquals(items[1].stringValue, slowPattern(pattern)?.name?.lowercase(), pattern)
+            assertEquals(items[2].boolValue, isQuadratic(pattern), pattern)
+        }
     }
 }

@@ -17,6 +17,8 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.util.concurrent.Callable
+import java.util.concurrent.Executors
 
 class QuadraticPatternTest {
     private fun text(
@@ -128,6 +130,38 @@ class QuadraticPatternTest {
         val engine = FormEngine(FormDefinition(definition), jsonObject("""{"a":"$long"}"""))
         assertTrue(engine.validate().isEmpty())
         assertNull(validateFieldValue(field(digits), JsonValue.String(long), MutableJsonObject()))
+    }
+
+    @Test
+    fun `group items and multiselect values over 1000 characters get the pattern error on the server`() {
+        val first = "1".repeat(600)
+        val second = "2".repeat(600)
+        val group = """{"key":"people","type":"group","label":"P","fields":[${text("name", "^\\d+\\.?\\d*$")}]}"""
+        val tags =
+            """{"key":"tags","type":"multiselect","label":"T","options":[{"value":"$first","label":"A"},""" +
+                """{"value":"$second","label":"B"}],"validation":{"pattern":"^[0-9,]+\\.?[0-9,]*$"}}"""
+        val definition = form(group, tags)
+        val long = "1".repeat(1001)
+        val values = """{"people":[{"name":"$long"},{"name":"${long.drop(1)}"}],"tags":["$first","$second"]}"""
+        val result = validateSubmission(definition, JsonValue.parse(values))
+        assertEquals(mapOf("people.0.name" to "Invalid format", "tags" to "Invalid format"), result.errors.toMap())
+        val short = validateSubmission(definition, JsonValue.parse("""{"people":[{"name":"12"}],"tags":["$first"]}"""))
+        assertTrue(short.errors.isEmpty())
+        assertTrue(FormEngine(FormDefinition(definition), jsonObject(values)).validate().isEmpty())
+    }
+
+    @Test
+    fun `verdicts agree when computed concurrently`() {
+        val patterns = (0 until 64).map { "^\\d+\\.?[\\d${it % 10}]*$" } + (0 until 64).map { "(a{$it}+)+" }
+        val serial = patterns.map(::patternVerdict)
+        val pool = Executors.newFixedThreadPool(8)
+        try {
+            val concurrent = pool.invokeAll(patterns.map { Callable { patternVerdict(it) } }).map { it.get() }
+            assertEquals(serial, concurrent)
+        } finally {
+            pool.shutdown()
+        }
+        assertTrue(PatternVerdict.QUADRATIC in serial && PatternVerdict.REFUSED in serial)
     }
 
     @Test
