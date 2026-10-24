@@ -67,6 +67,7 @@ class CorpusFixture(
     private val overlay: JsonValue? = json["overlay"]
     val cases: List<CorpusCase> = json["cases"]?.arrayValue.orEmpty().map(::CorpusCase)
     val recall: List<RecallCase> = json["recall"]?.arrayValue.orEmpty().map(::RecallCase)
+    val reveals: JsonValue? = json["reveals"]
 
     fun runtime(): FormDefinition = overlay?.let { localize(definition, it).definition } ?: FormDefinition(definition)
 

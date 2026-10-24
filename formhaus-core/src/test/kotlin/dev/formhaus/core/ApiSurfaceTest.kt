@@ -13,6 +13,8 @@ import dev.formhaus.core.server.validateSubmission
 import dev.formhaus.core.support.jsonObject
 import dev.formhaus.core.validation.MessageKey
 import dev.formhaus.core.validation.MessageSource
+import dev.formhaus.core.visibility.RevealTarget
+import dev.formhaus.core.visibility.revealTargets
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -36,6 +38,20 @@ class ApiSurfaceTest {
         assertEquals("future-code", IssueCode("future-code").rawValue)
         val issues = checkDefinition(JsonValue.parse("""{"id":"f","submit":{"label":"S"},"fields":1}"""))
         assertTrue(issues.any { it.code == IssueCode.INVALID_TYPE })
+    }
+
+    @Test
+    fun `revealTargets maps each node of a list to the option that reveals it`() {
+        val form =
+            FormDefinition(
+                JsonValue.parse(
+                    """{"id":"f","submit":{"label":"S"},"fields":[
+                    {"key":"a","type":"radio","label":"A","options":[{"value":"x","label":"X"},{"value":"y","label":"Y"}]},
+                    {"key":"b","type":"text","label":"B","show":[{"field":"a","eq":"y"}]},
+                    {"key":"c","type":"text","label":"C"}]}""",
+                ),
+            )
+        assertEquals(listOf(null, RevealTarget(0, 1), null), revealTargets(form.fields.orEmpty()))
     }
 
     @Test

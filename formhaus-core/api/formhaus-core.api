@@ -1369,6 +1369,23 @@ public final class dev/formhaus/core/validation/ValidateStepKt {
 	public static synthetic fun validateStep$default (Ldev/formhaus/core/model/FormStep;Ldev/formhaus/core/json/StringMap;Ldev/formhaus/core/validation/ValidateOptions;ILjava/lang/Object;)Ldev/formhaus/core/json/StringMap;
 }
 
+public final class dev/formhaus/core/visibility/RevealTarget {
+	public fun <init> (II)V
+	public final fun component1 ()I
+	public final fun component2 ()I
+	public final fun copy (II)Ldev/formhaus/core/visibility/RevealTarget;
+	public static synthetic fun copy$default (Ldev/formhaus/core/visibility/RevealTarget;IIILjava/lang/Object;)Ldev/formhaus/core/visibility/RevealTarget;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getOption ()I
+	public final fun getParent ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/formhaus/core/visibility/RevealTargetKt {
+	public static final fun revealTargets (Ljava/util/List;)Ljava/util/List;
+}
+
 public final class dev/formhaus/core/visibility/VisibilityKt {
 	public static final fun evaluateCondition (Ldev/formhaus/core/model/ShowCondition;Ldev/formhaus/core/json/StringMap;)Z
 	public static final fun isActionDisabled (Ldev/formhaus/core/model/FormAction;Ldev/formhaus/core/json/StringMap;)Z
