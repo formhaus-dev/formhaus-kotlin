@@ -195,6 +195,8 @@ public final class dev/formhaus/compose/form/FieldContext {
 	public final fun getKey ()Ljava/lang/String;
 	public final fun getLabel ()Ljava/lang/String;
 	public final fun getLoading ()Z
+	public final fun getMaxLength ()Ljava/lang/Double;
+	public final fun getMinLength ()Ljava/lang/Double;
 	public final fun getModel ()Ldev/formhaus/compose/model/FormModel;
 	public final fun getOptions ()Ljava/util/List;
 	public final fun getPlaceholder ()Ljava/lang/String;

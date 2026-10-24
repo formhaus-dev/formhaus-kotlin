@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
+import dev.formhaus.compose.fields.ChoiceSelection
 import dev.formhaus.compose.form.FieldContext
 import dev.formhaus.compose.form.LocalFormBehavior
 import dev.formhaus.compose.model.FieldState
@@ -53,9 +54,29 @@ internal fun OnFormhausFocus(
 public fun Modifier.formhausFocus(
     context: FieldContext,
     requester: FocusRequester,
+): Modifier = focusRequester(requester).formhausGroupFocus(context, requester)
+
+@Composable
+internal fun Modifier.formhausGroupFocus(
+    context: FieldContext,
+    requester: FocusRequester,
 ): Modifier {
     val state = context.state
     OnFormhausFocus(context) { requester.requestFocus() }
     DisposableEffect(state) { onDispose { state.noteFocus(false) } }
-    return focusRequester(requester).onFocusChanged { state.noteFocus(it.hasFocus) }
+    return onFocusChanged { state.noteFocus(it.hasFocus) }
+}
+
+@Composable
+internal fun Modifier.formhausOptionsFocus(
+    context: FieldContext,
+    requester: FocusRequester,
+): Modifier = if (focusedOption(context) == null) formhausFocus(context, requester) else formhausGroupFocus(context, requester)
+
+internal fun focusedOption(context: FieldContext): Int? {
+    val options = context.options
+    if (options.isEmpty()) return null
+    if (context.field.type != "radio") return 0
+    val checked = ChoiceSelection.values(context.value, false)
+    return options.indexOfFirst { it.value.orEmpty() in checked }.takeIf { it >= 0 } ?: 0
 }

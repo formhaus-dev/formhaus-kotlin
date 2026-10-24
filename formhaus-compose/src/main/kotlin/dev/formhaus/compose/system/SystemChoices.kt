@@ -19,11 +19,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import dev.formhaus.compose.components.focusedOption
 import dev.formhaus.compose.components.formhausFocus
+import dev.formhaus.compose.components.formhausOptionsFocus
 import dev.formhaus.compose.components.marked
 import dev.formhaus.compose.fields.ChoiceSelection
 import dev.formhaus.compose.form.FieldContext
@@ -39,13 +42,15 @@ internal fun SystemChoiceList(context: FieldContext) {
     val requester = remember { FocusRequester() }
     val selection = ChoiceSelection(context)
     val multiple = selection.multiple
+    val target = focusedOption(context)
     SystemBlock(context) {
-        Column(Modifier.formhausFocus(context, requester).selectableGroup()) {
-            for (option in context.options) {
+        Column(Modifier.formhausOptionsFocus(context, requester).selectableGroup()) {
+            context.options.forEachIndexed { index, option ->
                 val value = option.value.orEmpty()
                 val selected = selection.isSelected(value)
                 ChoiceRow(
                     Modifier
+                        .then(if (index == target) Modifier.focusRequester(requester) else Modifier)
                         .selectable(selected, enabled = !context.isLocked, role = if (multiple) Role.Checkbox else Role.RadioButton) {
                             selection.choose(value)
                         }.formhausTestId(context.optionTestId(value)),

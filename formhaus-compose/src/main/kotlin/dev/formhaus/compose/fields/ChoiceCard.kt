@@ -31,6 +31,7 @@ internal fun ChoiceCard(
     enabled: Boolean,
     invalid: Boolean,
     actions: ChoiceActions,
+    focus: Modifier = Modifier,
 ) {
     val tokens = LocalFormhausTokens.current
     val value = option.value.orEmpty()
@@ -41,7 +42,7 @@ internal fun ChoiceCard(
         OptionCardBox(
             selected,
             { actions.choose(value) },
-            fill.formhausTestId(actions.testId(value)),
+            fill.then(focus).formhausTestId(actions.testId(value)),
             invalid = invalid,
             enabled = enabled,
             shape = shape,
