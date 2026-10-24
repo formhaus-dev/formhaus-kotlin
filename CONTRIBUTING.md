@@ -90,6 +90,12 @@ CI runs fast checks that count work and never measures time. `benchmarks-compose
 FORMHAUS_HEAVY_TESTS=1 ./gradlew :formhaus-core:test
 ```
 
+`scripts/reveal-fuzz.sh` compares `revealTargets` with the TypeScript one on 50,000 generated definitions. It takes the built entry of `@formhaus/core` at the pinned tag, by default `../formhaus/packages/core/dist/index.js`, and an optional count:
+
+```sh
+scripts/reveal-fuzz.sh ../formhaus/packages/core/dist/index.js 50000
+```
+
 `scripts/benchmarks.sh` runs the timing benchmarks and prints the tables:
 
 ```sh
