@@ -26,8 +26,8 @@ Releases are published to Maven Central:
 
 ```kotlin
 dependencies {
-    implementation("dev.formhaus:formhaus-core:0.4.0")
-    implementation("dev.formhaus:formhaus-compose:0.4.0")
+    implementation("dev.formhaus:formhaus-core:0.5.0")
+    implementation("dev.formhaus:formhaus-compose:0.5.0")
 }
 ```
 
@@ -158,7 +158,7 @@ suspend fun fill() {
 A `radio`, `multiselect` or `select` field with `"randomize": true` shows its options in a random order per respondent. Add `formhaus-research` and pass `Research()`:
 
 ```kotlin
-implementation("dev.formhaus:formhaus-research:0.4.0")
+implementation("dev.formhaus:formhaus-research:0.5.0")
 ```
 
 ```kotlin
@@ -298,6 +298,8 @@ import dev.formhaus.core.definitionvalidation.checkDefinition
 val problems = checkDefinition(definition).filter { it.isError }
 ```
 
+`validateSubmission` throws `FormDefinitionError` when a pattern can take very long on some values, so the server does not run it. `checkDefinition` reports these patterns as `slow-pattern` warnings. Patterns with one overlapping repeat after `^`, such as `^\d+\.?\d*$`, still run on values of up to 1,000 characters; a longer value gets the pattern error.
+
 ## Translations
 
 `localize` applies an overlay of translated texts and sets the language. `missingKeys` lists the built-in message and label keys that a catalog lacks, for a unit test of your translations:
@@ -427,6 +429,7 @@ With `HiddenValues.KEEP`, conditions, validation and recall still treat hidden f
 
 | formhaus-kotlin | @formhaus/core | Format |
 |---|---|---|
+| 0.5.0 | 1.4.2 | 1.6 |
 | 0.4.0 | 1.3.0 | 1.6 |
 | 0.3.0 | 1.3.0 | 1.6 |
 | 0.2.1 | 1.2.2 | 1.6 |
