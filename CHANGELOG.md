@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.6.0
+
+### formhaus-core
+
+- Passes the conformance suite of `@formhaus/core` 1.6.0.
+- New `revealTargets(nodes)` returns, for each node of a list, the choice field and option that reveal it, following the Revealed fields rule of the specification.
+- New type `RevealTarget`.
+
+### formhaus-compose
+
+- `FieldContext` has `minLength` and `maxLength` of text fields, for character counters.
+- Fixed focus landing on the first option of a radio group when another option is checked.
+
 ## 0.5.0
 
 ### formhaus-core
