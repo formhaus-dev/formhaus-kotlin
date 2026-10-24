@@ -21,6 +21,7 @@ class CorpusCase(
     val expectedErrors: JsonValue = json["expected"]?.get("errors") ?: JsonValue.Object(MutableJsonObject())
     val canSubmit: Boolean = json["canSubmit"]?.boolValue ?: false
     val serverValues: JsonValue? = json["serverValues"]
+    val serverErrors: JsonValue? = json["serverErrors"]
 }
 
 class RecallEntry(
@@ -61,6 +62,7 @@ class CorpusFixture(
 ) {
     val issues: List<IssueEntry> = IssueEntry.list(json["issues"]).orEmpty()
     val warnings: List<IssueEntry>? = IssueEntry.list(json["warnings"])
+    val refused: List<IssueEntry>? = IssueEntry.list(json["refused"])
     val definition: JsonValue = json["definition"] ?: JsonValue.Null
     private val overlay: JsonValue? = json["overlay"]
     val cases: List<CorpusCase> = json["cases"]?.arrayValue.orEmpty().map(::CorpusCase)

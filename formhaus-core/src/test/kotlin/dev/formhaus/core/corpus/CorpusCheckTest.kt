@@ -9,6 +9,7 @@ import dev.formhaus.core.json.MutableJsonObject
 import dev.formhaus.core.server.validateSubmission
 import dev.formhaus.core.support.Fixtures
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestFactory
@@ -93,6 +94,7 @@ class CorpusCheckTest {
             "recall-values",
             "recall-version",
             "shared-key-branches",
+            "slow-pattern-quadratic",
             "times-and-hidden",
             "trimmed-conditions",
             "trimmed-text",
@@ -142,5 +144,25 @@ class CorpusCheckTest {
                     JsonValue.Object(MutableJsonObject()),
                 )
             }
+        }
+
+    @Test
+    fun `lists the patterns the server refuses wherever slow patterns are reported`() {
+        val slow = CorpusFixture.all.filter { fixture -> fixture.warnings.orEmpty().any { it.code == "slow-pattern" } }
+        assertEquals(emptyList<String>(), slow.filter { it.refused == null }.map { it.name })
+        assertTrue(CorpusFixture.all.any { it.refused != null })
+    }
+
+    @TestFactory
+    fun `slow patterns refused by the server`(): List<DynamicTest> =
+        fixtures({ it.refused != null }) { fixture ->
+            val issues =
+                try {
+                    validateSubmission(fixture.definition, JsonValue.Object(MutableJsonObject()))
+                    emptyList()
+                } catch (error: FormDefinitionError) {
+                    error.issues.map { IssueEntry(it.code.rawValue, it.path) }
+                }
+            assertEquals(fixture.refused.orEmpty().sorted(), issues.sorted())
         }
 }
