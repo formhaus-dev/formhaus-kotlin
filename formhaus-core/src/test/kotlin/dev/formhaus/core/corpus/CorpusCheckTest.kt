@@ -93,6 +93,7 @@ class CorpusCheckTest {
             "recall-translations",
             "recall-values",
             "recall-version",
+            "reveal",
             "shared-key-branches",
             "slow-pattern-quadratic",
             "times-and-hidden",
