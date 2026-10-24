@@ -14,6 +14,7 @@ import dev.formhaus.core.json.JsonValue
 import dev.formhaus.core.json.MutableJsonObject
 import dev.formhaus.core.json.toJsonString
 import dev.formhaus.core.model.FieldOption
+import dev.formhaus.core.model.FieldValidation
 import dev.formhaus.core.model.FormField
 import dev.formhaus.core.renderer.TestIdTarget
 import dev.formhaus.core.renderer.advancesOnCommit
@@ -48,6 +49,9 @@ public class FieldContext internal constructor(
     public val isInvalid: Boolean get() = !error.isNullOrEmpty()
     public val isLocked: Boolean get() = loading || (disabled && !focused)
     public val isRequired: Boolean get() = this.field.isRequired
+    public val minLength: Double? get() = counted?.minLength
+    public val maxLength: Double? get() = counted?.maxLength
+    private val counted: FieldValidation? get() = this.field.validation.takeIf { this.field.type in countedTypes }
     public val advancesOnCommit: Boolean get() = !isItem && this.field.advancesOnCommit
     public val accessibilityName: String get() = if (isRequired) "$label, ${text("required")}" else label
     public val testId: String? get() = model.testId(TestIdTarget.Kind.FIELD, key)
@@ -82,3 +86,5 @@ public class FieldContext internal constructor(
 }
 
 internal fun numberText(number: Double): String = JsonValue.Number(number).toJsonString()
+
+private val countedTypes = setOf("text", "email", "phone", "password", "textarea")

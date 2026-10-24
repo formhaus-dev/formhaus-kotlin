@@ -15,6 +15,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.formhaus.compose.components.ColumnGrid
@@ -24,7 +25,8 @@ import dev.formhaus.compose.components.GridSpec
 import dev.formhaus.compose.components.ImageViewer
 import dev.formhaus.compose.components.IndicatorShape
 import dev.formhaus.compose.components.OptionImages
-import dev.formhaus.compose.components.formhausFocus
+import dev.formhaus.compose.components.focusedOption
+import dev.formhaus.compose.components.formhausOptionsFocus
 import dev.formhaus.compose.form.FieldContext
 import dev.formhaus.compose.form.numberText
 import dev.formhaus.compose.theme.FormhausTokens
@@ -108,8 +110,8 @@ private fun ChoiceList(
     PrefetchImages(options)
     ChoiceScope(context) { actions ->
         FieldShell(context, variant = FieldShellVariant.GROUP) {
-            val modifier = Modifier.formhausFocus(context, requester).selectableGroup()
-            ChoiceOptions(context, shape, arrangement, options.indices, spec::columnCount, actions, modifier)
+            val modifier = Modifier.formhausOptionsFocus(context, requester).selectableGroup()
+            ChoiceOptions(context, shape, arrangement, options.indices, spec::columnCount, actions, modifier, requester)
         }
     }
 }
@@ -142,16 +144,19 @@ internal fun ChoiceOptions(
     columnCount: (width: Dp, count: Int) -> Int,
     actions: ChoiceActions,
     modifier: Modifier,
+    focus: FocusRequester? = null,
 ) {
     val tokens = LocalFormhausTokens.current
     val options = context.options
+    val target = focus?.let { focusedOption(context) }
     val selected = ChoiceSelection.values(context.value, shape == IndicatorShape.CHECKBOX).toSet()
     val enabled = !context.isLocked
     val invalid = context.isInvalid
     val picture = arrangement == ChoiceArrangement.PICTURES
     val card: @Composable (Int) -> Unit = { index ->
         val option = options[index]
-        ChoiceCard(option, shape, option.value.orEmpty() in selected, picture, enabled, invalid, actions)
+        val card = if (focus != null && index == target) Modifier.focusRequester(focus) else Modifier
+        ChoiceCard(option, shape, option.value.orEmpty() in selected, picture, enabled, invalid, actions, card)
     }
     when (arrangement) {
         ChoiceArrangement.PICTURES -> {
