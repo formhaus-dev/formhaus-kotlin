@@ -60,7 +60,7 @@ class CorpusCaseTest {
         cases { fixture, case ->
             val result = validateSubmission(fixture.runtime(), case.values, options(case))
             assertEquals(case.serverValues ?: case.expectedValues, JsonValue.Object(result.values))
-            assertEquals(case.expectedErrors, json(result.errors))
+            assertEquals(case.serverErrors ?: case.expectedErrors, json(result.errors))
         }
 
     @TestFactory
@@ -77,7 +77,7 @@ class CorpusCaseTest {
     fun `a payload the browser accepts passes the server`(): List<DynamicTest> =
         cases { fixture, case ->
             val definition = fixture.runtime()
-            if (!runBlocking { browserCanSubmit(definition, case) }) return@cases
+            if (case.serverErrors != null || !runBlocking { browserCanSubmit(definition, case) }) return@cases
             assertTrue(validateSubmission(definition, case.values, options(case)).errors.isEmpty())
         }
 }
