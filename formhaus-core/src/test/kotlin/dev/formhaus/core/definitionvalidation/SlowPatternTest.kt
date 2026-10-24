@@ -1,5 +1,6 @@
 package dev.formhaus.core.definitionvalidation
 
+import dev.formhaus.core.json.JsonValue
 import dev.formhaus.core.regex.JsRegex
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -36,9 +37,16 @@ class SlowPatternTest {
     }
 
     @Test
-    fun `patterns are scanned up to 1000 characters`() {
+    fun `patterns are scanned up to 1000 characters and longer ones are reported`() {
         val pattern = { length: Int -> "(a+)+" + "b".repeat(length - 5) }
         assertEquals(SlowPattern.NESTED, slowPattern(pattern(1000)))
-        assertNull(slowPattern(pattern(1001)))
+        assertEquals(SlowPattern.LONG, slowPattern(pattern(1001)))
+        val form =
+            JsonValue.parse(
+                """{"id":"f","title":"F","submit":{"label":"S"},"fields":[{"key":"p","type":"text","label":"P","validation":{"pattern":"${"a".repeat(
+                    1001,
+                )}"}}]}""",
+            )
+        assertEquals("Shorten it to 1000 characters or less.", checkDefinition(form).single().hint)
     }
 }

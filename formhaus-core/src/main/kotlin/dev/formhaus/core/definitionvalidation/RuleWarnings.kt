@@ -19,10 +19,13 @@ private fun slowPatternWarning(
     rules: JsonObject?,
 ): List<DefinitionIssue> {
     val slow = rules?.get("pattern")?.stringValue?.let(::slowPattern) ?: return emptyList()
-    val nested = slow == SlowPattern.NESTED
-    val behavior = if (nested) "nests quantifiers" else "repeats overlapping parts next to each other"
+    val (behavior, hint) =
+        when (slow) {
+            SlowPattern.NESTED -> "nests quantifiers" to "Remove the inner or outer quantifier"
+            SlowPattern.ADJACENT -> "repeats overlapping parts next to each other" to "Merge the repeated parts into one"
+            SlowPattern.LONG -> "is longer than 1000 characters" to "Shorten it to 1000 characters or less"
+        }
     val problem = "the pattern of \"${entry.field.key}\" $behavior and can be very slow"
-    val hint = if (nested) "Remove the inner or outer quantifier" else "Merge the repeated parts into one"
     return listOf(warning(IssueCode.SLOW_PATTERN, "${entry.path}/validation/pattern", problem, hint))
 }
 

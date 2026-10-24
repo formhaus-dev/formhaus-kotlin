@@ -84,16 +84,39 @@ internal class PatternLexer(
         if (lower == 'u' && hex(index + 2, 4)) return index + 6
         if (lower == 'c' && unit(index + 2)?.lowercaseAscii() in 'a'..'z') return index + 3
         if (char in '0'..'9') return digitsEnd(index + 1)
+        if (lower == 'k') groupNameEnd(index + 2)?.let { return it }
         return if (lower == 'b') null else index + 2
     }
+
+    private fun groupNameEnd(start: Int): Int? {
+        if (unit(start) != '<') return null
+        var index = start + 1
+        while (true) index = nameUnitEnd(index) ?: break
+        return if (index > start + 1 && unit(index) == '>') index + 1 else null
+    }
+
+    private fun nameUnitEnd(index: Int): Int? {
+        val char = unit(index) ?: return null
+        if (char == '$' || char.code >= 0x80 || char.isAsciiWord()) return index + 1
+        if (char != '\\' || unit(index + 1)?.lowercaseAscii() != 'u') return null
+        if (hex(index + 2, 4)) return index + 6
+        if (unit(index + 2) != '{') return null
+        val close = hexEnd(index + 3)
+        return if (close > index + 3 && unit(close) == '}') close + 1 else null
+    }
+
+    private fun isHex(index: Int): Boolean = unit(index)?.let { it in '0'..'9' || it.lowercaseAscii() in 'a'..'f' } ?: false
 
     private fun hex(
         start: Int,
         count: Int,
-    ): Boolean =
-        (start until start + count).all { index ->
-            unit(index)?.let { it in '0'..'9' || it.lowercaseAscii() in 'a'..'f' } ?: false
-        }
+    ): Boolean = (start until start + count).all(::isHex)
+
+    private fun hexEnd(start: Int): Int {
+        var index = start
+        while (isHex(index)) index++
+        return index
+    }
 
     private fun digitsEnd(start: Int): Int {
         var index = start
@@ -146,3 +169,5 @@ internal class PatternLexer(
         fun Char.lowercaseAscii(): Char = (code or 0x20).toChar()
     }
 }
+
+internal fun Char.isAsciiWord(): Boolean = this in '0'..'9' || this in 'A'..'Z' || this in 'a'..'z' || this == '_'
