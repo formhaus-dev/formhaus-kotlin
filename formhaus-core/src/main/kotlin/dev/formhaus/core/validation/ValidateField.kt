@@ -10,7 +10,6 @@ import dev.formhaus.core.model.FieldValidation
 import dev.formhaus.core.model.FormField
 import dev.formhaus.core.regex.CallBudget
 import dev.formhaus.core.regex.JsRegex
-import dev.formhaus.core.server.QuadraticPatterns
 import dev.formhaus.core.visibility.isBlank
 
 public typealias ValidatorFn = (JsonValue, JsonObject) -> String?
@@ -64,18 +63,15 @@ private fun patternError(
     rules: FieldValidation,
     message: () -> String,
 ): String? {
-    val source = rules.pattern ?: return null
-    val pattern = JsRegex.compile(source) ?: return null
-    val limit = QuadraticPatterns.valueLimit(source)
-    return if (rejects(pattern, jsString(value), limit)) rules.message("patternMessage") ?: message() else null
+    val pattern = rules.pattern?.let(JsRegex::compile) ?: return null
+    return if (rejects(pattern, jsString(value))) rules.message("patternMessage") ?: message() else null
 }
 
 internal fun rejects(
     pattern: JsRegex,
     text: String,
-    limit: Int = MAX_STRING_LENGTH,
 ): Boolean {
-    if (text.length > limit) return true
+    if (text.length > MAX_STRING_LENGTH) return true
     val call = CallBudget.current.value
     return call?.admitsPatternTest() == false || pattern.test(text, call) != true
 }
