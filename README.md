@@ -201,7 +201,7 @@ MaterialTheme {
 }
 ```
 
-`LocalFormBehavior` takes a `FormBehavior` for the error summary, the remove confirmation, the Back button placement, step scrolling and the title display mode. With `BackPlacement.APP_BAR` the form leaves its Back button out, so your app bar shows Back while `model.actions.showBack` is true and calls `model.back()`.
+`LocalFormBehavior` takes a `FormBehavior` for the error summary, the remove confirmation, the Back button placement, step scrolling, the title display mode and fields revealed under their option. With `BackPlacement.APP_BAR` the form leaves its Back button out, so your app bar shows Back while `model.actions.showBack` is true and calls `model.back()`.
 
 ### Your own components
 
@@ -231,7 +231,17 @@ Switching the components or the theme of a running form keeps its values, step a
 
 `context.minLength` and `context.maxLength` hold the length limits of `text`, `email`, `phone`, `password` and `textarea` fields, for a character counter.
 
-`revealTargets(nodes)` returns, for each node of a list, the choice field and option that reveal it, following the Revealed fields rule of the [specification](https://github.com/formhaus-dev/formhaus/blob/main/docs/spec.md#revealed-fields). Use it to draw a field under the option that shows it. The built-in sets draw revealed fields in place.
+`revealTargets(nodes)` returns, for each node of a list, the choice field and option that reveal it, following the Revealed fields rule of the [specification](https://github.com/formhaus-dev/formhaus/blob/main/docs/spec.md#revealed-fields). Use it to draw a field under the option that shows it in your own components.
+
+Set `conditionalReveal` to draw such a field under its option in the built-in sets, indented with a line on its start side, as GOV.UK does:
+
+```kotlin
+CompositionLocalProvider(LocalFormBehavior provides FormBehavior(conditionalReveal = true)) {
+    FormhausForm(definition) { _, _ -> SubmitResult.Ok }
+}
+```
+
+Values, validation, the submit payload and the order of the error summary do not change. The revealed fields follow their option in TalkBack order, and a choice with revealed fields shows its own error above the options. A field type you register with `field(type)`, a `radio` that the system set draws as a menu, matrix sections and the fields of a group item keep the revealed fields in place.
 
 ## Theming
 

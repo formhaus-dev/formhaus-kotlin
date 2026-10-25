@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+### formhaus-compose
+
+- New `conditionalReveal` option on `FormBehavior` draws a field revealed by a `radio` or `multiselect` option under that option in the built-in sets, indented with a line on its start side.
+- A choice field with revealed fields shows its error above its options.
+
 ## 0.6.0
 
 ### formhaus-core
