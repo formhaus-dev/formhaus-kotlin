@@ -31,7 +31,9 @@ import dev.formhaus.compose.fields.ChoiceRow
 import dev.formhaus.compose.fields.choicePlan
 import dev.formhaus.compose.fields.choiceRowGap
 import dev.formhaus.compose.fields.mayNeedRows
+import dev.formhaus.compose.fields.revealInset
 import dev.formhaus.compose.model.FormModel
+import dev.formhaus.compose.model.RevealLayout
 import dev.formhaus.compose.model.formhausTestId
 import dev.formhaus.compose.model.testId
 import dev.formhaus.compose.theme.FormhausTokens
@@ -88,6 +90,7 @@ private fun LazyFormBody(
     val components = LocalFormComponents.current
     val anchors = LocalScrollAnchors.current
     val index = remember { ItemIndex() }
+    val layout = rememberRevealLayout(model.structure.nodes.filter { it.type != "hidden" }, model)
     DisposableEffect(anchors, list) {
         anchors?.revealer = AnchorRevealer { key -> index.find(key)?.let { list.scrollToItem(it) } != null }
         onDispose { anchors?.revealer = null }
@@ -99,7 +102,7 @@ private fun LazyFormBody(
             state = list,
             contentPadding = PaddingValues(tokens.spacing.s10),
             horizontalAlignment = Alignment.CenterHorizontally,
-        ) { FormItems(this, index, width, tokens).add(model, behavior, components) }
+        ) { FormItems(this, index, width, tokens).add(model, behavior, components, layout) }
     }
 }
 
@@ -115,19 +118,20 @@ private class FormItems(
         model: FormModel,
         behavior: FormBehavior,
         components: FormComponents,
+        layout: RevealLayout,
     ) {
         index.clear()
         index[FORM_TOP_ANCHOR] = 0
         val structure = model.structure
         if (structure.isMultiStep) item("progress", emptyList()) { FormProgress(model) }
-        structure.nodes.filter { it.type != "hidden" }.forEachIndexed { position, node ->
+        layout.nodes.forEachIndexed { position, node ->
             val key = "${structure.revision}:${node.nodeId}"
             val field = node as? FormField
             val plan = field?.let { choicePlan(it, model, components, tokens, width) }
             if (field != null && plan != null) {
-                choice(key, field, model, plan)
+                choice(key, field, model, plan, layout)
             } else {
-                item(key, node.anchorKeys) { SpacedNode(node, position, model) }
+                item(key, node.anchorKeys + layout.nestedKeys(node)) { SpacedNode(node, position, model, layout) }
             }
         }
         if (model.topLevelErrors.isNotEmpty() || model.actionError != null) item("errors", emptyList()) { FormTopLevelErrors(model) }
@@ -140,28 +144,59 @@ private class FormItems(
         field: FormField,
         model: FormModel,
         plan: ChoicePlan,
+        layout: RevealLayout,
     ) {
-        item("$key/head", listOf(field.key)) { ChoiceHeader(field, model) }
+        val slots = layout.slots(field)
+        item("$key/head", listOf(field.key)) { ChoiceHeader(field, model, errorFirst = slots != null) }
+        if (slots == null) {
+            rows(key, field, model, plan, 0 until plan.rows)
+            if (!model.field(field.key).error.isNullOrEmpty()) {
+                val position = count++
+                scope.item("$key/error") { Spaced(0.dp, position) { ChoiceError(field, model) } }
+            }
+            return
+        }
+        val reveals = FieldReveals(slots) { nested -> NodeColumn(nested, layout, model, tokens.spacing.s10) }
+        val values = FieldContext(field, model).options.map { it.value.orEmpty() }
+        var start = 0
+        values.forEachIndexed { row, value ->
+            val nodes = slots[value]
+            if (nodes.isNullOrEmpty()) return@forEachIndexed
+            rows(key, field, model, plan, start..row)
+            start = row + 1
+            val anchors = nodes.flatMap { listOf(it.key) + layout.nestedKeys(it) }
+            item("$key/reveal/$value", anchors, tokens.choiceRowGap(plan)) {
+                reveals.Block(value, tokens.revealInset, tokens.colors.border)
+            }
+        }
+        rows(key, field, model, plan, start until plan.rows)
+    }
+
+    private fun rows(
+        key: String,
+        field: FormField,
+        model: FormModel,
+        plan: ChoicePlan,
+        range: IntRange,
+    ) {
         val gap = tokens.choiceRowGap(plan)
         val first = count
-        count += plan.rows
-        scope.items(plan.rows, { "$key/row/$it" }) { row ->
-            Spaced(if (row == 0) 0.dp else gap, first + row) { ChoiceRow(field, model, plan, row) }
-        }
-        if (!model.field(field.key).error.isNullOrEmpty()) {
-            val position = count++
-            scope.item("$key/error") { Spaced(0.dp, position) { ChoiceError(field, model) } }
+        count += range.count()
+        scope.items(range.count(), { "$key/row/${range.first + it}" }) { offset ->
+            val row = range.first + offset
+            Spaced(if (row == 0) 0.dp else gap, first + offset) { ChoiceRow(field, model, plan, row) }
         }
     }
 
     private fun item(
         key: String,
         anchors: List<String>,
+        gap: Dp = tokens.spacing.gap,
         content: @Composable () -> Unit,
     ) {
         val position = count++
         anchors.forEach { index[it] = position }
-        scope.item(key) { Spaced(tokens.spacing.gap, position, content) }
+        scope.item(key) { Spaced(gap, position, content) }
     }
 
     @Composable

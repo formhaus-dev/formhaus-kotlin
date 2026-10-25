@@ -40,6 +40,17 @@ public fun FieldShell(
     variant: FieldShellVariant = FieldShellVariant.STANDARD,
     content: @Composable () -> Unit,
 ) {
+    FieldShell(context, modifier, variant, errorFirst = false, content)
+}
+
+@Composable
+internal fun FieldShell(
+    context: FieldContext,
+    modifier: Modifier,
+    variant: FieldShellVariant,
+    errorFirst: Boolean,
+    content: @Composable () -> Unit,
+) {
     val tokens = LocalFormhausTokens.current
     val inline = variant == FieldShellVariant.INLINE || variant == FieldShellVariant.ROW
     val inset = if (variant == FieldShellVariant.INLINE) tokens.controls.indicator + tokens.spacing.s5 else 0.dp
@@ -54,7 +65,7 @@ public fun FieldShell(
             .formhausScrollAnchor(context)
             .measured("${context.key}/field"),
     ) {
-        if (!inline) FieldHeader(context, variant, helper)
+        if (!inline) FieldHeader(context, variant, helper, error.takeIf { errorFirst })
         Row(Modifier.trimmedToText(inline && (helper != null || error != null)), verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f, fill = false).measured("${context.key}/control")) { content() }
             if (variant == FieldShellVariant.INLINE) {
@@ -66,7 +77,7 @@ public fun FieldShell(
             Spacer(Modifier.height(tokens.spacing.s3 - tokens.spacing.s1))
             Text(helper, Modifier.padding(start = inset), style = tokens.textStyle(TextRole.helper))
         }
-        if (error != null) {
+        if (error != null && !errorFirst) {
             Spacer(Modifier.height(tokens.spacing.s3))
             FieldError(error, Modifier.padding(start = inset))
         }
@@ -78,6 +89,7 @@ internal fun FieldHeader(
     context: FieldContext,
     variant: FieldShellVariant,
     helper: String?,
+    error: String? = null,
 ) {
     val tokens = LocalFormhausTokens.current
     if (context.label.isNotEmpty()) {
@@ -92,6 +104,10 @@ internal fun FieldHeader(
     }
     if (helper != null) {
         Text(helper, style = tokens.textStyle(TextRole.helper))
+        Spacer(Modifier.height(tokens.spacing.s3))
+    }
+    if (error != null) {
+        FieldError(error)
         Spacer(Modifier.height(tokens.spacing.s3))
     }
 }
