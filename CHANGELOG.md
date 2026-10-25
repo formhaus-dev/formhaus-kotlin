@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+### formhaus-compose
+
+- New `conditionalReveal` option on `FormBehavior` draws a field revealed by a `radio` or `multiselect` option under that option in the built-in sets, indented with a line on its start side.
+- With `conditionalReveal`, a choice field with revealed fields shows its error above its options.
+- **Breaking:** The `FormBehavior` constructor has a new parameter. Code compiled against 0.6.0 that constructs `FormBehavior` must be recompiled. Its source does not change.
+
 ## 0.6.0
 
 ### formhaus-core

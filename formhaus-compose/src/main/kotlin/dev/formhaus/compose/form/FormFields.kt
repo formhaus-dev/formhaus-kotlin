@@ -10,13 +10,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.formhaus.compose.containers.GroupNode
 import dev.formhaus.compose.containers.MatrixRows
 import dev.formhaus.compose.model.FormModel
+import dev.formhaus.compose.model.RevealLayout
 import dev.formhaus.compose.model.texts
 import dev.formhaus.compose.theme.LocalFormhausTokens
 import dev.formhaus.compose.theme.TextRole
@@ -52,17 +55,32 @@ internal fun NodeStack(
     model: FormModel,
     modifier: Modifier = Modifier,
 ) {
-    val tokens = LocalFormhausTokens.current
-    Column(modifier, verticalArrangement = Arrangement.spacedBy(tokens.spacing.gap)) {
-        nodes.forEachIndexed { index, node -> key(node.nodeId) { SpacedNode(node, index, model) } }
+    val layout = rememberRevealLayout(nodes, model)
+    NodeColumn(layout.nodes, layout, model, LocalFormhausTokens.current.spacing.gap, modifier)
+}
+
+@Composable
+internal fun NodeColumn(
+    nodes: List<FormNode>,
+    layout: RevealLayout,
+    model: FormModel,
+    gap: Dp,
+    modifier: Modifier = Modifier,
+) {
+    Column(modifier, verticalArrangement = Arrangement.spacedBy(gap)) {
+        nodes.forEachIndexed { index, node -> key(node.nodeId) { SpacedNode(node, index, model, layout) } }
     }
 }
+
+internal fun RevealLayout.revealedColumn(model: FormModel): @Composable (List<FormNode>) -> Unit =
+    { nested -> NodeColumn(nested, this, model, LocalFormhausTokens.current.spacing.s10) }
 
 @Composable
 internal fun SpacedNode(
     node: FormNode,
     index: Int,
     model: FormModel,
+    layout: RevealLayout,
 ) {
     val tokens = LocalFormhausTokens.current
     val container = node is FormSection || (node as? FormField)?.isGroup == true
@@ -71,7 +89,10 @@ internal fun SpacedNode(
             top = if (container && index > 0) tokens.spacing.s5 else 0.dp,
             bottom = if (container) tokens.spacing.s5 else 0.dp,
         ),
-    ) { FormNodeView(node, model) }
+    ) {
+        val revealed = remember(layout, model) { layout.revealedColumn(model) }
+        ProvideReveals(node, layout, revealed) { FormNodeView(node, model) }
+    }
 }
 
 @Composable

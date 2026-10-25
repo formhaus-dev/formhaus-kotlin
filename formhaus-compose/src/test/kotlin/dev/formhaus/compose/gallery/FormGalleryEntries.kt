@@ -86,6 +86,32 @@ private val arabic =
       {"key": "message", "type": "textarea", "label": "الرسالة"}]}
     """.trimIndent()
 
+private const val CHANNELS =
+    """[{"value": "email", "label": "Email"}, {"value": "phone", "label": "Phone"}, {"value": "post", "label": "Post"}]"""
+
+private val reach =
+    """
+    {"id": "reach", "title": "Reach", "submit": {"label": "Save"}, "fields": [
+      {"key": "contact", "type": "radio", "label": "How should we contact you?", "validation": {"required": true}, "options": $CHANNELS},
+      {"key": "email", "type": "email", "label": "Email address", "validation": {"required": true},
+       "show": [{"field": "contact", "eq": "email"}]},
+      {"key": "phone", "type": "phone", "label": "Phone number", "show": [{"field": "contact", "eq": "phone"}]},
+      {"key": "when", "type": "radio", "label": "When can we call?", "show": [{"field": "contact", "eq": "phone"}],
+       "options": [{"value": "day", "label": "During the day"}, {"value": "evening", "label": "In the evening"}]},
+      {"key": "hour", "type": "text", "label": "Best hour", "helperText": "Your local time", "show": [{"field": "when", "eq": "evening"}]},
+      {"key": "notes", "type": "textarea", "label": "Anything else?"}]}
+    """.trimIndent()
+
+private val updates =
+    """
+    {"id": "updates", "title": "Updates", "submit": {"label": "Save"}, "fields": [
+      {"key": "channels", "type": "multiselect", "label": "Where should we send updates?", "options": $CHANNELS},
+      {"key": "email", "type": "email", "label": "Email address", "show": [{"field": "channels", "contains": "email"}]},
+      {"key": "address", "type": "textarea", "label": "Postal address", "show": [{"field": "channels", "contains": "post"}]}]}
+    """.trimIndent()
+
+private val revealing = FormBehavior(conditionalReveal = true)
+
 private const val ONE_TRAVELLER = """{"travellers": [{"name": "Ada Lovelace", "email": "ada@example.com"}]}"""
 private const val TWO_TRAVELLERS =
     """{"travellers": [{"name": "Ada Lovelace", "email": "ada@example.com"}, {"name": "Charles Babbage"}], "seat": "w"}"""
@@ -161,4 +187,12 @@ val formEntries: List<FormEntry> =
             goToStep("guests")
         }) { model(booking, """{"email": "ada@example.com"}""") },
         FormEntry("form-rtl", rtl = true, prepare = { submit() }) { model(arabic, """{"topic": "help"}""") },
+        FormEntry("form-reveal-closed", behavior = revealing) { model(reach) },
+        FormEntry("form-reveal-open", behavior = revealing) { model(reach, """{"contact": "email"}""") },
+        FormEntry("form-reveal-multiple", behavior = revealing) { model(updates, """{"channels": ["email", "post"]}""") },
+        FormEntry("form-reveal-nested", behavior = revealing) { model(reach, """{"contact": "phone", "when": "evening"}""") },
+        FormEntry("form-reveal-errors", behavior = revealing, prepare = { submit() }) { model(reach, """{"contact": "email"}""") },
+        FormEntry("form-reveal-required", behavior = revealing, prepare = { submit() }) { model(reach) },
+        FormEntry("form-reveal-rtl", behavior = revealing, rtl = true) { model(updates, """{"channels": ["post"]}""") },
+        FormEntry("system-reveal", FormComponents.system, revealing) { model(reach, """{"contact": "phone", "when": "evening"}""") },
     )

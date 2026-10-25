@@ -217,12 +217,13 @@ public final class dev/formhaus/compose/form/FieldContext {
 public final class dev/formhaus/compose/form/FormBehavior {
 	public static final field $stable I
 	public fun <init> ()V
-	public fun <init> (ZZZLdev/formhaus/compose/form/BackPlacement;Ldev/formhaus/compose/form/StepScroll;ILdev/formhaus/compose/form/TitleDisplayMode;)V
-	public synthetic fun <init> (ZZZLdev/formhaus/compose/form/BackPlacement;Ldev/formhaus/compose/form/StepScroll;ILdev/formhaus/compose/form/TitleDisplayMode;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun copy (ZZZLdev/formhaus/compose/form/BackPlacement;Ldev/formhaus/compose/form/StepScroll;ILdev/formhaus/compose/form/TitleDisplayMode;)Ldev/formhaus/compose/form/FormBehavior;
-	public static synthetic fun copy$default (Ldev/formhaus/compose/form/FormBehavior;ZZZLdev/formhaus/compose/form/BackPlacement;Ldev/formhaus/compose/form/StepScroll;ILdev/formhaus/compose/form/TitleDisplayMode;ILjava/lang/Object;)Ldev/formhaus/compose/form/FormBehavior;
+	public fun <init> (ZZZLdev/formhaus/compose/form/BackPlacement;Ldev/formhaus/compose/form/StepScroll;ILdev/formhaus/compose/form/TitleDisplayMode;Z)V
+	public synthetic fun <init> (ZZZLdev/formhaus/compose/form/BackPlacement;Ldev/formhaus/compose/form/StepScroll;ILdev/formhaus/compose/form/TitleDisplayMode;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun copy (ZZZLdev/formhaus/compose/form/BackPlacement;Ldev/formhaus/compose/form/StepScroll;ILdev/formhaus/compose/form/TitleDisplayMode;Z)Ldev/formhaus/compose/form/FormBehavior;
+	public static synthetic fun copy$default (Ldev/formhaus/compose/form/FormBehavior;ZZZLdev/formhaus/compose/form/BackPlacement;Ldev/formhaus/compose/form/StepScroll;ILdev/formhaus/compose/form/TitleDisplayMode;ZILjava/lang/Object;)Ldev/formhaus/compose/form/FormBehavior;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getBackPlacement ()Ldev/formhaus/compose/form/BackPlacement;
+	public final fun getConditionalReveal ()Z
 	public final fun getConfirmRemove ()Z
 	public final fun getErrorSummary ()Z
 	public final fun getInlineChoiceLimit ()I

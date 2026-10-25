@@ -28,6 +28,7 @@ import dev.formhaus.compose.components.OptionImages
 import dev.formhaus.compose.components.focusedOption
 import dev.formhaus.compose.components.formhausOptionsFocus
 import dev.formhaus.compose.form.FieldContext
+import dev.formhaus.compose.form.LocalFieldReveals
 import dev.formhaus.compose.form.numberText
 import dev.formhaus.compose.theme.FormhausTokens
 import dev.formhaus.compose.theme.LocalFormhausTokens
@@ -108,8 +109,9 @@ private fun ChoiceList(
     val arrangement = remember(options) { choiceArrangement(context.field, options) }
     val spec = LocalFormhausTokens.current.pictureGrid(context.field.columns)
     PrefetchImages(options)
+    val reveals = LocalFieldReveals.current
     ChoiceScope(context) { actions ->
-        FieldShell(context, variant = FieldShellVariant.GROUP) {
+        FieldShell(context, Modifier, FieldShellVariant.GROUP, errorFirst = reveals != null) {
             val modifier = Modifier.formhausOptionsFocus(context, requester).selectableGroup()
             ChoiceOptions(context, shape, arrangement, options.indices, spec::columnCount, actions, modifier, requester)
         }
@@ -153,6 +155,7 @@ internal fun ChoiceOptions(
     val enabled = !context.isLocked
     val invalid = context.isInvalid
     val picture = arrangement == ChoiceArrangement.PICTURES
+    val reveals = LocalFieldReveals.current
     val card: @Composable (Int) -> Unit = { index ->
         val option = options[index]
         val card = if (focus != null && index == target) Modifier.focusRequester(focus) else Modifier
@@ -172,10 +175,17 @@ internal fun ChoiceOptions(
         }
 
         ChoiceArrangement.LIST -> {
-            Column(modifier, verticalArrangement = Arrangement.spacedBy(tokens.spacing.s3)) { indices.forEach { card(it) } }
+            Column(modifier, verticalArrangement = Arrangement.spacedBy(tokens.spacing.s3)) {
+                indices.forEach { index ->
+                    card(index)
+                    reveals?.Block(options[index].value.orEmpty(), tokens.revealInset, tokens.colors.border)
+                }
+            }
         }
     }
 }
+
+internal val FormhausTokens.revealInset: Dp get() = spacing.s6 + (controls.indicator - spacing.s1) / 2
 
 internal fun FormhausTokens.pictureGrid(columns: Int?): GridSpec {
     val fixed =

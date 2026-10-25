@@ -65,6 +65,15 @@ internal fun choicePlan(
 internal fun FormField.isBuiltInChoice(components: FormComponents): Boolean =
     (type == "radio" || type == "multiselect") && components.builtIns && !components.system && !components.fields.containsKey(type)
 
+internal fun FormField.drawsReveals(
+    components: FormComponents,
+    inlineChoiceLimit: Int,
+): Boolean =
+    (type == "radio" || type == "multiselect") &&
+        components.builtIns &&
+        !components.fields.containsKey(type) &&
+        (!components.system || type == "multiselect" || options.orEmpty().size <= inlineChoiceLimit)
+
 internal fun FormField.mayNeedRows(components: FormComponents): Boolean =
     isBuiltInChoice(components) && (hasOptionsFrom || options.orEmpty().size > SPLIT_OPTIONS)
 
@@ -81,6 +90,7 @@ internal fun FormhausTokens.choiceRowGap(plan: ChoicePlan): Dp =
 internal fun ChoiceHeader(
     field: FormField,
     model: FormModel,
+    errorFirst: Boolean,
 ) {
     val context = FieldContext(field, model)
     val error = context.error?.takeIf { it.isNotEmpty() }
@@ -91,7 +101,7 @@ internal fun ChoiceHeader(
             .semantics { if (error != null) error(error) }
             .formhausTestId(context.testId)
             .formhausScrollAnchor(context),
-    ) { FieldHeader(context, FieldShellVariant.GROUP, context.helperText) }
+    ) { FieldHeader(context, FieldShellVariant.GROUP, context.helperText, error.takeIf { errorFirst }) }
 }
 
 @Composable

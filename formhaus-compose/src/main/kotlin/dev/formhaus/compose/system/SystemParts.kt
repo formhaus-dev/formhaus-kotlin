@@ -37,10 +37,13 @@ import dev.formhaus.compose.containers.summaryFocus
 import dev.formhaus.compose.form.ActionsContext
 import dev.formhaus.compose.form.FormhausField
 import dev.formhaus.compose.form.LocalFormComponents
+import dev.formhaus.compose.form.ProvideReveals
 import dev.formhaus.compose.form.SUMMARY_ANCHOR
 import dev.formhaus.compose.form.SectionContext
 import dev.formhaus.compose.form.formhausScrollAnchor
+import dev.formhaus.compose.form.rememberRevealLayout
 import dev.formhaus.compose.model.FormModel
+import dev.formhaus.compose.model.RevealLayout
 import dev.formhaus.compose.model.focus
 import dev.formhaus.compose.model.formhausTestId
 import dev.formhaus.compose.model.testId
@@ -59,12 +62,24 @@ internal fun SystemNodes(
     nodes: List<FormNode>,
     model: FormModel,
 ) {
+    val layout = rememberRevealLayout(nodes, model)
+    SystemNodeColumn(layout.nodes, layout, model)
+}
+
+@Composable
+private fun SystemNodeColumn(
+    nodes: List<FormNode>,
+    layout: RevealLayout,
+    model: FormModel,
+) {
     Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(20.dp)) {
         for (node in nodes) {
             key(node.nodeId) {
-                when (node) {
-                    is FormField -> if (node.isGroup) GroupNode(node, model) else FormhausField(node, model)
-                    is FormSection -> SystemSection(node, model)
+                ProvideReveals(node, layout, { nested -> SystemNodeColumn(nested, layout, model) }) {
+                    when (node) {
+                        is FormField -> if (node.isGroup) GroupNode(node, model) else FormhausField(node, model)
+                        is FormSection -> SystemSection(node, model)
+                    }
                 }
             }
         }
