@@ -166,10 +166,7 @@ public fun validateSubmission(
     definition: FormDefinition,
     values: JsonValue,
     options: SubmissionOptions = SubmissionOptions(),
-): SubmissionResult {
-    val quadratic = refuseSlowPatterns(definition)
-    return CallBudget.run { QuadraticPatterns.current.withValue(quadratic) { submissionResult(definition, values, options) } }
-}
+): SubmissionResult = CallBudget.run { submissionResult(definition, values, options) }
 
 private fun submissionResult(
     definition: FormDefinition,

@@ -21,7 +21,6 @@ class CorpusCase(
     val expectedErrors: JsonValue = json["expected"]?.get("errors") ?: JsonValue.Object(MutableJsonObject())
     val canSubmit: Boolean = json["canSubmit"]?.boolValue ?: false
     val serverValues: JsonValue? = json["serverValues"]
-    val serverErrors: JsonValue? = json["serverErrors"]
 }
 
 class RecallEntry(
