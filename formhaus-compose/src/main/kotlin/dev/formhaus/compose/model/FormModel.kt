@@ -136,6 +136,7 @@ public class FormModel private constructor(
     internal val optionStates = mutableMapOf<String, OptionsState>()
     internal var optionsRevision = -1
     internal val heldEdits = mutableMapOf<String, JsonValue?>()
+    internal var revealPlan: RevealPlan? = null
     private var lastValues: JsonObject = engine.values
     internal val focusRequests = FocusRequests()
     private var emittedValues: JsonObject? = null

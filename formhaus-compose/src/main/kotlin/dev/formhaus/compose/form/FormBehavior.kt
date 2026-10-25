@@ -22,6 +22,7 @@ public class FormBehavior(
     public val stepScroll: StepScroll = StepScroll.SCREEN_TOP,
     public val inlineChoiceLimit: Int = 6,
     public val titleDisplayMode: TitleDisplayMode = TitleDisplayMode.AUTOMATIC,
+    public val conditionalReveal: Boolean = false,
 ) {
     public fun copy(
         errorSummary: Boolean = this.errorSummary,
@@ -31,8 +32,18 @@ public class FormBehavior(
         stepScroll: StepScroll = this.stepScroll,
         inlineChoiceLimit: Int = this.inlineChoiceLimit,
         titleDisplayMode: TitleDisplayMode = this.titleDisplayMode,
+        conditionalReveal: Boolean = this.conditionalReveal,
     ): FormBehavior =
-        FormBehavior(errorSummary, confirmRemove, stepErrorMarks, backPlacement, stepScroll, inlineChoiceLimit, titleDisplayMode)
+        FormBehavior(
+            errorSummary,
+            confirmRemove,
+            stepErrorMarks,
+            backPlacement,
+            stepScroll,
+            inlineChoiceLimit,
+            titleDisplayMode,
+            conditionalReveal,
+        )
 
     override fun equals(other: Any?): Boolean = equalParts(other, FormBehavior::parts)
 
@@ -49,6 +60,7 @@ public class FormBehavior(
             "stepScroll" to stepScroll,
             "inlineChoiceLimit" to inlineChoiceLimit,
             "titleDisplayMode" to titleDisplayMode,
+            "conditionalReveal" to conditionalReveal,
         )
 }
 
