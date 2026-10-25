@@ -2,86 +2,77 @@ package dev.formhaus.core.definitionvalidation
 
 internal enum class SlowPattern { NESTED, ADJACENT, LONG }
 
-internal const val SLOW_PATTERN_LENGTH_LIMIT = 1000
+private const val SLOW_PATTERN_LENGTH_LIMIT = 1000
+private const val MAX_BOUNDED_REPEAT = 10
+
+private class Part(
+    val chars: PatternChars,
+    val quantifier: PatternQuantifier,
+    val atom: Boolean,
+)
+
+private class Repeated(
+    val chars: PatternChars,
+    val first: PatternChars = chars,
+    val last: PatternChars = chars,
+)
 
 private class PatternGroup(
     val look: Boolean = false,
-    var inner: Boolean = false,
-    var alternated: Boolean = false,
-    val entry: AsciiSet = AsciiSet(),
-    var previous: AsciiSet = entry,
+    val entry: PatternChars = PatternChars.empty,
 ) {
-    var chars = AsciiCounts()
-    private var hasLead = false
-    var lead: Char? = null
-        private set
-    var tail: Char? = null
-        private set
-
-    val separated: Char?
-        get() = if (alternated) null else listOfNotNull(lead, tail).firstOrNull(chars::appearsOnce)
+    var previous: PatternChars = entry
+    var inner: Boolean = false
+    var unbounded: Boolean = false
+    var alternated: Boolean = false
+    val parts: MutableList<Part> = ArrayList()
 
     fun separate(alternation: Boolean) {
         inner = inner || alternation
         alternated = alternated || alternation
-        previous = if (alternation) entry else AsciiSet()
+        previous = if (alternation) entry else PatternChars.empty
     }
 
-    fun append(
-        added: AsciiCounts,
-        separator: Char?,
-    ) {
-        chars += added
-        if (!hasLead) {
-            hasLead = true
-            lead = separator
+    fun repeats(quantifier: PatternQuantifier): Boolean {
+        if (!inner || !quantifier.repeats || quantifier.exact) return false
+        return quantifier.unbounded || unbounded || quantifier.upper > MAX_BOUNDED_REPEAT
+    }
+
+    private fun separator(index: Int): Part? {
+        val part = parts.getOrNull(index)?.takeIf { it.atom && it.quantifier.mandatory } ?: return null
+        val others = parts.filterIndexed { at, _ -> at != index }
+        if (part.chars overlaps PatternChars.union(others.map { it.chars })) return null
+        return part.takeIf { it.quantifier.exact || others.any { other -> other.quantifier.mandatory } }
+    }
+
+    fun separated(chars: PatternChars): Repeated? {
+        if (alternated) return null
+        val lead = separator(0)
+        val tail = separator(parts.size - 1)
+        return when {
+            lead != null && (lead.quantifier.exact || tail?.quantifier?.exact != true) -> Repeated(chars, first = lead.chars)
+            tail != null -> Repeated(chars, last = tail.chars)
+            else -> null
         }
-        tail = separator
     }
 }
-
-private class Repeated(
-    val own: AsciiCounts,
-    val first: AsciiSet,
-    val last: AsciiSet,
-) {
-    constructor(set: AsciiSet) : this(AsciiCounts() + set, set, set)
-}
-
-private class Sampler {
-    private val cache = HashMap<String, AsciiSet>()
-
-    fun samples(atom: String): AsciiSet = cache.getOrPut(atom) { sample(atom) }
-
-    private fun sample(atom: String): AsciiSet {
-        if (atom.length > 1 && atom[0] == '\\' && (atom[1] == 'k' || atom[1] in '1'..'9')) return AsciiSet.ALL
-        return asciiMatches("^(?:$atom)$")
-    }
-}
-
-private fun isSeparatorAtom(atom: String): Boolean =
-    when (atom.length) {
-        1 -> !atom[0].isAsciiWord()
-        2 -> atom[0] == '\\' && !atom[1].isAsciiWord()
-        else -> false
-    }
 
 private sealed interface Trailing {
     data object Adjacent : Trailing
 
     class Previous(
-        val chars: AsciiSet,
+        val chars: PatternChars,
     ) : Trailing
 }
 
 private fun trailing(
-    previous: AsciiSet,
+    previous: PatternChars,
     quantifier: PatternQuantifier,
     repeated: Repeated,
 ): Trailing {
-    if (!quantifier.unbounded) return Trailing.Previous(if (quantifier.optional) previous else AsciiSet())
-    if (previous.intersects(repeated.first)) return Trailing.Adjacent
-    return Trailing.Previous(if (quantifier.optional) previous union repeated.last else repeated.last)
+    if (!quantifier.unbounded) return Trailing.Previous(if (quantifier.optional) previous else PatternChars.empty)
+    if (previous overlaps repeated.first) return Trailing.Adjacent
+    return Trailing.Previous(if (quantifier.optional) PatternChars.union(listOf(previous, repeated.last)) else repeated.last)
 }
 
 private sealed interface Closing {
@@ -101,14 +92,13 @@ private fun close(
 ): Closing {
     if (groups.size < 2) return Closing.Invalid
     val closed = groups.removeAt(groups.size - 1)
-    val separated = closed.separated
-    if (closed.inner && separated == null && quantifier.repeats) return Closing.Nested
-    val all = closed.chars.once
-    val first = if (separated != null && separated == closed.lead) AsciiSet().with(separated) else all
-    val last = if (separated != null && separated == closed.tail) AsciiSet().with(separated) else all
+    val chars = PatternChars.union(closed.parts.map { it.chars })
+    val separated = closed.separated(chars)
+    if (separated == null && closed.repeats(quantifier)) return Closing.Nested
     val parent = groups.last()
     parent.inner = parent.inner || closed.inner
-    return Closing.Closed(closed, Repeated(closed.chars, first, last))
+    parent.unbounded = parent.unbounded || closed.unbounded
+    return Closing.Closed(closed, separated ?: Repeated(chars))
 }
 
 private sealed interface ScanStep {
@@ -120,11 +110,10 @@ private sealed interface ScanStep {
 }
 
 private class SlowPatternScan {
-    private val sampler = Sampler()
     private val groups = mutableListOf(PatternGroup())
 
     fun open(look: Boolean) {
-        val entry = if (look) AsciiSet() else groups.last().previous
+        val entry = if (look) PatternChars.empty else groups.last().previous
         groups.add(PatternGroup(look = look, entry = entry))
     }
 
@@ -136,7 +125,6 @@ private class SlowPatternScan {
     ): ScanStep {
         val repeated: Repeated
         var closed: PatternGroup? = null
-        var separator: Char? = null
         if (atom == ")") {
             when (val closing = close(groups, quantifier)) {
                 Closing.Invalid -> {
@@ -153,17 +141,16 @@ private class SlowPatternScan {
                 }
             }
         } else {
-            val own = sampler.samples(atom)
-            repeated = Repeated(own)
-            if (!quantifier.present && isSeparatorAtom(atom)) separator = own.single
+            repeated = Repeated(atomChars(atom))
         }
         val current = groups.last()
-        current.append(repeated.own, separator)
+        current.parts += Part(repeated.chars, quantifier, closed == null)
         if (closed != null && (closed.look || !quantifier.present)) {
-            current.previous = if (closed.look || closed.alternated) AsciiSet() else closed.previous
+            current.previous = if (closed.look || closed.alternated) PatternChars.empty else closed.previous
             return ScanStep.Next
         }
-        current.inner = current.inner || quantifier.present
+        current.inner = current.inner || !quantifier.exact
+        current.unbounded = current.unbounded || quantifier.unbounded
         return when (val next = trailing(current.previous, quantifier, repeated)) {
             Trailing.Adjacent -> {
                 ScanStep.Done(SlowPattern.ADJACENT)

@@ -19,12 +19,19 @@ internal class Token(
 
 internal class PatternQuantifier(
     val end: Int,
-    val present: Boolean = false,
-    val repeats: Boolean = false,
-    val unbounded: Boolean = false,
-    val optional: Boolean = false,
+    private val kind: Char? = null,
+    private val min: String = "",
+    private val max: String? = null,
 ) {
-    fun ending(end: Int): PatternQuantifier = PatternQuantifier(end, present, repeats, unbounded, optional)
+    val present: Boolean get() = kind != null
+    val repeats: Boolean get() = kind != null && kind != '?'
+    val unbounded: Boolean get() = kind == '*' || kind == '+' || max == ""
+    val optional: Boolean get() = kind == '*' || kind == '?' || min == "0"
+    val exact: Boolean get() = kind == null || (kind == '{' && (max == null || max == min))
+    val mandatory: Boolean get() = exact || kind == '+' || (max != null && min.first() != '0')
+    val upper: Int get() = max?.toIntOrNull() ?: Int.MAX_VALUE
+
+    fun ending(end: Int): PatternQuantifier = PatternQuantifier(end, kind, min, max)
 }
 
 internal class PatternLexer(
@@ -127,24 +134,10 @@ internal class PatternLexer(
     fun quantifier(start: Int): PatternQuantifier {
         val char = unit(start) ?: return PatternQuantifier(start)
         val result =
-            when {
-                char == '*' || char == '+' || char == '?' -> {
-                    PatternQuantifier(
-                        start + 1,
-                        present = true,
-                        repeats = char != '?',
-                        unbounded = char != '?',
-                        optional = char != '+',
-                    )
-                }
-
-                char == '{' -> {
-                    braced(start) ?: return PatternQuantifier(start)
-                }
-
-                else -> {
-                    return PatternQuantifier(start)
-                }
+            when (char) {
+                '*', '+', '?' -> PatternQuantifier(start + 1, char)
+                '{' -> braced(start) ?: return PatternQuantifier(start)
+                else -> return PatternQuantifier(start)
             }
         return if (unit(result.end) == '?') result.ending(result.end + 1) else result
     }
@@ -152,15 +145,12 @@ internal class PatternLexer(
     private fun braced(start: Int): PatternQuantifier? {
         val minimumEnd = digitsEnd(start + 1)
         if (minimumEnd <= start + 1) return null
-        var index = minimumEnd
-        var open = false
-        if (unit(index) == ',') {
-            index = digitsEnd(index + 1)
-            open = index == minimumEnd + 1
-        }
-        if (unit(index) != '}') return null
-        val zero = minimumEnd == start + 2 && unit(start + 1) == '0'
-        return PatternQuantifier(index + 1, present = true, repeats = true, unbounded = open, optional = zero)
+        val min = String(units, start + 1, minimumEnd - start - 1)
+        if (unit(minimumEnd) == '}') return PatternQuantifier(minimumEnd + 1, '{', min)
+        if (unit(minimumEnd) != ',') return null
+        val maximumEnd = digitsEnd(minimumEnd + 1)
+        if (unit(maximumEnd) != '}') return null
+        return PatternQuantifier(maximumEnd + 1, '{', min, String(units, minimumEnd + 1, maximumEnd - minimumEnd - 1))
     }
 
     private companion object {
@@ -170,4 +160,4 @@ internal class PatternLexer(
     }
 }
 
-internal fun Char.isAsciiWord(): Boolean = this in '0'..'9' || this in 'A'..'Z' || this in 'a'..'z' || this == '_'
+private fun Char.isAsciiWord(): Boolean = this in '0'..'9' || this in 'A'..'Z' || this in 'a'..'z' || this == '_'
