@@ -1,5 +1,6 @@
 package dev.formhaus.compose.components
 
+import android.os.Looper
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import dev.formhaus.compose.fields.FieldList
 import dev.formhaus.compose.fields.Themed
@@ -16,6 +17,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.GraphicsMode
 
 @RunWith(RobolectricTestRunner::class)
@@ -49,7 +51,11 @@ class InlineImageTest {
         val option = """{"value": "a", "label": "A", "image": "$source"}"""
         val form = model(definition("""{"key": "c", "type": "radio", "label": "C", "options": [$option]}"""))
         compose.setContent { Themed { FieldList(form) } }
-        compose.waitUntil(5_000) { OptionImages.cached(source) != null }
+        val main = shadowOf(Looper.getMainLooper())
+        compose.waitUntil(5_000) {
+            main.idle()
+            OptionImages.cached(source) != null
+        }
         assertNotEquals(null, OptionImages.cached(source))
     }
 }
