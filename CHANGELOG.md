@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### formhaus-core
+
+- Passes the conformance suite of `@formhaus/core` 1.6.1.
+- `validateSubmission` no longer throws `FormDefinitionError` for patterns that `checkDefinition` reports as `slow-pattern`. It runs every pattern on values of up to 10,000 characters, also patterns with one overlapping repeat on values over 1,000 characters.
+- `checkDefinition` no longer reports `slow-pattern` for a repeated group that starts or ends with a separator nothing else in the group matches, such as `[A-Za-z]+([ '-][A-Za-z]+)*` or `\w+(\s+\w+)*`.
+- `checkDefinition` no longer reports `slow-pattern` for a group without unbounded repeats that repeats a fixed number of times or at most 10 times, such as `#(?:[0-9a-f]{3}){1,2}`.
+- The `slow-pattern` warning also covers overlapping repeats of non-ASCII characters, such as `[À-ÿ]+[à-ÿ]+`.
+
 ### formhaus-compose
 
 - New `conditionalReveal` option on `FormBehavior` draws a field revealed by a `radio` or `multiselect` option under that option in the built-in sets, indented with a line on its start side.

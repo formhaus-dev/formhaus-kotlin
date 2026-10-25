@@ -312,7 +312,7 @@ import dev.formhaus.core.definitionvalidation.checkDefinition
 val problems = checkDefinition(definition).filter { it.isError }
 ```
 
-`validateSubmission` throws `FormDefinitionError` when a pattern can take very long on some values, so the server does not run it. `checkDefinition` reports these patterns as `slow-pattern` warnings. Patterns with one overlapping repeat after `^`, such as `^\d+\.?\d*$`, still run on values of up to 1,000 characters; a longer value gets the pattern error.
+`checkDefinition` reports a pattern that can take very long on some values as a `slow-pattern` warning. `validateSubmission` runs every pattern, like the engine, on values of up to 10,000 characters and at most 10,000 pattern tests per call.
 
 ## Translations
 
