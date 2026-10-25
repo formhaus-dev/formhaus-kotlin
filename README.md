@@ -26,8 +26,8 @@ Releases are published to Maven Central:
 
 ```kotlin
 dependencies {
-    implementation("dev.formhaus:formhaus-core:0.6.0")
-    implementation("dev.formhaus:formhaus-compose:0.6.0")
+    implementation("dev.formhaus:formhaus-core:0.7.0")
+    implementation("dev.formhaus:formhaus-compose:0.7.0")
 }
 ```
 
@@ -158,7 +158,7 @@ suspend fun fill() {
 A `radio`, `multiselect` or `select` field with `"randomize": true` shows its options in a random order per respondent. Add `formhaus-research` and pass `Research()`:
 
 ```kotlin
-implementation("dev.formhaus:formhaus-research:0.6.0")
+implementation("dev.formhaus:formhaus-research:0.7.0")
 ```
 
 ```kotlin
@@ -443,6 +443,7 @@ With `HiddenValues.KEEP`, conditions, validation and recall still treat hidden f
 
 | formhaus-kotlin | @formhaus/core | Format |
 |---|---|---|
+| 0.7.0 | 1.6.1 | 1.6 |
 | 0.6.0 | 1.6.0 | 1.6 |
 | 0.5.0 | 1.4.2 | 1.6 |
 | 0.4.0 | 1.3.0 | 1.6 |
