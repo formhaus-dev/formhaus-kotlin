@@ -156,7 +156,7 @@ private class FormItems(
             }
             return
         }
-        val reveals = FieldReveals(slots) { nested -> NodeColumn(nested, layout, model, tokens.spacing.s10) }
+        val reveals = FieldReveals(slots, layout.revealedColumn(model))
         val values = FieldContext(field, model).options.map { it.value.orEmpty() }
         var start = 0
         values.forEachIndexed { row, value ->

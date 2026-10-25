@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
@@ -71,6 +72,9 @@ internal fun NodeColumn(
     }
 }
 
+internal fun RevealLayout.revealedColumn(model: FormModel): @Composable (List<FormNode>) -> Unit =
+    { nested -> NodeColumn(nested, this, model, LocalFormhausTokens.current.spacing.s10) }
+
 @Composable
 internal fun SpacedNode(
     node: FormNode,
@@ -86,7 +90,8 @@ internal fun SpacedNode(
             bottom = if (container) tokens.spacing.s5 else 0.dp,
         ),
     ) {
-        ProvideReveals(node, layout, { nested -> NodeColumn(nested, layout, model, tokens.spacing.s10) }) { FormNodeView(node, model) }
+        val revealed = remember(layout, model) { layout.revealedColumn(model) }
+        ProvideReveals(node, layout, revealed) { FormNodeView(node, model) }
     }
 }
 
