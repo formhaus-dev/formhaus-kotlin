@@ -58,6 +58,19 @@ private val nested =
         """{"key": "hour", "type": "text", "label": "Hour", "show": [{"field": "when", "eq": "evening"}]}""",
     )
 
+private const val CONTACT_RADIO = """{"key": "contact", "type": "radio", "label": "Contact", "options": $OPTIONS}"""
+private const val EMAIL_FIELD =
+    """{"key": "email", "type": "text", "label": "Email address", "show": [{"field": "contact", "eq": "email"}]}"""
+
+private val sectioned =
+    """{"id": "f", "title": "F", "submit": {"label": "Send"}, "fields": [
+       {"key": "about", "type": "section", "title": "About", "fields": [$CONTACT_RADIO, $EMAIL_FIELD]}]}"""
+
+private val stepped =
+    """{"id": "f", "title": "F", "submit": {"label": "Send"}, "steps": [
+       {"id": "one", "title": "One", "fields": [$CONTACT_RADIO, $EMAIL_FIELD]},
+       {"id": "two", "title": "Two", "fields": [{"key": "note", "type": "text", "label": "Note"}]}]}"""
+
 private val manyOptions = (0 until MANY).joinToString { """{"value": "v$it", "label": "Pick $it"}""" }
 
 private val many =
@@ -107,6 +120,14 @@ class RevealTest {
         compose.onNodeWithTag(tag).assert(hasAnyAncestor(hasTestTag(parent))).assert(hasAnyAncestor(traversalGroup))
     }
 
+    private fun assertErrorBeforeOptions(components: FormComponents) {
+        val form = show(contact, components = components)
+        compose.act(form) { submit() }
+        compose.waitForIdle()
+        val error = compose.onNodeWithText("This field is required").fetchSemanticsNode()
+        assertTrue(error.boundsInRoot.bottom <= top("f.contact.email"))
+    }
+
     @Test
     fun revealedFieldsStayInPlaceByDefault() {
         show(contact, """{"contact": "email"}""", FormBehavior())
@@ -149,11 +170,26 @@ class RevealTest {
 
     @Test
     fun theErrorOfAChoiceWithRevealsComesBeforeItsOptions() {
-        val form = show(contact)
-        compose.act(form) { submit() }
-        compose.waitForIdle()
-        val error = compose.onNodeWithText("This field is required").fetchSemanticsNode()
-        assertTrue(error.boundsInRoot.bottom <= top("f.contact.email"))
+        assertErrorBeforeOptions(FormComponents.standard)
+    }
+
+    @Test
+    fun aSectionDrawsTheRevealsOfItsFieldsUnderTheirOption() {
+        show(sectioned, """{"contact": "email"}""")
+        assertNestedIn("f.email", "f.contact")
+        assertBetween("f.email", "f.contact.email", "f.contact.phone")
+    }
+
+    @Test
+    fun aStepDrawsTheRevealsOfItsFieldsUnderTheirOption() {
+        show(stepped, """{"contact": "email"}""")
+        assertNestedIn("f.email", "f.contact")
+        assertBetween("f.email", "f.contact.email", "f.contact.phone")
+    }
+
+    @Test
+    fun theSystemSetShowsTheErrorOfAChoiceWithRevealsBeforeItsOptions() {
+        assertErrorBeforeOptions(FormComponents.system)
     }
 
     @Test
