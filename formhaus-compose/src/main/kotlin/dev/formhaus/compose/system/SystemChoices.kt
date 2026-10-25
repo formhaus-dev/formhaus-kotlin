@@ -30,12 +30,14 @@ import dev.formhaus.compose.components.formhausOptionsFocus
 import dev.formhaus.compose.components.marked
 import dev.formhaus.compose.fields.ChoiceSelection
 import dev.formhaus.compose.form.FieldContext
+import dev.formhaus.compose.form.LocalFieldReveals
 import dev.formhaus.compose.form.formhausScrollAnchor
 import dev.formhaus.compose.model.formhausTestId
 import dev.formhaus.compose.theme.LocalFormhausTokens
 import dev.formhaus.core.json.JsonValue
 
 private val rowHeight = 48.dp
+private val revealInset = 10.dp
 
 @Composable
 internal fun SystemChoiceList(context: FieldContext) {
@@ -43,7 +45,8 @@ internal fun SystemChoiceList(context: FieldContext) {
     val selection = ChoiceSelection(context)
     val multiple = selection.multiple
     val target = focusedOption(context)
-    SystemBlock(context) {
+    val reveals = LocalFieldReveals.current
+    SystemBlock(context, errorFirst = reveals != null) {
         Column(Modifier.formhausOptionsFocus(context, requester).selectableGroup()) {
             context.options.forEachIndexed { index, option ->
                 val value = option.value.orEmpty()
@@ -62,6 +65,7 @@ internal fun SystemChoiceList(context: FieldContext) {
                     }
                     Text(option.label ?: value, Modifier.weight(1f), style = MaterialTheme.typography.bodyLarge)
                 }
+                reveals?.Block(value, revealInset, MaterialTheme.colorScheme.outlineVariant)
             }
         }
     }

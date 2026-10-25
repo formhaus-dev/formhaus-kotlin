@@ -57,6 +57,7 @@ private val textTypes = setOf("text", "email", "phone", "number", "password", "t
 @Composable
 internal fun SystemBlock(
     context: FieldContext,
+    errorFirst: Boolean,
     content: @Composable () -> Unit,
 ) {
     Column(
@@ -75,17 +76,21 @@ internal fun SystemBlock(
             color = MaterialTheme.colorScheme.onSurface,
             style = MaterialTheme.typography.titleSmall,
         )
+        if (errorFirst) context.error?.takeIf { it.isNotEmpty() }?.let { SystemErrorText(it) }
         content()
-        SystemNotes(context)
+        SystemNotes(context, error = !errorFirst)
     }
 }
 
 @Composable
-internal fun SystemNotes(context: FieldContext) {
+internal fun SystemNotes(
+    context: FieldContext,
+    error: Boolean = true,
+) {
     context.helperText?.let {
         Text(it, color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall)
     }
-    context.error?.takeIf { it.isNotEmpty() }?.let { SystemErrorText(it) }
+    if (error) context.error?.takeIf { it.isNotEmpty() }?.let { SystemErrorText(it) }
 }
 
 @Composable
