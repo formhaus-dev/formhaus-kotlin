@@ -27,7 +27,7 @@ public fun FileField(context: FieldContext) {
         return
     }
     val colors = LocalFormhausTokens.current.colors
-    val picker = rememberFilePicker(context) { context.replaceFile(it.first()) }
+    val picker = rememberFilePicker(context, 1) { files, _ -> files.firstOrNull()?.let(context::replaceFile) }
     PickerInput(context, picker.active, context.text.isNotEmpty(), JsonValue.Null, context.fileValueText, picker::open) {
         FilePickerLabel(
             context.fileName ?: context.referenceName ?: context.placeholder ?: context.text("chooseFile"),

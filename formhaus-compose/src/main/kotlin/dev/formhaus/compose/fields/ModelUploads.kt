@@ -3,24 +3,30 @@ package dev.formhaus.compose.fields
 import dev.formhaus.compose.model.FormModel
 import dev.formhaus.core.json.JsonObject
 import dev.formhaus.core.json.JsonValue
-import dev.formhaus.core.renderer.fileItems
 import dev.formhaus.core.renderer.value
+import dev.formhaus.core.validation.fileItems
 import java.io.File
 
 public fun FormModel.pickedFile(key: String): File? = engine.value(key)?.stringValue?.let { UploadStore.owned(it, uploadOwner) }
 
-public fun FormModel.pickedFiles(key: String): List<File> = ownedFiles(engine.value(key)).map { it.file }
+public fun FormModel.pickedFiles(key: String): List<File> = fileEntries(engine.value(key)).mapNotNull { it.file }
 
-internal class PickedFile(
+internal class FileEntry(
     val index: Int,
     val value: JsonValue,
-    val file: File,
+    val name: String,
+    val file: File?,
 )
 
-internal fun FormModel.ownedFiles(value: JsonValue?): List<PickedFile> =
+internal fun FormModel.fileEntries(value: JsonValue?): List<FileEntry> =
     fileItems(value).withIndex().mapNotNull { (index, item) ->
-        item.stringValue?.let { UploadStore.owned(it, uploadOwner) }?.let { PickedFile(index, item, it) }
+        val text = item.stringValue
+        val file = text?.let { UploadStore.owned(it, uploadOwner) }
+        val name = file?.name ?: text?.let(::referenceSegment) ?: item.objectValue?.get("name")?.stringValue
+        name?.let { FileEntry(index, item, it, file) }
     }
+
+private fun referenceSegment(value: String): String = value.substringAfterLast('/').ifEmpty { value }
 
 internal fun FormModel.pruneUploads(values: JsonObject) {
     val files = HashSet<String>()
