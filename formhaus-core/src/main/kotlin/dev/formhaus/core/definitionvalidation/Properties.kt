@@ -46,6 +46,7 @@ internal object Properties {
             "props",
             "i18n",
         )
+    val fileListField = field + "multiple"
     val section = listOf("key", "type", "title", "description", "layout", "show", "showAny", "fields", "i18n")
     val group =
         listOf(
