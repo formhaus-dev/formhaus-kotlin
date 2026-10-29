@@ -68,6 +68,7 @@ class CorpusCheckTest {
             "exclusive-options",
             "file-app-reference",
             "file-multiple",
+            "file-multiple-limits",
             "flat-api-steps",
             "format-version",
             "group-list-answers",
