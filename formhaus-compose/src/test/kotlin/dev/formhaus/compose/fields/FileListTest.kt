@@ -130,18 +130,31 @@ class FileListTest {
     fun everyListItemWithANameGetsARowAndReferencesShowTheirLastSegment() {
         val form =
             render(
-                values = """{"docs": ["https://cdn.example.com/files/w9.pdf", "upload-1", {"name": "scan.pdf"}, 7, {"size": 1}]}""",
+                values = """{"docs": ["https://cdn.example.com/files/w9.pdf", "upload-1", {"name": "scan.pdf"}, 7, {"size": 1},
+                    "https://cdn.example.com/", "a/b/", "/"]}""",
             )
         val file = upload(form, "a.pdf")
         compose.runOnIdle { context(form).addFiles(listOf(file), 0) }
-        for (name in listOf("w9.pdf", "upload-1", "scan.pdf", "a.pdf")) compose.onNodeWithContentDescription("Remove $name").assertExists()
+        for (name in listOf(
+            "w9.pdf",
+            "upload-1",
+            "scan.pdf",
+            "cdn.example.com",
+            "b",
+            "/",
+            "a.pdf",
+        )) {
+            compose.onNodeWithContentDescription("Remove $name").assertExists()
+        }
         compose.onNodeWithText("https://cdn.example.com/files/w9.pdf").assertDoesNotExist()
-        compose.onAllNodesWithText("Remove").assertCountEquals(4)
+        compose.onAllNodesWithText("Remove").assertCountEquals(7)
         compose.onNodeWithContentDescription("Remove w9.pdf").performClick()
         compose.waitForIdle()
         assertEquals("w9.pdf removed", announced(form))
         assertEquals(
-            json("""["upload-1", {"name": "scan.pdf"}, 7, {"size": 1}, "${fileValue(file)}"]"""),
+            json(
+                """["upload-1", {"name": "scan.pdf"}, 7, {"size": 1}, "https://cdn.example.com/", "a/b/", "/", "${fileValue(file)}"]""",
+            ),
             form.engine.values["docs"],
         )
         form.close()
