@@ -90,6 +90,7 @@ public final class dev/formhaus/core/definitionvalidation/IssueCode$Companion {
 	public final fun getMISSING_OPTIONS-SGZMid8 ()Ljava/lang/String;
 	public final fun getMISSING_PROPERTY-SGZMid8 ()Ljava/lang/String;
 	public final fun getMISSING_RESEARCH-SGZMid8 ()Ljava/lang/String;
+	public final fun getMULTIPLE_NOT_APPLICABLE-SGZMid8 ()Ljava/lang/String;
 	public final fun getOUTDATED_FORMAT_VERSION-SGZMid8 ()Ljava/lang/String;
 	public final fun getRANDOMIZE_NOT_APPLICABLE-SGZMid8 ()Ljava/lang/String;
 	public final fun getRECALL_FORWARD_REFERENCE-SGZMid8 ()Ljava/lang/String;
@@ -906,6 +907,7 @@ public final class dev/formhaus/core/model/FormField : dev/formhaus/core/model/F
 	public final fun getSource ()Ldev/formhaus/core/json/JsonValue;
 	public fun getType ()Ljava/lang/String;
 	public final fun getValidation ()Ldev/formhaus/core/model/FieldValidation;
+	public final fun isFileList ()Z
 	public final fun isGroup ()Z
 	public final fun isScale ()Z
 }
@@ -1074,6 +1076,10 @@ public final class dev/formhaus/core/renderer/ErrorSummaryOptions {
 	public final fun getLabels ()Ldev/formhaus/core/renderer/LabelSource;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/formhaus/core/renderer/FileItemsKt {
+	public static final fun fileItems (Ldev/formhaus/core/json/JsonValue;)Ljava/util/List;
 }
 
 public final class dev/formhaus/core/renderer/FormActionsState {
