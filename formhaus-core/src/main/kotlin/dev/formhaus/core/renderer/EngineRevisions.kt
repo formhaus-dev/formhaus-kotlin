@@ -24,3 +24,10 @@ public var FormEngine.onValidate: ValidateFn?
     set(value) {
         core.onValidate = value
     }
+
+@RendererApi
+public var FormEngine.validateWithRules: Boolean
+    get() = core.validateWithRules
+    set(value) {
+        core.validateWithRules = value
+    }

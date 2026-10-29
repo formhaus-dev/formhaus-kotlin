@@ -177,6 +177,7 @@ public class FormEngineOptions(
     public val debugChecks: Boolean? = null,
     public val locale: List<LocaleCatalog> = emptyList(),
     public val onValidate: ValidateFn? = null,
+    public val validateWithRules: Boolean = false,
 ) {
     internal val checksOn: Boolean get() = debugChecks == true
     internal val recallFormat: RecallFormatFn? by lazy { formatRecall ?: recallFormatter?.let(::recallFormat) }
