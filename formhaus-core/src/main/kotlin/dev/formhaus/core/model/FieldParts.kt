@@ -36,11 +36,3 @@ public data class ScaleRange(
 )
 
 internal val scaleTypes = listOf("scale", "rating")
-
-internal class Ordinals(
-    val listsFiles: Boolean,
-) {
-    private var next = 0
-
-    fun take(): Int = next++
-}

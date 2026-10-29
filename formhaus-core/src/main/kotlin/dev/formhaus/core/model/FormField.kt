@@ -10,16 +10,16 @@ public class FormField private constructor(
     public val fields: List<FormNode>?,
     private val listsFiles: Boolean,
 ) : FormNode() {
-    internal constructor(json: JsonObject, ordinals: Ordinals) :
+    internal constructor(json: JsonObject, reader: NodeReader) :
         this(
             json,
-            ordinals.take(),
+            reader.nextOrdinal(),
             if (json["type"]?.stringValue == "group") {
-                formNodes(json["fields"], ordinals)
+                formNodes(json["fields"], reader)
             } else {
                 null
             },
-            ordinals.listsFiles,
+            reader.listsFiles,
         )
 
     override val key: String = json["key"]?.stringValue ?: ""

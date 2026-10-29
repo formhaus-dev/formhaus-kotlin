@@ -11,11 +11,11 @@ import dev.formhaus.core.renderer.DomIds
 
 public class FormStep internal constructor(
     internal val json: JsonObject,
-    ordinals: Ordinals,
+    reader: NodeReader,
 ) : Conditional {
-    internal val ordinal: Int = ordinals.take()
+    internal val ordinal: Int = reader.nextOrdinal()
     public val id: String = json["id"]?.stringValue ?: ""
-    public val fields: List<FormNode> = formNodes(json["fields"], ordinals).orEmpty()
+    public val fields: List<FormNode> = formNodes(json["fields"], reader).orEmpty()
     override val show: List<ShowCondition>? = conditions(json["show"])
     override val showAny: List<ShowCondition>? = conditions(json["showAny"])
     public val routes: List<StepRoute>? =
@@ -42,13 +42,13 @@ public class FormDefinition internal constructor(
     public constructor(json: JsonValue) : this(checkedRoot(json))
 
     internal val listsFiles: Boolean = formatAtLeast(json["formatVersion"], FILE_LISTS_MINOR)
-    private val ordinals = Ordinals(listsFiles)
+    private val reader = NodeReader(listsFiles)
     public val id: String = json["id"]?.stringValue ?: ""
     public val submit: FormAction = FormAction(json["submit"]?.objectValue ?: MutableJsonObject())
     public val cancel: FormAction? = json["cancel"]?.objectValue?.let(::FormAction)
-    public val fields: List<FormNode>? = formNodes(json["fields"], ordinals)
+    public val fields: List<FormNode>? = formNodes(json["fields"], reader)
     public val steps: List<FormStep>? =
-        json["steps"]?.arrayValue?.mapNotNull { item -> item.objectValue?.let { FormStep(it, ordinals) } }
+        json["steps"]?.arrayValue?.mapNotNull { item -> item.objectValue?.let { FormStep(it, reader) } }
     internal val recallsAnswers: Boolean = formatAtLeast(json["formatVersion"], RECALL_MINOR)
 
     public val title: String? get() = json["title"]?.stringValue
