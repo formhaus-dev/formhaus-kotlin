@@ -25,6 +25,9 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import dev.formhaus.compose.theme.FormhausTokens
@@ -44,6 +47,21 @@ public fun FormButton(
     compact: Boolean = false,
     icon: ImageVector? = null,
 ) {
+    DescribedButton(label, variant, onClick, modifier, enabled, busy, compact, icon, null)
+}
+
+@Composable
+internal fun DescribedButton(
+    label: String,
+    variant: FormButtonVariant,
+    onClick: () -> Unit,
+    modifier: Modifier,
+    enabled: Boolean,
+    busy: Boolean,
+    compact: Boolean,
+    icon: ImageVector?,
+    description: String?,
+) {
     val tokens = LocalFormhausTokens.current
     val source = remember { MutableInteractionSource() }
     val pressed by source.collectIsPressedAsState()
@@ -58,12 +76,13 @@ public fun FormButton(
             .heightIn(min = if (compact) tokens.controls.hitTarget else tokens.controls.height)
             .surface(tokens.controlShape, look.fill, look.border)
             .clickable(source, null, enabled && !busy, role = Role.Button, onClick = onClick)
-            .padding(horizontal = look.padding),
+            .padding(horizontal = look.padding)
+            .described(description),
         contentAlignment = Alignment.Center,
     ) {
         val role = if (variant == FormButtonVariant.TEXT || compact) TextRole.textButton else TextRole.button
         Row(
-            Modifier.alpha(labelAlpha),
+            Modifier.alpha(labelAlpha).hidden(description != null),
             horizontalArrangement = Arrangement.spacedBy(tokens.spacing.s3),
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -73,6 +92,11 @@ public fun FormButton(
         if (busy) CircularProgressIndicator(Modifier.padding(2.dp).heightIn(max = tokens.controls.indicator), foreground, 2.dp)
     }
 }
+
+private fun Modifier.described(description: String?): Modifier =
+    if (description == null) this else semantics { contentDescription = description }
+
+private fun Modifier.hidden(hide: Boolean): Modifier = if (hide) clearAndSetSemantics {} else this
 
 private class ButtonLook(
     tokens: FormhausTokens,

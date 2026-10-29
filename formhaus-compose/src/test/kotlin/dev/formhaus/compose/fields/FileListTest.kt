@@ -9,6 +9,7 @@ import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assert
@@ -27,6 +28,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityOptionsCompat
 import androidx.test.core.app.ApplicationProvider
+import dev.formhaus.compose.form.Announcer
 import dev.formhaus.compose.form.FieldContext
 import dev.formhaus.compose.model.FormModel
 import dev.formhaus.compose.model.json
@@ -127,6 +129,31 @@ class FileListTest {
     }
 
     @Test
+    fun theRemoveButtonExposesOnlyItsNamedDescription() {
+        val form = render(values = """{"docs": ["upload-1"]}""")
+        val button = compose.onNodeWithContentDescription(remove("upload-1"))
+        button.assert(SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.Button))
+        button.assert(SemanticsMatcher("one description") { it.config[SemanticsProperties.ContentDescription].size == 1 })
+        button.assert(SemanticsMatcher.keyNotDefined(SemanticsProperties.Text))
+        compose.onAllNodesWithText("Remove").assertCountEquals(0)
+        form.close()
+    }
+
+    @Test
+    fun theLiveRegionIsAlwaysPresentAndSpeaksEveryAnnouncement() {
+        val form = model(papers("1.7"), "{}")
+        val region = SemanticsMatcher.keyIsDefined(SemanticsProperties.LiveRegion)
+        compose.setContent { Themed { Announcer(form) } }
+        compose.onNode(region).assertExists()
+        repeat(2) {
+            compose.runOnIdle { form.alerts.announce("Saved") }
+            compose.waitForIdle()
+            compose.onNode(region).assert(hasContentDescription("Saved"))
+        }
+        form.close()
+    }
+
+    @Test
     fun everyListItemWithANameGetsARowAndReferencesShowTheirLastSegment() {
         val form =
             render(
@@ -148,7 +175,7 @@ class FileListTest {
             compose.onNodeWithContentDescription(remove(name)).assertExists()
         }
         compose.onNodeWithText("https://cdn.example.com/files/w9.pdf").assertDoesNotExist()
-        compose.onAllNodesWithText("Remove").assertCountEquals(8)
+        compose.onAllNodesWithText("Remove").assertCountEquals(0)
         compose.onNodeWithContentDescription(remove("w9.pdf")).performClick()
         compose.waitForIdle()
         assertEquals("${iso("w9.pdf")} removed", announced(form))
@@ -175,8 +202,10 @@ class FileListTest {
         compose.onNodeWithText("At most 3 allowed").assertExists()
         compose.onNodeWithContentDescription(remove("b.pdf")).assertIsFocused()
         compose.onNode(picker).assertIsNotEnabled()
+        compose.onNode(picker).assert(SemanticsMatcher.expectValue(SemanticsProperties.StateDescription, "Files: 3. At most 3 allowed"))
         compose.onNodeWithContentDescription(remove("b.pdf")).performClick()
         compose.onNodeWithText("At most 3 allowed").assertDoesNotExist()
+        compose.onNode(picker).assert(SemanticsMatcher.expectValue(SemanticsProperties.StateDescription, "Files: 2"))
         compose.onNode(picker).assertIsEnabled()
         compose.onNode(picker).performClick()
         settle { form.pickedFiles("docs").size == 2 && announced(form) != "${iso("b.pdf")} removed" }

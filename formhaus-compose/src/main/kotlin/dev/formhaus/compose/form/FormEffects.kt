@@ -6,7 +6,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalConfiguration
@@ -39,11 +43,17 @@ internal fun InvalidFeedback(model: FormModel) {
 
 @Composable
 internal fun Announcer(model: FormModel) {
-    val announcement = model.alerts.announcement ?: return
+    val announcement = model.alerts.announcement
+    var spoken by remember { mutableStateOf("") }
+    LaunchedEffect(announcement?.id) {
+        spoken = ""
+        withFrameNanos { }
+        spoken = announcement?.text.orEmpty()
+    }
     Box(
         Modifier.size(1.dp).semantics {
             liveRegion = LiveRegionMode.Polite
-            contentDescription = announcement.text
+            contentDescription = spoken
         },
     )
 }
