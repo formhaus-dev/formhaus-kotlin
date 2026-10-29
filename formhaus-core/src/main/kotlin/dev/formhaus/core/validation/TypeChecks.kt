@@ -43,7 +43,9 @@ internal fun normalizeValue(
     input: JsonValue?,
 ): JsonValue? {
     if (input?.arrayValue?.isEmpty() == true && !field.isListField && field.type in builtInTypes) return null
-    if (field.isFileList && input is JsonValue.String && input.value.isNotEmpty()) return JsonValue.Array(listOf(input))
+    if (field.isFileList && (input is JsonValue.Array || (input is JsonValue.String && input.value.isNotEmpty()))) {
+        return JsonValue.Array(fileItems(input))
+    }
     if (field.isGroup) return normalizeItems(field, input)
     val value = trimValue(field, input)
     if (field.type !in numberTypes || value !is JsonValue.String || decimal.test(value.value) != true) return value
@@ -186,17 +188,18 @@ private fun groupError(
 
 private fun isReference(item: JsonValue): Boolean = item.stringValue?.let { it.isNotEmpty() && it.length <= MAX_STRING_LENGTH } == true
 
+internal fun FormField.maxFilesMessage(resolve: (MessageKey, JsonObject) -> String): String =
+    validation?.message("maxLengthMessage") ?: resolve(MessageKey.MAX_ITEMS, stringMapOf("max" to JsonValue.Number(fileListMax)))
+
+private fun isFileValue(item: JsonValue): Boolean = item.stringValue != null || item.objectValue?.get("name")?.stringValue != null
+
 private fun fileListError(
     field: FormField,
     value: JsonValue,
     fail: Fail,
 ): String? {
     val items = value.arrayValue ?: return fail(MessageKey.FILE, noParams)
-    val max = field.fileListMax
-    if (items.size > max) {
-        return field.validation?.message("maxLengthMessage")
-            ?: fail(MessageKey.MAX_ITEMS, stringMapOf("max" to JsonValue.Number(max)))
-    }
+    if (items.size > field.fileListMax) return field.maxFilesMessage(fail)
     return if (items.all(::isReference)) null else fail(MessageKey.FILE, noParams)
 }
 
@@ -312,6 +315,7 @@ internal fun clientTypeError(
     value: JsonValue?,
     resolve: ResolveMessage,
 ): String? {
+    if (field.isFileList) return if (fileItems(value).all(::isFileValue)) null else resolve(MessageKey.FILE, noParams, field)
     if (field.type == "file" || (field.type !in builtInTypes && !field.isGroup)) return null
     return typeError(field, value, resolve)
 }
