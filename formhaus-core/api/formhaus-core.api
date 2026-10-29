@@ -1078,8 +1078,8 @@ public final class dev/formhaus/core/renderer/ErrorSummaryOptions {
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class dev/formhaus/core/renderer/FileItemsKt {
-	public static final fun fileItems (Ldev/formhaus/core/json/JsonValue;)Ljava/util/List;
+public final class dev/formhaus/core/renderer/FileListsKt {
+	public static final fun maxItemsMessage (Ldev/formhaus/core/engine/FormEngine;Ldev/formhaus/core/model/FormField;)Ljava/lang/String;
 }
 
 public final class dev/formhaus/core/renderer/FormActionsState {
@@ -1289,6 +1289,10 @@ public final class dev/formhaus/core/server/ValidateSubmissionKt {
 	public static final fun validateSubmission (Ldev/formhaus/core/model/FormDefinition;Ldev/formhaus/core/json/JsonValue;Ldev/formhaus/core/server/SubmissionOptions;)Ldev/formhaus/core/server/SubmissionResult;
 	public static synthetic fun validateSubmission$default (Ldev/formhaus/core/json/JsonValue;Ldev/formhaus/core/json/JsonValue;Ldev/formhaus/core/server/SubmissionOptions;ILjava/lang/Object;)Ldev/formhaus/core/server/SubmissionResult;
 	public static synthetic fun validateSubmission$default (Ldev/formhaus/core/model/FormDefinition;Ldev/formhaus/core/json/JsonValue;Ldev/formhaus/core/server/SubmissionOptions;ILjava/lang/Object;)Ldev/formhaus/core/server/SubmissionResult;
+}
+
+public final class dev/formhaus/core/validation/FileItemsKt {
+	public static final fun fileItems (Ldev/formhaus/core/json/JsonValue;)Ljava/util/List;
 }
 
 public final class dev/formhaus/core/validation/MessageKey {

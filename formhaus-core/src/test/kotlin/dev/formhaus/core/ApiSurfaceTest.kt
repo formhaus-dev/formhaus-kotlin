@@ -9,12 +9,12 @@ import dev.formhaus.core.json.JsonValue
 import dev.formhaus.core.json.MutableJsonObject
 import dev.formhaus.core.model.FormDefinition
 import dev.formhaus.core.model.FormField
-import dev.formhaus.core.renderer.fileItems
 import dev.formhaus.core.server.SubmissionOptions
 import dev.formhaus.core.server.validateSubmission
 import dev.formhaus.core.support.jsonObject
 import dev.formhaus.core.validation.MessageKey
 import dev.formhaus.core.validation.MessageSource
+import dev.formhaus.core.validation.fileItems
 import dev.formhaus.core.visibility.RevealTarget
 import dev.formhaus.core.visibility.revealTargets
 import kotlinx.coroutines.runBlocking

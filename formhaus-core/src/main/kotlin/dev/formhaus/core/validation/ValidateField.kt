@@ -11,7 +11,6 @@ import dev.formhaus.core.model.FieldValidation
 import dev.formhaus.core.model.FormField
 import dev.formhaus.core.regex.CallBudget
 import dev.formhaus.core.regex.JsRegex
-import dev.formhaus.core.renderer.fileItems
 import dev.formhaus.core.visibility.isBlank
 
 public typealias ValidatorFn = (JsonValue, JsonObject) -> String?
