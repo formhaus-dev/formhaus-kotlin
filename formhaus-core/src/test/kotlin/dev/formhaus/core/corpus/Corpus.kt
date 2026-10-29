@@ -2,6 +2,7 @@ package dev.formhaus.core.corpus
 
 import dev.formhaus.core.engine.HiddenValues
 import dev.formhaus.core.engine.RecallItem
+import dev.formhaus.core.i18n.LocaleCatalog
 import dev.formhaus.core.i18n.localize
 import dev.formhaus.core.json.JsonObject
 import dev.formhaus.core.json.JsonValue
@@ -64,6 +65,7 @@ class CorpusFixture(
     val refused: List<IssueEntry>? = IssueEntry.list(json["refused"])
     val definition: JsonValue = json["definition"] ?: JsonValue.Null
     private val overlay: JsonValue? = json["overlay"]
+    val locale: List<LocaleCatalog> = json["locale"]?.arrayValue.orEmpty().mapNotNull(LocaleCatalog::fromJson)
     val cases: List<CorpusCase> = json["cases"]?.arrayValue.orEmpty().map(::CorpusCase)
     val recall: List<RecallCase> = json["recall"]?.arrayValue.orEmpty().map(::RecallCase)
     val reveals: JsonValue? = json["reveals"]
