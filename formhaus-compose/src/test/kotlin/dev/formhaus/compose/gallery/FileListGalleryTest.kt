@@ -50,7 +50,8 @@ class FileListGalleryTest {
             model(
                 """{"id": "f", "title": "F", "formatVersion": "1.7", "submit": {"label": "Send"}, "fields": [
                    {"key": "docs", "type": "file", "label": "Receipts", "accept": ".pdf", "multiple": true,
-                    "helperText": "Up to 5 files", "validation": {"required": true, "maxLength": 5}}]}""",
+                    "helperText": "Up to 3 files", "validation": {"required": true, "maxLength": 3}}]}""",
+                """{"docs": ["https://cdn.example.com/files/w9-2025.pdf"]}""",
             )
         val cache = ApplicationProvider.getApplicationContext<Context>().cacheDir
         val files =
@@ -63,7 +64,7 @@ class FileListGalleryTest {
                 Box(Modifier.fillMaxWidth().padding(16.dp)) { FieldList(form) }
             }
         }
-        compose.runOnIdle { FieldContext(form.structure.visibleFields.first(), form).addFiles(files) }
+        compose.runOnIdle { FieldContext(form.structure.visibleFields.first(), form).addFiles(files, 0) }
         compose.waitForIdle()
         compose
             .onNodeWithTag(SHEET)
