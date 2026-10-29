@@ -2,6 +2,7 @@ package dev.formhaus.core.validation
 
 import dev.formhaus.core.json.JsonObject
 import dev.formhaus.core.json.JsonValue
+import dev.formhaus.core.json.MutableJsonObject
 import dev.formhaus.core.json.StringMap
 import dev.formhaus.core.json.jsString
 import dev.formhaus.core.json.strictEquals
@@ -10,6 +11,7 @@ import dev.formhaus.core.model.FieldValidation
 import dev.formhaus.core.model.FormField
 import dev.formhaus.core.regex.CallBudget
 import dev.formhaus.core.regex.JsRegex
+import dev.formhaus.core.renderer.fileItems
 import dev.formhaus.core.visibility.isBlank
 
 public typealias ValidatorFn = (JsonValue, JsonObject) -> String?
@@ -115,6 +117,12 @@ private fun sizeError(
         }
     }
 
+private fun fileListRules(field: FormField): FieldValidation {
+    val rules = field.validation?.json?.toMutableStringMap() ?: MutableJsonObject()
+    rules.assign("maxLength", JsonValue.Number(field.maxItems))
+    return FieldValidation(rules)
+}
+
 public fun validateFieldValue(
     field: FormField,
     input: JsonValue?,
@@ -130,8 +138,8 @@ internal fun fieldValueError(
     messages: MessageSource?,
     required: Boolean = true,
 ): String? {
-    val value = trimValue(field, input)
-    val rules = field.validation ?: FieldValidation(noParams)
+    val value = if (field.isFileList) JsonValue.Array(fileItems(input)) else trimValue(field, input)
+    val rules = if (field.isFileList) fileListRules(field) else field.validation ?: FieldValidation(noParams)
     val resolve = if (messages == null) defaultResolver else namedResolver(messageResolver(messages))
     if (value == null || isEmptyValue(value, field)) return emptyValueError(field, rules, allValues, required, resolve)
     clientTypeError(field, value, resolve)?.takeIf { it.isNotEmpty() }?.let { return it }

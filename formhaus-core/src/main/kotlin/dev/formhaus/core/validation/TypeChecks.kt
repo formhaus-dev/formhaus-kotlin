@@ -24,6 +24,8 @@ internal val FormField.maxItems: Double get() =
         MAX_GROUP_ITEMS.toDouble(),
     )
 
+private val FormField.isListField: Boolean get() = type in listTypes || isFileList
+
 internal fun trimValue(
     field: FormField,
     value: JsonValue?,
@@ -36,7 +38,8 @@ internal fun normalizeValue(
     field: FormField,
     input: JsonValue?,
 ): JsonValue? {
-    if (input?.arrayValue?.isEmpty() == true && field.type !in listTypes && field.type in builtInTypes) return null
+    if (input?.arrayValue?.isEmpty() == true && !field.isListField && field.type in builtInTypes) return null
+    if (field.isFileList && input is JsonValue.String && input.value.isNotEmpty()) return JsonValue.Array(listOf(input))
     if (field.isGroup) return normalizeItems(field, input)
     val value = trimValue(field, input)
     if (field.type !in numberTypes || value !is JsonValue.String || decimal.test(value.value) != true) return value
@@ -155,7 +158,7 @@ private fun primitiveError(
 private fun isEmpty(
     field: FormField,
     value: JsonValue?,
-): Boolean = isBlank(value) && (field.type in listTypes || value?.arrayValue == null)
+): Boolean = isBlank(value) && (field.isListField || value?.arrayValue == null)
 
 private fun groupError(
     field: FormField,
@@ -175,6 +178,22 @@ private fun groupError(
     } else {
         null
     }
+}
+
+private fun isReference(item: JsonValue): Boolean = item.stringValue?.let { it.isNotEmpty() && it.length <= MAX_STRING_LENGTH } == true
+
+private fun fileListError(
+    field: FormField,
+    value: JsonValue,
+    fail: Fail,
+): String? {
+    val items = value.arrayValue ?: return fail(MessageKey.FILE, noParams)
+    val max = field.maxItems
+    if (items.size > max) {
+        return field.validation?.message("maxLengthMessage")
+            ?: fail(MessageKey.MAX_ITEMS, stringMapOf("max" to JsonValue.Number(max)))
+    }
+    return if (items.all(::isReference)) null else fail(MessageKey.FILE, noParams)
 }
 
 internal fun typeError(
@@ -213,6 +232,10 @@ private fun choiceOrTextError(
     return when {
         field.type in listTypes -> {
             multiselectError(field, value, fail)
+        }
+
+        field.isFileList -> {
+            fileListError(field, value, fail)
         }
 
         field.type == "file" -> {
@@ -266,7 +289,7 @@ internal fun typeMessageKeys(field: FormField): List<MessageKey> {
         }
 
         field.type == "file" -> {
-            listOf(MessageKey.FILE, MessageKey.MAX_LENGTH)
+            listOf(MessageKey.FILE, if (field.isFileList) MessageKey.MAX_ITEMS else MessageKey.MAX_LENGTH)
         }
 
         field.type == "select" || field.type == "radio" -> {
