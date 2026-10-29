@@ -1,5 +1,6 @@
 package dev.formhaus.core.engine
 
+import dev.formhaus.core.json.FieldErrors
 import dev.formhaus.core.json.JsonObject
 import dev.formhaus.core.json.MutableStringMap
 import dev.formhaus.core.model.FormNode
@@ -21,6 +22,8 @@ private fun EngineCore.shownPaths(submit: Boolean): List<String> {
     return paths
 }
 
+internal val EngineCore.validatesWithRules: Boolean get() = onValidate != null && validateWithRules
+
 internal fun EngineCore.clearFormErrors() {
     topLevelErrors = serverFormErrors
 }
@@ -30,6 +33,7 @@ internal suspend fun FormEngine.passesValidate(
     values: JsonObject,
     stale: () -> Boolean,
     submit: Boolean,
+    ruleErrors: FieldErrors,
 ): Boolean {
     val core = core
     val fields = core.shownPaths(submit)
@@ -40,6 +44,7 @@ internal suspend fun FormEngine.passesValidate(
     val errors = MutableStringMap<String>()
     val general = ArrayList<String>()
     for ((key, message) in result) if (key in known) errors[key] = message else general.add(message)
+    errors.merge(ruleErrors)
     core.applyValidationErrors(errors, formErrors = general, navigate = submit)
     return false
 }

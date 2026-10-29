@@ -1,6 +1,8 @@
 package dev.formhaus.core.engine
 
+import dev.formhaus.core.json.FieldErrors
 import dev.formhaus.core.json.JsonObject
+import dev.formhaus.core.json.stringMapOf
 import dev.formhaus.core.model.FormStep
 import dev.formhaus.core.regex.CallBudget
 import kotlinx.coroutines.NonCancellable
@@ -14,8 +16,10 @@ internal class StepMove(
     val index: Int,
     val forward: Boolean,
     val skipping: Boolean,
+    val ruleErrors: FieldErrors,
 ) {
     val validating: Boolean get() = forward && !skipping
+    val invalid: Boolean get() = !ruleErrors.isEmpty()
 }
 
 internal fun EngineCore.plannedMove(
@@ -29,10 +33,15 @@ internal fun EngineCore.plannedMove(
     clearFormErrors()
     val validating = forward && !skipping
     if (validating) includeCurrentStep()
-    if (validating && hasStepErrors()) return null
+    val ruleErrors = moveRuleErrors(validating) ?: return null
     val index = currentStepIndex + if (forward) 1 else -1
     val target = (if (skipping) skipTarget() else visibleSteps.getOrNull(index)) ?: return null
-    return StepMove(step, target, index, forward, skipping)
+    return StepMove(step, target, index, forward, skipping, ruleErrors)
+}
+
+private fun EngineCore.moveRuleErrors(validating: Boolean): FieldErrors? {
+    if (!validating) return stringMapOf()
+    return stepErrors()?.takeIf { it.isEmpty() || validatesWithRules }
 }
 
 internal fun EngineCore.beginOperation(): Int {
@@ -55,14 +64,16 @@ internal fun EngineCore.watchCheckedInputs(checked: JsonObject): () -> Boolean {
     }
 }
 
-internal fun EngineCore.hasStepErrors(): Boolean {
-    val step = currentStep ?: return true
+private fun EngineCore.stepErrors(): FieldErrors? {
+    val step = currentStep ?: return null
     val found = fieldsErrors(step.fields)
-    if (found.isEmpty()) return false
+    if (found.isEmpty()) return found
     replaceErrors(errors.merging(found))
     notify()
-    return true
+    return found
 }
+
+private fun EngineCore.hasStepErrors(): Boolean = stepErrors()?.isEmpty() != true
 
 private suspend fun settle() {
     withContext(NonCancellable) { yield() }
@@ -150,9 +161,24 @@ private suspend fun FormEngine.approve(
     context: StepChangeContext,
     stale: () -> Boolean,
 ): Boolean {
+    if (stale() || !passesStepHooks(move, context, stale)) return false
+    val before = options.onBeforeStepChange
+    if (before != null) {
+        val allowed = suspended { before(context) }
+        if (stale() || allowed == false) return false
+    }
     if (stale()) return false
+    return !(move.validating && core.hasStepErrors())
+}
+
+private suspend fun FormEngine.passesStepHooks(
+    move: StepMove,
+    context: StepChangeContext,
+    stale: () -> Boolean,
+): Boolean {
+    if (!move.validating) return true
     val validate = options.onStepValidate
-    if (move.validating && validate != null) {
+    if (validate != null && !move.invalid) {
         val result = suspended { validate(move.step.id, context.values) }
         if (stale()) return false
         if (result != null && !result.isEmpty()) {
@@ -161,14 +187,8 @@ private suspend fun FormEngine.approve(
         }
     }
     val onValidate = core.onValidate
-    if (move.validating && onValidate != null && !passesValidate(onValidate, context.values, stale, submit = false)) return false
-    val before = options.onBeforeStepChange
-    if (before != null) {
-        val allowed = suspended { before(context) }
-        if (stale() || allowed == false) return false
-    }
-    if (stale()) return false
-    return !(move.validating && core.hasStepErrors())
+    if (onValidate != null && !passesValidate(onValidate, context.values, stale, submit = false, move.ruleErrors)) return false
+    return !move.invalid
 }
 
 private fun FormEngine.commit(move: StepMove) {
