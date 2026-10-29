@@ -5,6 +5,18 @@
 ### formhaus-core
 
 - Fixed field errors from `onValidate` and `onStepValidate` staying on a step after its next Continue passed, and showing again after Back.
+- Supports form definition format 1.7. `SUPPORTED_FORMAT_VERSION` is `1.7`.
+- A `file` field with `"multiple": true` in a definition with `formatVersion` 1.7 or newer keeps a list of files. Below 1.7, `multiple` is reported as `unknown-property` and `outdated-format-version`, and the field keeps one file.
+- New `FormField.isFileList`, `fileItems(value)` and `fileListLimit(field)`. A file list holds at most `maxLength` files, rounded down, from 0 to 1000, or 100 without `maxLength`.
+- New issue code `IssueCode.MULTIPLE_NOT_APPLICABLE` for `multiple` on a field that is not a `file` field. `multiple` that is not a boolean is `invalid-type`.
+- `validateSubmission` accepts a file list as an array of string references. A single string counts as a list of one. `""` and `null` entries are dropped. Any other entry fails the field with the `file` message.
+- New renderer API `FormEngine.maxItemsMessage(field)`.
+
+### formhaus-compose
+
+- A file list shows the chosen files below the picker, each with a Remove button. Picking adds files up to the list's limit and announces the files that were added.
+- New `FormModel.pickedFiles(key)`.
+- After a restore, a file list drops uploads whose file is gone.
 
 ## 0.7.0
 
