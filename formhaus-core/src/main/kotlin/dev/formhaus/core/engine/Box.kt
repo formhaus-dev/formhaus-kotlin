@@ -89,12 +89,14 @@ private suspend fun FormEngine.approveSubmission(
     checked: JsonObject,
     stale: () -> Boolean,
 ): JsonObject? {
-    if (stale() || invalid(stale)) return null
+    if (stale()) return null
+    val ruleErrors = core.validate(navigate = true)
+    if (stale()) return null
+    val invalid = !ruleErrors.isEmpty()
+    if (invalid && !core.validatesWithRules) return failed(stale)
     val onValidate = core.onValidate
-    if (onValidate != null && !passesValidate(onValidate, checked, stale, submit = true)) {
-        if (!stale()) core.emit(FormEvent.FormSubmitFailed(SubmitFailureReason.Validation))
-        return null
-    }
+    if (onValidate != null && !passesValidate(onValidate, checked, stale, submit = true, ruleErrors)) return failed(stale)
+    if (invalid) return failed(stale)
     val before = options.onBeforeSubmit ?: return checked
     val allowed = suspended { before(checked) }
     if (stale() || allowed == false || invalid(stale)) return null
@@ -103,8 +105,13 @@ private suspend fun FormEngine.approveSubmission(
 
 private fun FormEngine.invalid(stale: () -> Boolean): Boolean {
     if (core.validate(navigate = true).isEmpty()) return stale()
-    if (!stale()) core.emit(FormEvent.FormSubmitFailed(SubmitFailureReason.Validation))
+    failed(stale)
     return true
+}
+
+private fun FormEngine.failed(stale: () -> Boolean): JsonObject? {
+    if (!stale()) core.emit(FormEvent.FormSubmitFailed(SubmitFailureReason.Validation))
+    return null
 }
 
 private suspend fun FormEngine.send(

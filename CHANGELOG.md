@@ -4,7 +4,13 @@
 
 ### formhaus-core
 
+- New `validateWithRules` option on `FormEngineOptions` runs `onValidate` even when the definition rules fail; the definition error wins on the same field.
+- **Breaking:** The `FormEngineOptions` constructor has a new parameter. Code compiled against 0.7.0 that constructs `FormEngineOptions` must be recompiled. Its source does not change.
 - Fixed field errors from `onValidate` and `onStepValidate` staying on a step after its next Continue passed, and showing again after Back.
+
+### formhaus-compose
+
+- The `validateWithRules` engine option reaches `FormhausForm` and `FormModel`.
 
 ## 0.7.0
 

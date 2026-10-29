@@ -1,12 +1,14 @@
 package dev.formhaus.compose.model
 
 import dev.formhaus.core.engine.FormEngineOptions
+import dev.formhaus.core.engine.ValidateFn
 import dev.formhaus.core.i18n.LocaleCatalog
 import dev.formhaus.core.json.stringMapOf
 import dev.formhaus.core.model.FormDefinition
 import dev.formhaus.core.renderer.onValidate
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Rule
 import org.junit.Test
@@ -53,5 +55,22 @@ class LocaleModelTest {
             assertEquals(emptyList<String>(), form.topLevelErrors)
             form.updateHandlers(engineOptions = FormEngineOptions())
             assertNull(form.engine.onValidate)
+        }
+
+    @Test
+    fun validateWithRulesRunsOnValidateWhenTheStepRulesFailAndFollowsUpdates() =
+        runTest {
+            var calls = 0
+            val onValidate: ValidateFn = { _, _ -> stringMapOf("" to "Service down").also { calls += 1 } }
+            val form = stepsModel(FormEngineOptions(onValidate = onValidate, validateWithRules = true))
+            form.next()
+            assertEquals(1, calls)
+            assertEquals("who", form.structure.currentStep?.id)
+            assertNotNull(form.field("name").error)
+            assertEquals(listOf("Service down"), form.topLevelErrors)
+            form.updateHandlers(engineOptions = FormEngineOptions(onValidate = onValidate))
+            form.next()
+            assertEquals(1, calls)
+            assertEquals(emptyList<String>(), form.topLevelErrors)
         }
 }
