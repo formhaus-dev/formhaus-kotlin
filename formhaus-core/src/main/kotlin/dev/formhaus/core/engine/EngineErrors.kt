@@ -110,6 +110,11 @@ internal fun EngineCore.clearError(
     errors.assign(key, serverErrors[key])
 }
 
+internal fun EngineCore.clearPassedErrors(nodes: List<FormNode>) {
+    val hidden = valueFields(nodes).filter { it.type == "hidden" && errors[it.key] != null }.map { it.key }
+    for (key in errorKeys(nodes, errors, values.json) + hidden) clearError(key)
+}
+
 internal fun EngineCore.dropServerErrors(keys: Iterable<String>) {
     val dropped = keys.toHashSet()
     for (key in serverErrors.keys) if (key in dropped || visibility.owner(key) in dropped) serverErrors.remove(key)
