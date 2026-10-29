@@ -83,6 +83,7 @@ class CorpusCheckTest {
             "impossible-dates",
             "invalid-labels",
             "invalid-messages",
+            "locale-precedence",
             "localized-catalog",
             "localized-overlay",
             "option-order",

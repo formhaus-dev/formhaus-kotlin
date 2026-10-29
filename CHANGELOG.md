@@ -4,6 +4,8 @@
 
 ### formhaus-core
 
+- New `validateWithRules` option on `FormEngineOptions` runs `onValidate` even when the definition rules fail; the definition error wins on the same field.
+- **Breaking:** The `FormEngineOptions` constructor has a new parameter. Code compiled against 0.7.0 that constructs `FormEngineOptions` must be recompiled. Its source does not change.
 - Fixed field errors from `onValidate` and `onStepValidate` staying on a step after its next Continue passed, and showing again after Back.
 - Supports form definition format 1.7. `SUPPORTED_FORMAT_VERSION` is `1.7`.
 - A `file` field with `"multiple": true` in a definition with `formatVersion` 1.7 or newer keeps a list of files. Below 1.7, `multiple` is reported as `unknown-property` and `outdated-format-version`, and the field keeps one file.
@@ -18,6 +20,7 @@
 - A file list shows the chosen files below the picker, each with a Remove button. Picking adds files up to the list's limit and announces the files that were added.
 - New `FormModel.pickedFiles(key)`.
 - After a restore, a file list drops uploads whose file is gone.
+- The `validateWithRules` engine option reaches `FormhausForm` and `FormModel`.
 
 ## 0.7.0
 

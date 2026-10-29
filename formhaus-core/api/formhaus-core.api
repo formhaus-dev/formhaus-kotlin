@@ -182,8 +182,8 @@ public final class dev/formhaus/core/engine/FormEngine {
 
 public final class dev/formhaus/core/engine/FormEngineOptions {
 	public fun <init> ()V
-	public fun <init> (Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Ldev/formhaus/core/json/StringMap;Ldev/formhaus/core/validation/MessageSource;Ljava/lang/String;Lkotlin/jvm/functions/Function3;Ldev/formhaus/core/engine/RecallFormatter;Ljava/lang/String;Ldev/formhaus/core/engine/FormResearch;Ldev/formhaus/core/engine/HiddenValues;Ljava/lang/Boolean;Ljava/util/List;Lkotlin/jvm/functions/Function3;)V
-	public synthetic fun <init> (Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Ldev/formhaus/core/json/StringMap;Ldev/formhaus/core/validation/MessageSource;Ljava/lang/String;Lkotlin/jvm/functions/Function3;Ldev/formhaus/core/engine/RecallFormatter;Ljava/lang/String;Ldev/formhaus/core/engine/FormResearch;Ldev/formhaus/core/engine/HiddenValues;Ljava/lang/Boolean;Ljava/util/List;Lkotlin/jvm/functions/Function3;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Ldev/formhaus/core/json/StringMap;Ldev/formhaus/core/validation/MessageSource;Ljava/lang/String;Lkotlin/jvm/functions/Function3;Ldev/formhaus/core/engine/RecallFormatter;Ljava/lang/String;Ldev/formhaus/core/engine/FormResearch;Ldev/formhaus/core/engine/HiddenValues;Ljava/lang/Boolean;Ljava/util/List;Lkotlin/jvm/functions/Function3;Z)V
+	public synthetic fun <init> (Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function3;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Ldev/formhaus/core/json/StringMap;Ldev/formhaus/core/validation/MessageSource;Ljava/lang/String;Lkotlin/jvm/functions/Function3;Ldev/formhaus/core/engine/RecallFormatter;Ljava/lang/String;Ldev/formhaus/core/engine/FormResearch;Ldev/formhaus/core/engine/HiddenValues;Ljava/lang/Boolean;Ljava/util/List;Lkotlin/jvm/functions/Function3;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun getDebugChecks ()Ljava/lang/Boolean;
 	public final fun getFormatRecall ()Lkotlin/jvm/functions/Function3;
 	public final fun getHiddenValues ()Ldev/formhaus/core/engine/HiddenValues;
@@ -201,6 +201,7 @@ public final class dev/formhaus/core/engine/FormEngineOptions {
 	public final fun getRecallFormatter ()Ldev/formhaus/core/engine/RecallFormatter;
 	public final fun getResearch ()Ldev/formhaus/core/engine/FormResearch;
 	public final fun getSeed ()Ljava/lang/String;
+	public final fun getValidateWithRules ()Z
 	public final fun getValidators ()Ldev/formhaus/core/json/StringMap;
 }
 
@@ -1022,8 +1023,10 @@ public final class dev/formhaus/core/renderer/EngineRevisionsKt {
 	public static final fun getOnValidate (Ldev/formhaus/core/engine/FormEngine;)Lkotlin/jvm/functions/Function3;
 	public static final fun getRestarts (Ldev/formhaus/core/engine/FormEngine;)I
 	public static final fun getSending (Ldev/formhaus/core/engine/FormEngine;)Z
+	public static final fun getValidateWithRules (Ldev/formhaus/core/engine/FormEngine;)Z
 	public static final fun getVersion (Ldev/formhaus/core/engine/FormEngine;)I
 	public static final fun setOnValidate (Ldev/formhaus/core/engine/FormEngine;Lkotlin/jvm/functions/Function3;)V
+	public static final fun setValidateWithRules (Ldev/formhaus/core/engine/FormEngine;Z)V
 }
 
 public final class dev/formhaus/core/renderer/EngineValuesKt {
