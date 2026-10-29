@@ -178,5 +178,6 @@ private fun FormEngine.commit(move: StepMove) {
         )
     }
     if (move.skipping) core.skipCurrentStep()
+    if (move.validating) core.clearPassedErrors(move.step.fields)
     moveTo(move.index)
 }
