@@ -118,7 +118,7 @@ private fun sizeError(
 
 private fun fileListRules(field: FormField): FieldValidation {
     val rules = field.validation?.json?.toMutableStringMap() ?: MutableJsonObject()
-    rules.assign("maxLength", JsonValue.Number(field.maxItems))
+    rules.assign("maxLength", JsonValue.Number(field.fileListMax))
     return FieldValidation(rules)
 }
 

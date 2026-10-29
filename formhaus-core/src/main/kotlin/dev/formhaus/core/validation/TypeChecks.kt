@@ -12,11 +12,15 @@ import dev.formhaus.core.model.FormField
 import dev.formhaus.core.model.ScaleRange
 import dev.formhaus.core.regex.JsRegex
 import dev.formhaus.core.visibility.isBlank
+import kotlin.math.floor
 
 private const val DEFAULT_GROUP_ITEMS = 100.0
 
 private val decimal = JsRegex.unchecked("^[+-]?(?:\\d+(?:\\.\\d*)?|\\.\\d+)(?:[eE][+-]?\\d+)?$")
 private val untrimmedTypes = setOf("password", "select", "radio", "file") + numberTypes
+
+internal val FormField.fileListMax: Double get() =
+    floor(validation?.maxLength?.takeIf { it.isFinite() } ?: DEFAULT_GROUP_ITEMS).coerceIn(0.0, MAX_GROUP_ITEMS.toDouble())
 
 internal val FormField.maxItems: Double get() =
     minOf(
@@ -188,7 +192,7 @@ private fun fileListError(
     fail: Fail,
 ): String? {
     val items = value.arrayValue ?: return fail(MessageKey.FILE, noParams)
-    val max = field.maxItems
+    val max = field.fileListMax
     if (items.size > max) {
         return field.validation?.message("maxLengthMessage")
             ?: fail(MessageKey.MAX_ITEMS, stringMapOf("max" to JsonValue.Number(max)))

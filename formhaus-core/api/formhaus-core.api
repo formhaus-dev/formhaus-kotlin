@@ -1079,6 +1079,7 @@ public final class dev/formhaus/core/renderer/ErrorSummaryOptions {
 }
 
 public final class dev/formhaus/core/renderer/FileListsKt {
+	public static final fun fileListLimit (Ldev/formhaus/core/model/FormField;)I
 	public static final fun maxItemsMessage (Ldev/formhaus/core/engine/FormEngine;Ldev/formhaus/core/model/FormField;)Ljava/lang/String;
 }
 

@@ -6,7 +6,7 @@ import dev.formhaus.core.json.JsonValue
 import dev.formhaus.core.json.stringMapOf
 import dev.formhaus.core.model.FormField
 import dev.formhaus.core.validation.MessageKey
-import dev.formhaus.core.validation.maxItems
+import dev.formhaus.core.validation.fileListMax
 import dev.formhaus.core.validation.messageResolver
 import dev.formhaus.core.validation.namedResolver
 
@@ -15,6 +15,9 @@ public fun FormEngine.maxItemsMessage(field: FormField): String =
     field.validation?.message("maxLengthMessage")
         ?: namedResolver(messageResolver(core.messageSource))(
             MessageKey.MAX_ITEMS,
-            stringMapOf("max" to JsonValue.Number(field.maxItems)),
+            stringMapOf("max" to JsonValue.Number(field.fileListMax)),
             field,
         )
+
+@RendererApi
+public fun fileListLimit(field: FormField): Int = field.fileListMax.toInt()
