@@ -5,6 +5,11 @@
 ### formhaus-core
 
 - Fixed field errors from `onValidate` and `onStepValidate` staying on a step after its next Continue passed, and showing again after Back.
+- New renderer API `FormEngine.storedFileName`. Recall shows the name it returns for each string value of a `file` field, instead of the stored value.
+
+### formhaus-compose
+
+- Fixed `{{key}}` recall of a picked file showing its `file://` path instead of its name. `FormModel` keeps a `storedFileName` callback set by the app and asks it first.
 
 ## 0.7.0
 
