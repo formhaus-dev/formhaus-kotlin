@@ -5,7 +5,7 @@ plugins {
 val onJitPack = System.getenv("JITPACK") == "true"
 
 group = if (onJitPack) "${System.getenv("GROUP")}.${System.getenv("ARTIFACT")}" else "dev.formhaus"
-version = if (onJitPack) System.getenv("VERSION") else "0.8.0"
+version = if (onJitPack) System.getenv("VERSION") else "0.8.1"
 
 mavenPublishing {
     if (!onJitPack) {
