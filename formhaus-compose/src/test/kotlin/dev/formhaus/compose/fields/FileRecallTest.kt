@@ -5,9 +5,12 @@ import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.test.core.app.ApplicationProvider
 import dev.formhaus.compose.model.FormModel
+import dev.formhaus.compose.model.json
 import dev.formhaus.compose.model.model
 import dev.formhaus.compose.model.setValue
+import dev.formhaus.core.engine.FormEngine
 import dev.formhaus.core.json.JsonValue
+import dev.formhaus.core.model.FormDefinition
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Rule
@@ -58,6 +61,17 @@ class FileRecallTest {
         val files = listOf(upload(form, "a.pdf"), upload(form, "b.pdf"))
         form.setValue("cv", JsonValue.Array(files.map { JsonValue.String(fileValue(it)) } + JsonValue.String("upload-1")))
         assertEquals("You sent a.pdf, b.pdf, and upload-1", form.engine.recallText("You sent {{cv}}"))
+        form.close()
+    }
+
+    @Test
+    fun anAppStoredFileNameIsAskedFirst() {
+        val engine = FormEngine(FormDefinition(json(RECALLING)))
+        engine.storedFileName = { value -> value.removePrefix("app:").takeIf { it != value } }
+        val form = FormModel(engine) { _, _ -> null }
+        val file = upload(form, "cv.pdf")
+        form.setValue("cv", JsonValue.Array(listOf(JsonValue.String("app:mine.pdf"), JsonValue.String(fileValue(file)))))
+        assertEquals("mine.pdf and cv.pdf", engine.recallText("{{cv}}"))
         form.close()
     }
 

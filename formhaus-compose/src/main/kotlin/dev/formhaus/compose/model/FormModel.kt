@@ -146,7 +146,8 @@ public class FormModel private constructor(
     private var unsubscribe: () -> Unit
 
     init {
-        engine.storedFileName = { UploadStore.owned(it, uploadOwner)?.name }
+        val appFileName = engine.storedFileName
+        engine.storedFileName = { appFileName?.invoke(it) ?: UploadStore.owned(it, uploadOwner)?.name }
         refreshStatus()
         unsubscribe = engine.subscribe(::refresh)
         reconcileUploads()
