@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -39,7 +40,7 @@ import java.io.File
 internal fun FileListField(context: FieldContext) {
     val tokens = LocalFormhausTokens.current
     val room = context.fileRoom
-    var notice by remember { mutableStateOf<String?>(null) }
+    var notice by rememberSaveable { mutableStateOf<String?>(null) }
     val picker = rememberFilePicker(context, room) { files, dropped -> notice = context.addFiles(files, dropped) }
     val files = context.model.fileEntries(context.value)
     val choose = context.placeholder ?: context.text("chooseFile")
@@ -104,7 +105,7 @@ private fun FileRow(
                     contentDescription =
                         context.text(
                             "removeItemNamed",
-                            stringMapOf("label" to JsonValue.String(remove), "item" to JsonValue.String(file.name)),
+                            stringMapOf("label" to JsonValue.String(remove), "item" to JsonValue.String(isolated(file.name))),
                         )
                 },
             enabled = !context.isLocked,
@@ -123,7 +124,7 @@ internal fun FieldContext.addFiles(
     dropped: Int,
 ): String? {
     if (files.isNotEmpty()) setValue(JsonValue.Array(fileItems(state.value) + files.map { JsonValue.String(fileValue(it)) }))
-    val added = files.takeIf { it.isNotEmpty() }?.let { label("itemAdded", it.joinToString(", ") { file -> file.name }) }
+    val added = files.takeIf { it.isNotEmpty() }?.let { label("itemAdded", it.joinToString(", ") { file -> isolated(file.name) }) }
     val limit = if (dropped > 0) model.engine.maxItemsMessage(field) else null
     model.alerts.announce(listOfNotNull(added, limit).joinToString(" "))
     if (files.isNotEmpty() && fileRoom <= 0) model.requestFocus(removeKey(model.fileEntries(state.value).size - 1))
@@ -139,7 +140,7 @@ private fun FieldContext.removeFile(
     if (items.getOrNull(file.index) != file.value) return
     setValue(JsonValue.Array(items.filterIndexed { index, _ -> index != file.index }))
     if (file.file != null && file.value !in fileItems(state.value)) UploadStore.discard(fileValue(file.file), model.uploadOwner)
-    model.alerts.announce(label("itemRemoved", file.name))
+    model.alerts.announce(label("itemRemoved", isolated(file.name)))
     model.requestFocus(
         when {
             position < count - 1 -> removeKey(position)
@@ -153,3 +154,5 @@ private fun FieldContext.label(
     name: String,
     item: String,
 ): String = text(name, stringMapOf("item" to JsonValue.String(item)))
+
+private fun isolated(name: String): String = "\u2068$name\u2069"

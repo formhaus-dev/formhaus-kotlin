@@ -103,23 +103,23 @@ class FileListTest {
         val files = listOf(upload(form, "a.pdf"), upload(form, "b.pdf"), upload(form, "c.pdf"))
         compose.runOnIdle { context(form).addFiles(files.take(2), 0) }
         compose.runOnIdle { context(form).addFiles(files.drop(2), 0) }
-        assertEquals("c.pdf added", announced(form))
+        assertEquals("${iso("c.pdf")} added", announced(form))
         assertEquals(files, form.pickedFiles("docs"))
         assertEquals(files.map { JsonValue.String(fileValue(it)) }, form.engine.values["docs"]?.arrayValue)
         for (name in listOf("a.pdf", "b.pdf", "c.pdf")) {
             compose.onNodeWithText(name).assertExists()
-            compose.onNodeWithContentDescription("Remove $name").assertHeightIsAtLeast(48.dp)
+            compose.onNodeWithContentDescription(remove(name)).assertHeightIsAtLeast(48.dp)
         }
-        compose.onNodeWithContentDescription("Remove b.pdf").performClick()
+        compose.onNodeWithContentDescription(remove("b.pdf")).performClick()
         compose.waitForIdle()
-        assertEquals("b.pdf removed", announced(form))
+        assertEquals("${iso("b.pdf")} removed", announced(form))
         assertFalse(files[1].exists())
         assertEquals(listOf(files[0], files[2]), form.pickedFiles("docs"))
-        compose.onNodeWithContentDescription("Remove c.pdf").assertIsFocused()
-        compose.onNodeWithContentDescription("Remove c.pdf").performClick()
+        compose.onNodeWithContentDescription(remove("c.pdf")).assertIsFocused()
+        compose.onNodeWithContentDescription(remove("c.pdf")).performClick()
         compose.waitForIdle()
-        compose.onNodeWithContentDescription("Remove a.pdf").assertIsFocused()
-        compose.onNodeWithContentDescription("Remove a.pdf").performClick()
+        compose.onNodeWithContentDescription(remove("a.pdf")).assertIsFocused()
+        compose.onNodeWithContentDescription(remove("a.pdf")).performClick()
         compose.waitForIdle()
         assertEquals(JsonValue.Array(emptyList()), form.engine.values["docs"])
         compose.onNode(focused).assert(hasContentDescription("Documents"))
@@ -131,7 +131,7 @@ class FileListTest {
         val form =
             render(
                 values = """{"docs": ["https://cdn.example.com/files/w9.pdf", "upload-1", {"name": "scan.pdf"}, 7, {"size": 1},
-                    "https://cdn.example.com/", "a/b/", "/"]}""",
+                    "https://cdn.example.com/", "a/b/", "/", "", null]}""",
             )
         val file = upload(form, "a.pdf")
         compose.runOnIdle { context(form).addFiles(listOf(file), 0) }
@@ -144,19 +144,20 @@ class FileListTest {
             "/",
             "a.pdf",
         )) {
-            compose.onNodeWithContentDescription("Remove $name").assertExists()
+            compose.onNodeWithContentDescription(remove(name)).assertExists()
         }
         compose.onNodeWithText("https://cdn.example.com/files/w9.pdf").assertDoesNotExist()
         compose.onAllNodesWithText("Remove").assertCountEquals(7)
-        compose.onNodeWithContentDescription("Remove w9.pdf").performClick()
+        compose.onNodeWithContentDescription(remove("w9.pdf")).performClick()
         compose.waitForIdle()
-        assertEquals("w9.pdf removed", announced(form))
+        assertEquals("${iso("w9.pdf")} removed", announced(form))
         assertEquals(
             json(
                 """["upload-1", {"name": "scan.pdf"}, 7, {"size": 1}, "https://cdn.example.com/", "a/b/", "/", "${fileValue(file)}"]""",
             ),
             form.engine.values["docs"],
         )
+        assertEquals("Must be a file reference", form.engine.validate()["docs"])
         form.close()
     }
 
@@ -168,17 +169,17 @@ class FileListTest {
         settle { form.pickedFiles("docs").size == 2 }
         assertTrue(picks.launched.single() is ActivityResultContracts.OpenMultipleDocuments)
         assertEquals(listOf("a.pdf", "b.pdf"), form.pickedFiles("docs").map { it.name })
-        assertEquals("a.pdf, b.pdf added At most 3 allowed", announced(form))
+        assertEquals("${iso("a.pdf")}, ${iso("b.pdf")} added At most 3 allowed", announced(form))
         compose.onNodeWithText("At most 3 allowed").assertExists()
-        compose.onNodeWithContentDescription("Remove b.pdf").assertIsFocused()
+        compose.onNodeWithContentDescription(remove("b.pdf")).assertIsFocused()
         compose.onNode(picker).assertIsNotEnabled()
-        compose.onNodeWithContentDescription("Remove b.pdf").performClick()
+        compose.onNodeWithContentDescription(remove("b.pdf")).performClick()
         compose.onNodeWithText("At most 3 allowed").assertDoesNotExist()
         compose.onNode(picker).assertIsEnabled()
         compose.onNode(picker).performClick()
-        settle { form.pickedFiles("docs").size == 2 && announced(form) != "b.pdf removed" }
+        settle { form.pickedFiles("docs").size == 2 && announced(form) != "${iso("b.pdf")} removed" }
         assertTrue(picks.launched.last() is ActivityResultContracts.OpenDocument)
-        assertEquals("a.pdf added", announced(form))
+        assertEquals("${iso("a.pdf")} added", announced(form))
         form.close()
     }
 
@@ -193,10 +194,10 @@ class FileListTest {
         compose.onNode(picker).performClick()
         settle { form.pickedFiles("docs").size == 2 }
         assertTrue(picks.launched.single() is ActivityResultContracts.PickMultipleVisualMedia)
-        assertEquals("a.png, b.png added Two photos at most", announced(form))
-        compose.onNodeWithContentDescription("Remove b.png").performClick()
+        assertEquals("${iso("a.png")}, ${iso("b.png")} added Two photos at most", announced(form))
+        compose.onNodeWithContentDescription(remove("b.png")).performClick()
         compose.onNode(picker).performClick()
-        settle { announced(form) == "a.png added" }
+        settle { announced(form) == "${iso("a.png")} added" }
         assertTrue(picks.launched.last() is ActivityResultContracts.PickVisualMedia)
         form.close()
     }
@@ -234,6 +235,10 @@ class FileListTest {
         form.close()
     }
 }
+
+private fun iso(name: String) = "\u2068$name\u2069"
+
+private fun remove(name: String) = "Remove ${iso(name)}"
 
 private val focused = SemanticsMatcher.expectValue(SemanticsProperties.Focused, true)
 
