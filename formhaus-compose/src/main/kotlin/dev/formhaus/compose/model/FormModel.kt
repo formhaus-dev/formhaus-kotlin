@@ -30,6 +30,7 @@ import dev.formhaus.core.renderer.nodeId
 import dev.formhaus.core.renderer.onValidate
 import dev.formhaus.core.renderer.restarts
 import dev.formhaus.core.renderer.sending
+import dev.formhaus.core.renderer.validateWithRules
 import dev.formhaus.core.renderer.value
 import dev.formhaus.core.renderer.version
 import dev.formhaus.core.validation.MessageSource
@@ -205,6 +206,7 @@ public class FormModel private constructor(
         if (engineOptions != null && hooks != null) {
             hooks.current = engineOptions
             engine.onValidate = hooks.onValidate
+            engine.validateWithRules = engineOptions.validateWithRules
         }
         if (engineOptions != null && engineOptions.locale != engine.locale) {
             localeVersion += 1

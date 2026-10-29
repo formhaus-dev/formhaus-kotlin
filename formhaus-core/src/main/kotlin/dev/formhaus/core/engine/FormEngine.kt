@@ -76,6 +76,7 @@ public class FormEngine(
         restored?.let(core::restore)
         core.emitEvent = options.onFormEvent
         core.onValidate = options.onValidate
+        core.validateWithRules = options.validateWithRules
         core.onChange = listeners::fire
     }
 

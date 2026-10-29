@@ -18,8 +18,8 @@ public class FormSection private constructor(
 ) : FormNode() {
     internal constructor(
         json: JsonObject,
-        ordinals: Ordinals,
-    ) : this(json, ordinals.take(), formNodes(json["fields"], ordinals).orEmpty())
+        reader: NodeReader,
+    ) : this(json, reader.nextOrdinal(), formNodes(json["fields"], reader).orEmpty())
 
     override val key: String = json["key"]?.stringValue ?: ""
     override val type: String get() = "section"
@@ -36,13 +36,21 @@ public class FormSection private constructor(
         FormSection(json, ordinal, fields.filter { it is FormField && include(it) })
 }
 
+internal class NodeReader(
+    val listsFiles: Boolean,
+) {
+    private var next = 0
+
+    fun nextOrdinal(): Int = next++
+}
+
 internal fun formNodes(
     value: JsonValue?,
-    ordinals: Ordinals,
+    reader: NodeReader,
 ): List<FormNode>? =
     value?.arrayValue?.mapNotNull { item ->
         val json = item.objectValue ?: return@mapNotNull null
-        if (json["type"]?.stringValue == "section") FormSection(json, ordinals) else FormField(json, ordinals)
+        if (json["type"]?.stringValue == "section") FormSection(json, reader) else FormField(json, reader)
     }
 
 internal fun valueFields(nodes: List<FormNode>): List<FormField> =

@@ -83,7 +83,7 @@ class ModelDecodingTest {
         val grid = nodes[3] as FormSection
         assertTrue(grid.isMatrix)
         assertFalse(form.recallsAnswers)
-        assertEquals("1.6", FormDefinition.SUPPORTED_FORMAT_VERSION)
+        assertEquals("1.7", FormDefinition.SUPPORTED_FORMAT_VERSION)
     }
 
     @Test

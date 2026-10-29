@@ -4,6 +4,7 @@ import dev.formhaus.core.definitionvalidation.DefinitionIssue
 import dev.formhaus.core.definitionvalidation.IssueCode
 import dev.formhaus.core.engine.FormEngineOptions
 import dev.formhaus.core.engine.HiddenValues
+import dev.formhaus.core.engine.ValidateFn
 import dev.formhaus.core.json.JsonObject
 import dev.formhaus.core.json.JsonValue
 import dev.formhaus.core.json.MutableStringMap
@@ -47,29 +48,39 @@ class ScenarioHooks(
         )
     }
 
-    fun options(): FormEngineOptions {
-        val before = replies("onBeforeStepChange")
-        val after = replies("onAfterStepChange")
-        val validate = replies("onStepValidate")
-        val beforeSubmit = replies("onBeforeSubmit")
-        val afterSubmit = replies("onAfterSubmit")
-        return FormEngineOptions(
+    private fun validateHook(): ValidateFn? =
+        replies("onValidate")?.let { replies ->
+            { values, context ->
+                val entry =
+                    listOfNotNull(
+                        "call" to JsonValue.String("onValidate"),
+                        context.stepId?.let { "stepId" to JsonValue.String(it) },
+                        "values" to JsonValue.Object(values),
+                        "submit" to JsonValue.Bool(context.submit),
+                    )
+                log.record(*entry.toTypedArray())
+                fieldErrors(script.reply(replies.next()))
+            }
+        }
+
+    fun options(): FormEngineOptions =
+        FormEngineOptions(
             onBeforeStepChange =
-                before?.let { replies ->
+                replies("onBeforeStepChange")?.let { replies ->
                     { context ->
                         log.record("call" to JsonValue.String("onBeforeStepChange"), "context" to json(context))
                         script.reply(replies.next())?.boolValue
                     }
                 },
             onAfterStepChange =
-                after?.let { replies ->
+                replies("onAfterStepChange")?.let { replies ->
                     { context ->
                         log.record("call" to JsonValue.String("onAfterStepChange"), "context" to json(context))
                         script.reply(replies.next())
                     }
                 },
             onStepValidate =
-                validate?.let { replies ->
+                replies("onStepValidate")?.let { replies ->
                     { stepId, values ->
                         log.record(
                             "call" to JsonValue.String("onStepValidate"),
@@ -80,14 +91,14 @@ class ScenarioHooks(
                     }
                 },
             onBeforeSubmit =
-                beforeSubmit?.let { replies ->
+                replies("onBeforeSubmit")?.let { replies ->
                     { values ->
                         log.record("call" to JsonValue.String("onBeforeSubmit"), "values" to JsonValue.Object(values))
                         script.reply(replies.next())?.boolValue
                     }
                 },
             onAfterSubmit =
-                afterSubmit?.let { replies ->
+                replies("onAfterSubmit")?.let { replies ->
                     { values, skipped ->
                         log.record(
                             "call" to JsonValue.String("onAfterSubmit"),
@@ -104,11 +115,12 @@ class ScenarioHooks(
             seed = scenario["seed"]?.stringValue,
             research = Research(),
             hiddenValues = HiddenValues.of(scenario["hiddenValues"]?.stringValue) ?: HiddenValues.CLEAR,
+            onValidate = validateHook(),
+            validateWithRules = scenario["validateWithRules"]?.boolValue ?: false,
         )
-    }
 
     companion object {
         val names: List<String> =
-            listOf("onBeforeStepChange", "onAfterStepChange", "onBeforeSubmit", "onAfterSubmit", "onStepValidate")
+            listOf("onBeforeStepChange", "onAfterStepChange", "onBeforeSubmit", "onAfterSubmit", "onStepValidate", "onValidate")
     }
 }

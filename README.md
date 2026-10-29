@@ -398,6 +398,7 @@ Each entry has the field `key`, its `text` with the field label, and an `id` wit
 | `recallFormatter` | A `RecallFormatter` that formats recalled answers: lists, numbers, dates and times. The default follows CLDR 48. |
 | `locale` | `LocaleCatalog`s that translate messages and labels, in order. See [Languages](#languages). |
 | `onValidate` | Runs after the definition rules pass, on Continue after `onStepValidate` and on Submit before `onBeforeSubmit`. Returns errors keyed by field path. |
+| `validateWithRules` | With `onValidate`, also runs it when the definition rules fail, so both errors show at once. On Continue it then skips `onStepValidate` and `onBeforeStepChange`. The definition error wins on the same field. Defaults to `false`. |
 
 The options class also takes `onBeforeStepChange`, `onAfterStepChange`, `onBeforeSubmit`, `onAfterSubmit`, `onStepValidate`, `onFormEvent`, `onWarning`, `validators`, `messages`, `lang` and `formatRecall`.
 

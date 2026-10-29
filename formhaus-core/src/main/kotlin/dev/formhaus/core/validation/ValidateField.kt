@@ -2,6 +2,7 @@ package dev.formhaus.core.validation
 
 import dev.formhaus.core.json.JsonObject
 import dev.formhaus.core.json.JsonValue
+import dev.formhaus.core.json.MutableJsonObject
 import dev.formhaus.core.json.StringMap
 import dev.formhaus.core.json.jsString
 import dev.formhaus.core.json.strictEquals
@@ -115,6 +116,12 @@ private fun sizeError(
         }
     }
 
+private fun fileListRules(field: FormField): FieldValidation {
+    val rules = field.validation?.json?.toMutableStringMap() ?: MutableJsonObject()
+    rules.assign("maxLength", JsonValue.Number(field.fileListMax))
+    return FieldValidation(rules)
+}
+
 public fun validateFieldValue(
     field: FormField,
     input: JsonValue?,
@@ -130,8 +137,8 @@ internal fun fieldValueError(
     messages: MessageSource?,
     required: Boolean = true,
 ): String? {
-    val value = trimValue(field, input)
-    val rules = field.validation ?: FieldValidation(noParams)
+    val value = if (field.isFileList) JsonValue.Array(fileItems(input)) else trimValue(field, input)
+    val rules = if (field.isFileList) fileListRules(field) else field.validation ?: FieldValidation(noParams)
     val resolve = if (messages == null) defaultResolver else namedResolver(messageResolver(messages))
     if (value == null || isEmptyValue(value, field)) return emptyValueError(field, rules, allValues, required, resolve)
     clientTypeError(field, value, resolve)?.takeIf { it.isNotEmpty() }?.let { return it }

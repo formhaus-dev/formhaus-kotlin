@@ -15,6 +15,8 @@ internal val sourceNames = listOf("referrer", "page", "pageTitle", "language", "
 
 private const val MAX_SCALE_SPAN = 11
 
+private val fileListRules = listOf("multiple" to ShapeKind.BOOLEAN)
+
 private fun ScaleRange.isValid(): Boolean = min.isInteger && max.isInteger && max > min && max - min < MAX_SCALE_SPAN
 
 private fun rangeIssue(
@@ -58,6 +60,7 @@ private fun ruleIssues(
             rangeIssue(rules, path, "minLength", "maxLength") + rangeIssue(rules, path, "min", "max") +
                 patternIssue(rules.pattern, path),
         )
+    if (context.definition.listsFiles) issues += typedProperties(field.json, fileListRules, path)
     val range = field.scaleRange
     if (range != null && !range.isValid()) {
         issues.add(error(IssueCode.INVALID_SCALE, "$path/validation", "a scale needs 2 to 11 whole-number points"))

@@ -86,4 +86,32 @@ class UploadRestoreTest {
         assertRestored({ snapshot -> FormModel(papers, restoring = snapshot) { _, _ -> null } }, attachLate = true)
         assertRestored({ snapshot -> FormModel(FormEngine(papers, restoring = snapshot)) { _, _ -> null } }, attachLate = true)
     }
+
+    @Test
+    fun aFileListDropsItsDeadUploadsAndKeepsTheRestInOrder() {
+        val album =
+            FormDefinition(
+                json(
+                    """{"id": "papers", "title": "Papers", "formatVersion": "1.7", "submit": {"label": "Send"}, "fields": [
+                      {"key": "docs", "type": "file", "label": "Documents", "multiple": true}]}""",
+                ),
+            )
+        UploadStore.attach(elsewhere)
+        val dead = stored("gone.pdf")
+        val live = stored("kept.pdf").apply { parentFile?.mkdirs() }.apply { writeText("cv") }
+        val values = """{"docs": ["upload-1", "${fileValue(dead)}", "${fileValue(live)}"]}"""
+        val snapshot =
+            requireNotNull(
+                FormSnapshot.fromJson("""{"version":1,"definitionId":"papers","values":$values,"step":null,"skipped":[],"seed":""}"""),
+            )
+        val form = FormModel(album, restoring = snapshot) { _, _ -> null }
+        form.attachUploads(cache)
+        assertEquals(
+            JsonValue.Array(listOf(JsonValue.String("upload-1"), JsonValue.String(fileValue(live)))),
+            form.engine.values["docs"],
+        )
+        assertEquals(listOf(live), form.pickedFiles("docs"))
+        form.close()
+        assertFalse(live.exists())
+    }
 }

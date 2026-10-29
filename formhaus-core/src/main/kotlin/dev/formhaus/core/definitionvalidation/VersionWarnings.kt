@@ -1,5 +1,6 @@
 package dev.formhaus.core.definitionvalidation
 
+import dev.formhaus.core.model.FILE_LISTS_MINOR
 import dev.formhaus.core.model.FormField
 import dev.formhaus.core.model.formatParts
 import dev.formhaus.core.model.scaleTypes
@@ -46,10 +47,15 @@ private fun latestOutdated(context: CheckContext): Outdated? {
 
 private fun setsOrder(field: FormField): Boolean = "randomize" in field.json || field.options.orEmpty().any { "pinned" in it.json }
 
-private fun outdated(
+private fun newestOutdated(
     context: CheckContext,
     minor: Double,
 ): Outdated? {
+    if (minor < FILE_LISTS_MINOR) {
+        context.entries.firstOrNull { it.field.type == "file" && "multiple" in it.field.json }?.let {
+            return Outdated("${it.path} sets \"multiple\"", FILE_LISTS_MINOR, "Below 1.7 the field keeps one file")
+        }
+    }
     if (minor < 6) {
         context.entries.firstOrNull { setsOrder(it.field) }?.let {
             return Outdated(
@@ -59,6 +65,14 @@ private fun outdated(
             )
         }
     }
+    return null
+}
+
+private fun outdated(
+    context: CheckContext,
+    minor: Double,
+): Outdated? {
+    newestOutdated(context, minor)?.let { return it }
     if (minor < 5) latestOutdated(context)?.let { return it }
     if (minor < 4) {
         for (entry in context.conditions) {

@@ -30,15 +30,18 @@ internal fun PickerInput(
     cleared: JsonValue,
     valueText: String,
     open: () -> Unit,
+    enabled: Boolean = true,
+    below: @Composable () -> Unit = {},
     label: @Composable () -> Unit,
 ) {
     val tokens = LocalFormhausTokens.current
     val source = remember { MutableInteractionSource() }
     val focused by source.collectIsFocusedAsState()
     val requester = remember { FocusRequester() }
+    val locked = context.isLocked || !enabled
     FieldShell(context) {
         Row(
-            Modifier.inputChrome(focused || active, context.isInvalid, context.isLocked),
+            Modifier.inputChrome(focused || active, context.isInvalid, locked),
             horizontalArrangement = Arrangement.spacedBy(tokens.spacing.s3),
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -46,8 +49,8 @@ internal fun PickerInput(
                 Modifier
                     .weight(1f)
                     .formhausFocus(context, requester)
-                    .focusable(!context.isLocked, source)
-                    .clickable(source, null, !context.isLocked, role = Role.Button, onClick = open)
+                    .focusable(!locked, source)
+                    .clickable(source, null, !locked, role = Role.Button, onClick = open)
                     .semantics {
                         contentDescription = context.accessibilityName
                         stateDescription = valueText
@@ -57,5 +60,6 @@ internal fun PickerInput(
             }
             FieldAccessories(context, clearable) { context.setValue(cleared) }
         }
+        below()
     }
 }
