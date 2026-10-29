@@ -128,7 +128,22 @@ private fun matrixWarnings(entry: FieldEntry): List<DefinitionIssue> {
     )
 }
 
-private fun fieldWarnings(entry: FieldEntry): List<DefinitionIssue> {
+private fun multipleWarnings(
+    entry: FieldEntry,
+    listsFiles: Boolean,
+): List<DefinitionIssue> {
+    val field = entry.field
+    if (!listsFiles || "multiple" !in field.json || field.type == "file") return emptyList()
+    val problem = "\"multiple\" of \"${field.key}\" applies to file fields"
+    return listOf(
+        warning(IssueCode.MULTIPLE_NOT_APPLICABLE, "${entry.path}/multiple", problem, "Remove \"multiple\""),
+    )
+}
+
+private fun fieldWarnings(
+    entry: FieldEntry,
+    listsFiles: Boolean,
+): List<DefinitionIssue> {
     val field = entry.field
     val path = entry.path
     val visible = field.type != "hidden"
@@ -138,12 +153,18 @@ private fun fieldWarnings(entry: FieldEntry): List<DefinitionIssue> {
             warning(IssueCode.MISSING_LABEL, "$path/label", "the label of \"${field.key}\" is empty", LABEL_HINT),
         )
     }
-    issues += unknown(field.json, path, if (field.isGroup) Properties.group else Properties.field, ::misplaced)
+    val known =
+        when {
+            field.isGroup -> Properties.group
+            listsFiles -> Properties.fileListField
+            else -> Properties.field
+        }
+    issues += unknown(field.json, path, known, ::misplaced)
     for ((index, option) in field.options.orEmpty().withIndex()) {
         issues +=
             optionWarnings(field, option, "$path/options/$index")
     }
-    issues += randomizeWarnings(entry) + matrixWarnings(entry)
+    issues += randomizeWarnings(entry) + multipleWarnings(entry, listsFiles) + matrixWarnings(entry)
     field.validation?.let { issues += unknown(it.json, "$path/validation", Properties.validation) }
     if ("columns" in field.json && (!field.hasPictures || inMatrix(entry))) {
         val problem = "\"columns\" of \"${field.key}\" applies to radio and multiselect options with images outside a matrix"
@@ -184,5 +205,5 @@ internal fun propertyWarnings(context: CheckContext): List<DefinitionIssue> {
                 unknown(entry.node.json, entry.path, Properties.section)
         }
     }
-    return issues + context.entries.flatMap(::fieldWarnings)
+    return issues + context.entries.flatMap { fieldWarnings(it, definition.listsFiles) }
 }

@@ -25,6 +25,7 @@ internal val defaultLabels: Map<String, String> =
         "submit" to "Submit",
         "stepTitle" to "Step {index}",
         "stepErrors" to "Errors: {count}",
+        "fileCount" to "Files: {count}",
         "or" to "or",
         "select" to "Select",
     )

@@ -32,7 +32,12 @@ private val bounds = mapOf("minLength" to "min", "maxLength" to "max", "min" to 
 private fun ruleKey(
     field: FormField,
     rule: String,
-): String = if ((field.type in listTypes || field.isGroup) && rule.endsWith("Length")) rule.replace("Length", "Items") else rule
+): String =
+    if ((field.type in listTypes || field.isGroup || field.isFileList) && rule.endsWith("Length")) {
+        rule.replace("Length", "Items")
+    } else {
+        rule
+    }
 
 private fun catalogKeys(value: JsonValue?): List<String> = value?.objectValue?.keys.orEmpty()
 
@@ -131,6 +136,8 @@ private fun catalogSlots(
     }
 }
 
+private val fileListLabels = listOf("removeItem", "removeItemNamed", "itemAdded", "itemRemoved", "fileCount")
+
 private val groupLabels =
     listOf(
         "addItem",
@@ -179,6 +186,7 @@ private fun usedLabels(definition: FormDefinition): Set<String> {
     add(fields.any { it.type in pickerTypes || it.type == "file" }, listOf("clear"))
     add(fields.any { it.type in pickerTypes }, listOf("done"))
     add(fields.any { it.type == "file" }, listOf("chooseFile"))
+    add(fields.any { it.isFileList }, fileListLabels)
     return labels
 }
 

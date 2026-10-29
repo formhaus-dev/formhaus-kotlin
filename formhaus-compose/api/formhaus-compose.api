@@ -111,6 +111,7 @@ public final class dev/formhaus/compose/fields/FileFieldKt {
 
 public final class dev/formhaus/compose/fields/ModelUploadsKt {
 	public static final fun pickedFile (Ldev/formhaus/compose/model/FormModel;Ljava/lang/String;)Ljava/io/File;
+	public static final fun pickedFiles (Ldev/formhaus/compose/model/FormModel;Ljava/lang/String;)Ljava/util/List;
 }
 
 public final class dev/formhaus/compose/fields/RatingFieldKt {

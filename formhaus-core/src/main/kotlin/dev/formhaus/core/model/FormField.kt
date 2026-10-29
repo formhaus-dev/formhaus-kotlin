@@ -8,16 +8,18 @@ public class FormField private constructor(
     override val json: JsonObject,
     override val ordinal: Int,
     public val fields: List<FormNode>?,
+    private val listsFiles: Boolean,
 ) : FormNode() {
-    internal constructor(json: JsonObject, ordinals: Ordinals) :
+    internal constructor(json: JsonObject, reader: NodeReader) :
         this(
             json,
-            ordinals.take(),
+            reader.nextOrdinal(),
             if (json["type"]?.stringValue == "group") {
-                formNodes(json["fields"], ordinals)
+                formNodes(json["fields"], reader)
             } else {
                 null
             },
+            reader.listsFiles,
         )
 
     override val key: String = json["key"]?.stringValue ?: ""
@@ -53,6 +55,7 @@ public class FormField private constructor(
     public val defaultItems: Double? get() = json["defaultItems"]?.numberValue
     public val isGroup: Boolean get() = type == "group"
     public val isScale: Boolean get() = type in scaleTypes
+    public val isFileList: Boolean = listsFiles && type == "file" && json["multiple"]?.boolValue == true
 
     internal val hasPictures: Boolean
         get() = type in pictureTypes && options.orEmpty().any { !it.image.isNullOrEmpty() }
@@ -68,7 +71,7 @@ public class FormField private constructor(
 
     public val items: List<FormField> get() = fields.orEmpty().filterIsInstance<FormField>()
 
-    internal fun withJson(json: JsonObject): FormField = FormField(json, ordinal, fields)
+    internal fun withJson(json: JsonObject): FormField = FormField(json, ordinal, fields, listsFiles)
 }
 
 private val pictureTypes = listOf("radio", "multiselect")

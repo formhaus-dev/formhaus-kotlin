@@ -9,6 +9,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import dev.formhaus.compose.components.FormhausIcons
 import dev.formhaus.compose.components.PickerInput
@@ -21,32 +22,46 @@ import java.io.File
 
 @Composable
 public fun FileField(context: FieldContext) {
-    val tokens = LocalFormhausTokens.current
-    val colors = tokens.colors
-    val picker = rememberFilePicker(context)
+    if (context.field.isFileList) {
+        FileListField(context)
+        return
+    }
+    val colors = LocalFormhausTokens.current.colors
+    val picker = rememberFilePicker(context, 1) { files, _ -> files.firstOrNull()?.let(context::replaceFile) }
     PickerInput(context, picker.active, context.text.isNotEmpty(), JsonValue.Null, context.fileValueText, picker::open) {
-        Row(
-            Modifier.heightIn(min = tokens.controls.hitTarget),
-            horizontalArrangement = Arrangement.spacedBy(tokens.spacing.s3),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            if (context.reference == null) {
-                Icon(FormhausIcons.paperclip, null, Modifier.size(tokens.controls.indicator), tint = colors.textMuted)
-            }
-            Text(
-                context.fileName ?: context.referenceName ?: context.placeholder ?: context.text("chooseFile"),
-                Modifier.weight(1f),
-                color =
-                    when {
-                        context.fileName != null -> colors.text
-                        context.reference == null -> colors.control
-                        else -> colors.textMuted
-                    },
-                maxLines = 1,
-                overflow = TextOverflow.MiddleEllipsis,
-                style = tokens.textStyle(TextRole.body, colored = false),
-            )
-        }
+        FilePickerLabel(
+            context.fileName ?: context.referenceName ?: context.placeholder ?: context.text("chooseFile"),
+            context.reference == null,
+            when {
+                context.fileName != null -> colors.text
+                context.reference == null -> colors.control
+                else -> colors.textMuted
+            },
+        )
+    }
+}
+
+@Composable
+internal fun FilePickerLabel(
+    text: String,
+    icon: Boolean,
+    color: Color,
+) {
+    val tokens = LocalFormhausTokens.current
+    Row(
+        Modifier.heightIn(min = tokens.controls.hitTarget),
+        horizontalArrangement = Arrangement.spacedBy(tokens.spacing.s3),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        if (icon) Icon(FormhausIcons.paperclip, null, Modifier.size(tokens.controls.indicator), tint = tokens.colors.textMuted)
+        Text(
+            text,
+            Modifier.weight(1f),
+            color = color,
+            maxLines = 1,
+            overflow = TextOverflow.MiddleEllipsis,
+            style = tokens.textStyle(TextRole.body, colored = false),
+        )
     }
 }
 

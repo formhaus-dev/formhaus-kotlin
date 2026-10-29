@@ -90,6 +90,7 @@ public final class dev/formhaus/core/definitionvalidation/IssueCode$Companion {
 	public final fun getMISSING_OPTIONS-SGZMid8 ()Ljava/lang/String;
 	public final fun getMISSING_PROPERTY-SGZMid8 ()Ljava/lang/String;
 	public final fun getMISSING_RESEARCH-SGZMid8 ()Ljava/lang/String;
+	public final fun getMULTIPLE_NOT_APPLICABLE-SGZMid8 ()Ljava/lang/String;
 	public final fun getOUTDATED_FORMAT_VERSION-SGZMid8 ()Ljava/lang/String;
 	public final fun getRANDOMIZE_NOT_APPLICABLE-SGZMid8 ()Ljava/lang/String;
 	public final fun getRECALL_FORWARD_REFERENCE-SGZMid8 ()Ljava/lang/String;
@@ -907,6 +908,7 @@ public final class dev/formhaus/core/model/FormField : dev/formhaus/core/model/F
 	public final fun getSource ()Ldev/formhaus/core/json/JsonValue;
 	public fun getType ()Ljava/lang/String;
 	public final fun getValidation ()Ldev/formhaus/core/model/FieldValidation;
+	public final fun isFileList ()Z
 	public final fun isGroup ()Z
 	public final fun isScale ()Z
 }
@@ -1077,6 +1079,11 @@ public final class dev/formhaus/core/renderer/ErrorSummaryOptions {
 	public final fun getLabels ()Ldev/formhaus/core/renderer/LabelSource;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/formhaus/core/renderer/FileListsKt {
+	public static final fun fileListLimit (Ldev/formhaus/core/model/FormField;)I
+	public static final fun maxItemsMessage (Ldev/formhaus/core/engine/FormEngine;Ldev/formhaus/core/model/FormField;)Ljava/lang/String;
 }
 
 public final class dev/formhaus/core/renderer/FormActionsState {
@@ -1286,6 +1293,10 @@ public final class dev/formhaus/core/server/ValidateSubmissionKt {
 	public static final fun validateSubmission (Ldev/formhaus/core/model/FormDefinition;Ldev/formhaus/core/json/JsonValue;Ldev/formhaus/core/server/SubmissionOptions;)Ldev/formhaus/core/server/SubmissionResult;
 	public static synthetic fun validateSubmission$default (Ldev/formhaus/core/json/JsonValue;Ldev/formhaus/core/json/JsonValue;Ldev/formhaus/core/server/SubmissionOptions;ILjava/lang/Object;)Ldev/formhaus/core/server/SubmissionResult;
 	public static synthetic fun validateSubmission$default (Ldev/formhaus/core/model/FormDefinition;Ldev/formhaus/core/json/JsonValue;Ldev/formhaus/core/server/SubmissionOptions;ILjava/lang/Object;)Ldev/formhaus/core/server/SubmissionResult;
+}
+
+public final class dev/formhaus/core/validation/FileItemsKt {
+	public static final fun fileItems (Ldev/formhaus/core/json/JsonValue;)Ljava/util/List;
 }
 
 public final class dev/formhaus/core/validation/MessageKey {

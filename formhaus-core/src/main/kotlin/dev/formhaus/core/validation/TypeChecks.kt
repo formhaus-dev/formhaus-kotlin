@@ -12,17 +12,23 @@ import dev.formhaus.core.model.FormField
 import dev.formhaus.core.model.ScaleRange
 import dev.formhaus.core.regex.JsRegex
 import dev.formhaus.core.visibility.isBlank
+import kotlin.math.floor
 
 private const val DEFAULT_GROUP_ITEMS = 100.0
 
 private val decimal = JsRegex.unchecked("^[+-]?(?:\\d+(?:\\.\\d*)?|\\.\\d+)(?:[eE][+-]?\\d+)?$")
 private val untrimmedTypes = setOf("password", "select", "radio", "file") + numberTypes
 
+internal val FormField.fileListMax: Double get() =
+    floor(validation?.maxLength?.takeIf { it.isFinite() } ?: DEFAULT_GROUP_ITEMS).coerceIn(0.0, MAX_GROUP_ITEMS.toDouble())
+
 internal val FormField.maxItems: Double get() =
     minOf(
         validation?.maxLength ?: DEFAULT_GROUP_ITEMS,
         MAX_GROUP_ITEMS.toDouble(),
     )
+
+private val FormField.isListField: Boolean get() = type in listTypes || isFileList
 
 internal fun trimValue(
     field: FormField,
@@ -36,7 +42,10 @@ internal fun normalizeValue(
     field: FormField,
     input: JsonValue?,
 ): JsonValue? {
-    if (input?.arrayValue?.isEmpty() == true && field.type !in listTypes && field.type in builtInTypes) return null
+    if (input?.arrayValue?.isEmpty() == true && !field.isListField && field.type in builtInTypes) return null
+    if (field.isFileList && (input is JsonValue.Array || (input is JsonValue.String && input.value.isNotEmpty()))) {
+        return JsonValue.Array(fileItems(input))
+    }
     if (field.isGroup) return normalizeItems(field, input)
     val value = trimValue(field, input)
     if (field.type !in numberTypes || value !is JsonValue.String || decimal.test(value.value) != true) return value
@@ -155,7 +164,7 @@ private fun primitiveError(
 private fun isEmpty(
     field: FormField,
     value: JsonValue?,
-): Boolean = isBlank(value) && (field.type in listTypes || value?.arrayValue == null)
+): Boolean = isBlank(value) && (field.isListField || value?.arrayValue == null)
 
 private fun groupError(
     field: FormField,
@@ -175,6 +184,23 @@ private fun groupError(
     } else {
         null
     }
+}
+
+private fun isReference(item: JsonValue): Boolean = item.stringValue?.let { it.isNotEmpty() && it.length <= MAX_STRING_LENGTH } == true
+
+internal fun FormField.maxFilesMessage(resolve: (MessageKey, JsonObject) -> String): String =
+    validation?.message("maxLengthMessage") ?: resolve(MessageKey.MAX_ITEMS, stringMapOf("max" to JsonValue.Number(fileListMax)))
+
+private fun isFileValue(item: JsonValue): Boolean = item.stringValue != null || item.objectValue?.get("name")?.stringValue != null
+
+private fun fileListError(
+    field: FormField,
+    value: JsonValue,
+    fail: Fail,
+): String? {
+    val items = value.arrayValue ?: return fail(MessageKey.FILE, noParams)
+    if (items.size > field.fileListMax) return field.maxFilesMessage(fail)
+    return if (items.all(::isReference)) null else fail(MessageKey.FILE, noParams)
 }
 
 internal fun typeError(
@@ -213,6 +239,10 @@ private fun choiceOrTextError(
     return when {
         field.type in listTypes -> {
             multiselectError(field, value, fail)
+        }
+
+        field.isFileList -> {
+            fileListError(field, value, fail)
         }
 
         field.type == "file" -> {
@@ -266,7 +296,7 @@ internal fun typeMessageKeys(field: FormField): List<MessageKey> {
         }
 
         field.type == "file" -> {
-            listOf(MessageKey.FILE, MessageKey.MAX_LENGTH)
+            listOf(MessageKey.FILE, if (field.isFileList) MessageKey.MAX_ITEMS else MessageKey.MAX_LENGTH)
         }
 
         field.type == "select" || field.type == "radio" -> {
@@ -285,6 +315,7 @@ internal fun clientTypeError(
     value: JsonValue?,
     resolve: ResolveMessage,
 ): String? {
+    if (field.isFileList) return if (fileItems(value).all(::isFileValue)) null else resolve(MessageKey.FILE, noParams, field)
     if (field.type == "file" || (field.type !in builtInTypes && !field.isGroup)) return null
     return typeError(field, value, resolve)
 }
