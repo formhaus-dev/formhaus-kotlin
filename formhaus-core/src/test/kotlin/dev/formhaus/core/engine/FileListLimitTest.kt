@@ -7,10 +7,13 @@ import dev.formhaus.core.json.stringMapOf
 import dev.formhaus.core.model.FormDefinition
 import dev.formhaus.core.model.FormField
 import dev.formhaus.core.renderer.RendererApi
-import dev.formhaus.core.renderer.itemLimits
+import dev.formhaus.core.renderer.fileListLimit
 import dev.formhaus.core.renderer.maxItemsMessage
 import dev.formhaus.core.server.validateSubmission
+import dev.formhaus.core.support.definition
+import dev.formhaus.core.validation.validateFieldValue
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
 
@@ -51,26 +54,36 @@ class FileListLimitTest {
     }
 
     @Test
-    fun `hostile counts clamp the picker limit and never throw`() {
-        val cases = listOf(1e300 to 1000, -1e300 to 0, -3.0 to 0, 2.5 to 2, 0.0 to 0)
+    fun `the limit is maxLength floored and clamped to 0 to 1000 everywhere`() {
+        val cases = listOf(1e300 to 1000, -1e300 to 0, -5.0 to 0, 2.5 to 2, 0.0 to 0, 1000.9 to 1000)
         for ((max, expected) in cases) {
             val engine = docs("maxLength" to max, "minLength" to minOf(max, -max))
-            assertEquals(expected, engine.itemLimits(engine.files).max, "maxLength $max")
-            engine.maxItemsMessage(engine.files)
-            engine.setValue("d", references(3))
-            engine.validate()
-            validateSubmission(JsonValue.Object(engine.definition.json), JsonValue.Object(stringMapOf("d" to references(3))))
+            val message = "At most $expected allowed"
+            assertEquals(expected, fileListLimit(engine.files), "maxLength $max")
+            assertEquals(message, engine.maxItemsMessage(engine.files))
+            val over = references(expected + 1)
+            engine.setValue("d", over)
+            assertEquals(message, engine.validate()["d"], "maxLength $max")
+            val result = validateSubmission(JsonValue.Object(engine.definition.json), JsonValue.Object(stringMapOf("d" to over)))
+            assertEquals(message, result.errors["d"], "maxLength $max")
+            engine.setValue("d", references(expected))
+            assertNull(engine.validate()["d"], "maxLength $max")
         }
     }
 
     @Test
-    fun `the cap holds for huge maxLength and negative limits fail every list`() {
-        val huge = docs("maxLength" to 1e300)
-        huge.setValue("d", references(1001))
-        assertEquals("At most 1000 allowed", huge.validate()["d"])
-        assertEquals("At most 1000 allowed", huge.maxItemsMessage(huge.files))
-        val negative = docs("maxLength" to -3.0, "minLength" to -5.0)
-        negative.setValue("d", references(1))
-        assertEquals("At most -3 allowed", negative.validate()["d"])
+    fun `a non-finite maxLength set through code counts as no maxLength`() {
+        for (max in listOf(Double.NaN, Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY)) {
+            val definition =
+                definition(
+                    """{"formatVersion":"1.7","id":"f","submit":{"label":"S"},"fields":[
+                    {"key":"d","type":"file","label":"D","multiple":true,"validation":{}}]}""",
+                )
+            val field = definition.allFields.single()
+            val json = field.json.toMutableStringMap().also { it["validation"] = obj("maxLength" to JsonValue.Number(max)) }
+            val hostile = field.withJson(json)
+            assertEquals(100, fileListLimit(hostile), "maxLength $max")
+            assertEquals("At most 100 allowed", validateFieldValue(hostile, references(101), stringMapOf()))
+        }
     }
 }

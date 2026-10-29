@@ -30,7 +30,7 @@ import dev.formhaus.compose.theme.TextRole
 import dev.formhaus.compose.theme.textStyle
 import dev.formhaus.core.json.JsonValue
 import dev.formhaus.core.json.stringMapOf
-import dev.formhaus.core.renderer.itemLimits
+import dev.formhaus.core.renderer.fileListLimit
 import dev.formhaus.core.renderer.maxItemsMessage
 import dev.formhaus.core.validation.fileItems
 import java.io.File
@@ -114,7 +114,7 @@ private fun FileRow(
 }
 
 private val FieldContext.fileRoom: Int
-    get() = (model.engine.itemLimits(field).max - fileItems(state.value).size).coerceAtLeast(0)
+    get() = (fileListLimit(field) - fileItems(state.value).size).coerceAtLeast(0)
 
 private fun FieldContext.removeKey(position: Int): String = "$key#remove$position"
 
