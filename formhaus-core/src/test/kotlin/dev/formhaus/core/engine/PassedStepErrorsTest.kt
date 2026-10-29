@@ -1,5 +1,6 @@
 package dev.formhaus.core.engine
 
+import dev.formhaus.core.support.engine
 import dev.formhaus.core.support.text
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -33,6 +34,21 @@ class PassedStepErrorsTest {
             assertEquals(itemTaken, engine.errors)
             assertTrue(engine.next())
             assertTrue(engine.errors.isEmpty())
+        }
+
+    @Test
+    fun `drops onStepValidate errors of hidden fields on the next Continue`(): Unit =
+        runBlocking {
+            val badLink = errorsOf("""{"ref":"Bad link"}""")
+            val plan = """{"key":"plan","type":"text","label":"Plan"},"""
+            val definition = League.DEFINITION.replace(plan, """$plan{"key":"ref","type":"hidden"},""")
+            val replies = ArrayDeque(listOf(badLink))
+            val engine = engine(definition, League.VALUES, FormEngineOptions(onStepValidate = { _, _ -> replies.removeFirstOrNull() }))
+            assertFalse(engine.next())
+            assertEquals(badLink, engine.errors)
+            assertTrue(engine.next())
+            assertTrue(engine.errors.isEmpty())
+            assertEquals(emptyList<String>(), engine.topLevelErrors)
         }
 
     @Test
