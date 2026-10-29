@@ -26,7 +26,11 @@ internal fun FormModel.fileEntries(value: JsonValue?): List<FileEntry> =
         name?.let { FileEntry(index, item, it, file) }
     }
 
-private fun referenceSegment(value: String): String = value.trimEnd('/').substringAfterLast('/').ifEmpty { value }
+private fun referenceSegment(value: String): String {
+    val end = value.indexOfFirst { it == '?' || it == '#' }
+    val path = if (end < 0) value else value.take(end)
+    return path.trimEnd('/').substringAfterLast('/').ifEmpty { value }
+}
 
 internal fun FormModel.pruneUploads(values: JsonObject) {
     val files = HashSet<String>()

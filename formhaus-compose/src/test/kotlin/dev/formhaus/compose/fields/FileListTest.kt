@@ -131,7 +131,7 @@ class FileListTest {
         val form =
             render(
                 values = """{"docs": ["https://cdn.example.com/files/w9.pdf", "upload-1", {"name": "scan.pdf"}, 7, {"size": 1},
-                    "https://cdn.example.com/", "a/b/", "/", "", null]}""",
+                    "https://cdn.example.com/", "a/b/", "/", "", null, "https://x.test/c.pdf?v=2#p"]}""",
             )
         val file = upload(form, "a.pdf")
         compose.runOnIdle { context(form).addFiles(listOf(file), 0) }
@@ -142,18 +142,20 @@ class FileListTest {
             "cdn.example.com",
             "b",
             "/",
+            "c.pdf",
             "a.pdf",
         )) {
             compose.onNodeWithContentDescription(remove(name)).assertExists()
         }
         compose.onNodeWithText("https://cdn.example.com/files/w9.pdf").assertDoesNotExist()
-        compose.onAllNodesWithText("Remove").assertCountEquals(7)
+        compose.onAllNodesWithText("Remove").assertCountEquals(8)
         compose.onNodeWithContentDescription(remove("w9.pdf")).performClick()
         compose.waitForIdle()
         assertEquals("${iso("w9.pdf")} removed", announced(form))
         assertEquals(
             json(
-                """["upload-1", {"name": "scan.pdf"}, 7, {"size": 1}, "https://cdn.example.com/", "a/b/", "/", "${fileValue(file)}"]""",
+                """["upload-1", {"name": "scan.pdf"}, 7, {"size": 1}, "https://cdn.example.com/", "a/b/", "/", "https://x.test/c.pdf?v=2#p",
+                "${fileValue(file)}"]""",
             ),
             form.engine.values["docs"],
         )
