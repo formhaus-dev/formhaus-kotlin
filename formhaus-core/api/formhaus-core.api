@@ -140,6 +140,7 @@ public final class dev/formhaus/core/engine/FormEngine {
 	public final fun getSeed ()Ljava/lang/String;
 	public final fun getStepErrors ()Ldev/formhaus/core/json/StringMap;
 	public final fun getStepValidating ()Z
+	public final fun getStoredFileName ()Lkotlin/jvm/functions/Function1;
 	public final fun getSubmitValues ()Ldev/formhaus/core/json/StringMap;
 	public final fun getSubmitting ()Z
 	public final fun getTopLevelErrors ()Ljava/util/List;
@@ -169,6 +170,7 @@ public final class dev/formhaus/core/engine/FormEngine {
 	public final fun setFieldLoading (Ljava/lang/String;Z)V
 	public final fun setItemValue (Ljava/lang/String;ILjava/lang/String;Ldev/formhaus/core/json/JsonValue;)V
 	public final fun setLocale (Ljava/util/List;)V
+	public final fun setStoredFileName (Lkotlin/jvm/functions/Function1;)V
 	public final fun setValue (Ljava/lang/String;Ldev/formhaus/core/json/JsonValue;)V
 	public final fun skip (Lkotlin/jvm/functions/Function3;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun skip$default (Ldev/formhaus/core/engine/FormEngine;Lkotlin/jvm/functions/Function3;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
