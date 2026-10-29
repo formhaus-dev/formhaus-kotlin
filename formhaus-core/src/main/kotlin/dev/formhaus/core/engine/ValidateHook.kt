@@ -36,6 +36,7 @@ internal suspend fun FormEngine.passesValidate(
     ruleErrors: FieldErrors,
 ): Boolean {
     val core = core
+    if (!ruleErrors.isEmpty()) reportRuleErrors()
     val fields = core.shownPaths(submit)
     val result = suspended { validate(values, ValidateContext(core.currentStep?.id, fields, submit)) }
     if (stale()) return false

@@ -65,6 +65,7 @@ internal class EngineCore(
     var emitEvent: ((FormEvent) -> Unit)? = null
     var onValidate: ValidateFn? = null
     var validateWithRules = false
+    var reportedErrors: ReportedErrors? = null
     var onChange: (() -> Unit)? = null
 
     fun load(

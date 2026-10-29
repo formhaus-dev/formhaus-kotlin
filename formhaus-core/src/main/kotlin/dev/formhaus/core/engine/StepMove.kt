@@ -91,13 +91,35 @@ internal suspend fun <T> suspended(body: suspend () -> T): T {
     return result
 }
 
+internal class ReportedErrors(
+    val operation: Int,
+    val generation: Int,
+    val errors: FieldErrors,
+)
+
 internal suspend fun FormEngine.reportErrors(action: suspend () -> Boolean): Boolean {
     val generation = core.errorsGeneration
-    val done = CallBudget.runSuspending { suspended(action) }
-    if (!done && core.errorsGeneration != generation) {
-        for ((fieldKey, error) in core.errors) core.emit(FormEvent.FieldError(fieldKey, error))
+    val operation = core.operationEpoch + 1
+    val own = { core.reportedErrors?.takeIf { it.operation == operation } }
+    try {
+        val done = CallBudget.runSuspending { suspended(action) }
+        val reported = own()
+        if (!done && core.errorsGeneration != (reported?.generation ?: generation)) emitFieldErrors(reported?.errors)
+        return done
+    } finally {
+        if (own() != null) core.reportedErrors = null
     }
-    return done
+}
+
+internal fun FormEngine.reportRuleErrors() {
+    core.reportedErrors = ReportedErrors(core.operationEpoch, core.errorsGeneration, core.errors.toMutableStringMap())
+    emitFieldErrors(null)
+}
+
+private fun FormEngine.emitFieldErrors(reported: FieldErrors?) {
+    for ((fieldKey, error) in core.errors) {
+        if (reported?.get(fieldKey) != error) core.emit(FormEvent.FieldError(fieldKey, error))
+    }
 }
 
 internal suspend fun afterCommit(
