@@ -8,6 +8,8 @@ import dev.formhaus.core.i18n.textSlots
 import dev.formhaus.core.json.JsonValue
 import dev.formhaus.core.json.MutableJsonObject
 import dev.formhaus.core.model.FormDefinition
+import dev.formhaus.core.model.FormField
+import dev.formhaus.core.renderer.fileItems
 import dev.formhaus.core.server.SubmissionOptions
 import dev.formhaus.core.server.validateSubmission
 import dev.formhaus.core.support.jsonObject
@@ -17,6 +19,7 @@ import dev.formhaus.core.visibility.RevealTarget
 import dev.formhaus.core.visibility.revealTargets
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.util.concurrent.Callable
@@ -52,6 +55,21 @@ class ApiSurfaceTest {
                 ),
             )
         assertEquals(listOf(null, RevealTarget(0, 1), null), revealTargets(form.fields.orEmpty()))
+    }
+
+    @Test
+    fun `multiple makes a file list only from format 1_7`() {
+        fun docs(version: String) =
+            FormDefinition(
+                JsonValue.parse(
+                    """{"formatVersion":"$version","id":"f","submit":{"label":"S"},"fields":[
+                    {"key":"d","type":"file","label":"D","multiple":true}]}""",
+                ),
+            ).fields.orEmpty().single() as FormField
+        assertTrue(docs("1.7").isFileList)
+        assertFalse(docs("1.6").isFileList)
+        assertEquals(emptyList<JsonValue>(), fileItems(JsonValue.String("")))
+        assertEquals(listOf(JsonValue.String("a")), fileItems(JsonValue.String("a")))
     }
 
     @Test
@@ -105,7 +123,7 @@ class ApiSurfaceTest {
         assertTrue(engine.isMultiStep)
         assertEquals("one", engine.currentStep?.id)
         assertTrue(engine.validate().isEmpty())
-        assertEquals("1.6", FormDefinition.SUPPORTED_FORMAT_VERSION)
+        assertEquals("1.7", FormDefinition.SUPPORTED_FORMAT_VERSION)
     }
 
     @Test
