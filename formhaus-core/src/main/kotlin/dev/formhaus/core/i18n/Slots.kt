@@ -136,7 +136,7 @@ private fun catalogSlots(
     }
 }
 
-private val fileListLabels = listOf("removeItem", "removeItemNamed", "itemAdded", "itemRemoved")
+private val fileListLabels = listOf("removeItem", "removeItemNamed", "itemAdded", "itemRemoved", "fileCount")
 
 private val groupLabels =
     listOf(

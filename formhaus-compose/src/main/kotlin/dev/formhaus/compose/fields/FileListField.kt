@@ -49,7 +49,7 @@ internal fun FileListField(context: FieldContext) {
         picker.active,
         false,
         JsonValue.Null,
-        files.joinToString(", ") { it.name }.ifEmpty { choose },
+        context.text("fileCount", stringMapOf("count" to JsonValue.Number(files.size.toDouble()))),
         picker::open,
         enabled = room > 0,
         below = {

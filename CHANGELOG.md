@@ -11,6 +11,7 @@
 - New issue code `IssueCode.MULTIPLE_NOT_APPLICABLE` for `multiple` on a field that is not a `file` field. `multiple` that is not a boolean is `invalid-type`.
 - `validateSubmission` accepts a file list as an array of string references. A single string counts as a list of one. `""` and `null` entries are dropped. Any other entry fails the field with the `file` message.
 - New renderer API `FormEngine.maxItemsMessage(field)`.
+- New label `fileCount`, `Files: {count}`, in every bundled catalog.
 
 ### formhaus-compose
 
