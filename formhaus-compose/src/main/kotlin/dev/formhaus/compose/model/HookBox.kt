@@ -37,6 +37,7 @@ internal class HookBox(
             debugChecks = options.debugChecks ?: debuggable,
             locale = options.locale,
             onValidate = onValidate,
+            validateWithRules = options.validateWithRules,
         )
     }
 }
