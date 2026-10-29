@@ -17,10 +17,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextOverflow
-import dev.formhaus.compose.components.FormButton
+import dev.formhaus.compose.components.DescribedButton
 import dev.formhaus.compose.components.FormButtonVariant
 import dev.formhaus.compose.components.OnFormhausFocus
 import dev.formhaus.compose.components.PickerInput
@@ -49,7 +48,12 @@ internal fun FileListField(context: FieldContext) {
         picker.active,
         false,
         JsonValue.Null,
-        context.text("fileCount", stringMapOf("count" to JsonValue.Number(files.size.toDouble()))),
+        listOfNotNull(
+            context.text("fileCount", stringMapOf("count" to JsonValue.Number(files.size.toDouble()))),
+            context.model.engine
+                .maxItemsMessage(context.field)
+                .takeIf { room <= 0 },
+        ).joinToString(". "),
         picker::open,
         enabled = room > 0,
         below = {
@@ -60,7 +64,7 @@ internal fun FileListField(context: FieldContext) {
                     }
                 }
             }
-            notice?.let { Text(it, Modifier.padding(top = tokens.spacing.s1), style = tokens.textStyle(TextRole.error)) }
+            notice?.let { Text(it, Modifier.padding(top = tokens.spacing.s1), style = tokens.textStyle(TextRole.helper)) }
         },
     ) {
         FilePickerLabel(choose, true, tokens.colors.control)
@@ -88,31 +92,34 @@ private fun FileRow(
             file.name,
             Modifier.weight(1f),
             color = if (file.file == null) tokens.colors.textMuted else tokens.colors.text,
-            maxLines = 1,
+            maxLines = if (LocalDensity.current.fontScale > LARGE_FONT_SCALE) LARGE_NAME_LINES else NAME_LINES,
             overflow = TextOverflow.MiddleEllipsis,
             style = tokens.textStyle(TextRole.body, colored = false),
         )
-        FormButton(
+        DescribedButton(
             remove,
             FormButtonVariant.TEXT,
             {
                 context.removeFile(file, position, count)
                 removed()
             },
-            Modifier
-                .focusRequester(requester)
-                .semantics {
-                    contentDescription =
-                        context.text(
-                            "removeItemNamed",
-                            stringMapOf("label" to JsonValue.String(remove), "item" to JsonValue.String(isolated(file.name))),
-                        )
-                },
+            Modifier.focusRequester(requester),
             enabled = !context.isLocked,
+            busy = false,
             compact = true,
+            icon = null,
+            description =
+                context.text(
+                    "removeItemNamed",
+                    stringMapOf("label" to JsonValue.String(remove), "item" to JsonValue.String(isolated(file.name))),
+                ),
         )
     }
 }
+
+private const val NAME_LINES = 2
+private const val LARGE_NAME_LINES = 4
+private const val LARGE_FONT_SCALE = 1.3f
 
 private val FieldContext.fileRoom: Int
     get() = (fileListLimit(field) - fileItems(state.value).size).coerceAtLeast(0)

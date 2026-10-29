@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+### formhaus-compose
+
+- Fixed the Remove button of a file list exposing both its visible label and its description to screen readers.
+- Fixed the screen reader announcer being missing until the first announcement, and skipping an announcement identical to the previous one.
+- A full file list picker reports the limit in its state description.
+- File names in a file list wrap onto two lines, or four at large font scales, instead of truncating on one.
+- The over-limit notice of a file list is styled as helper text instead of an error.
+
 ## 0.8.0
 
 ### formhaus-core
