@@ -5,6 +5,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import dev.formhaus.compose.fields.UploadStore
 import dev.formhaus.compose.fields.pruneUploads
 import dev.formhaus.compose.fields.reconcileUploads
 import dev.formhaus.compose.fields.releaseUploads
@@ -145,6 +146,7 @@ public class FormModel private constructor(
     private var unsubscribe: () -> Unit
 
     init {
+        engine.storedFileName = { UploadStore.owned(it, uploadOwner)?.name }
         refreshStatus()
         unsubscribe = engine.subscribe(::refresh)
         reconcileUploads()
