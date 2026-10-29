@@ -13,6 +13,7 @@ import dev.formhaus.core.model.FormDefinition
 import dev.formhaus.core.model.FormField
 import dev.formhaus.core.model.FormNode
 import dev.formhaus.core.model.FormStep
+import dev.formhaus.core.renderer.RendererApi
 import dev.formhaus.core.visibility.isActionDisabled
 
 internal class Listeners {
@@ -78,6 +79,9 @@ public class FormEngine(
         core.validateWithRules = options.validateWithRules
         core.onChange = listeners::fire
     }
+
+    @RendererApi
+    public var storedFileName: ((String) -> String?)? = null
 
     public val definition: FormDefinition get() = core.definition
     public val values: JsonObject get() = if (core.visibility.keep) core.keptJson() else core.values.json

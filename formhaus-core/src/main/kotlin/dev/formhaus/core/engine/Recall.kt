@@ -48,8 +48,11 @@ internal fun substitute(
 private fun answerText(
     field: FormField,
     item: JsonValue,
+    fileName: ((String) -> String?)?,
 ): RecallAnswer {
     item.objectValue?.let { return RecallAnswer.Text(it["name"]?.stringValue ?: "") }
+    val stored = if (field.type == "file") item.stringValue?.let { fileName?.invoke(it) } else null
+    if (stored != null) return RecallAnswer.Text(stored)
     val label = field.optionIndex?.position(item)?.let { field.options?.get(it)?.label }
     if (label != null) return RecallAnswer.Text(label)
     if (item is JsonValue.Number) return RecallAnswer.Number(item.value)
@@ -59,6 +62,7 @@ private fun answerText(
 internal fun recallAnswer(
     field: FormField,
     value: JsonValue?,
+    fileName: ((String) -> String?)? = null,
 ): RecallAnswer? {
     if (value == null || value.isNull) return null
     if (field.isGroup) return value.arrayValue?.let { RecallAnswer.Number(it.size.toDouble()) }
@@ -67,13 +71,13 @@ internal fun recallAnswer(
     }
     val items = value.arrayValue
     if (items == null) {
-        val single = answerText(field, value)
+        val single = answerText(field, value, fileName)
         return if (single is RecallAnswer.Text && single.text.isBlankText) null else single
     }
     if (items.isEmpty()) return null
     return RecallAnswer.Items(
         items.map { item ->
-            answerText(field, item).let { if (it is RecallAnswer.Text) it.text else it.stored }
+            answerText(field, item, fileName).let { if (it is RecallAnswer.Text) it.text else it.stored }
         },
     )
 }
@@ -83,6 +87,7 @@ internal class RecallScope(
     private val values: JsonObject,
     private val lang: String? = null,
     private val format: RecallFormatFn? = null,
+    private val fileName: ((String) -> String?)? = null,
     private val active: (String) -> FormField?,
 ) {
     fun resolver(options: RecallOptions): KeyResolver {
@@ -114,7 +119,7 @@ internal class RecallScope(
         val candidates = if (own == null) visibility.index.fieldsByKey[key].orEmpty() else shared.filter { it.key == key }
         val field = if (candidates.any { it.type == "password" }) null else own ?: active(key)
         val source = if (own == null) values else entry ?: MutableJsonObject()
-        val answer = if (field != null && key in source) recallAnswer(field, source[key]) else null
+        val answer = if (field != null && key in source) recallAnswer(field, source[key], fileName) else null
         return if (field != null && answer != null) format(answer, field, locale) else ""
     }
 }

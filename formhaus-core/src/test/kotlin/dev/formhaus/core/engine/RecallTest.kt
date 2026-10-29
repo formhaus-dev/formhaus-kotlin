@@ -101,6 +101,24 @@ class RecallTest {
     }
 
     @Test
+    fun `stored files recall their names and other values stay as written`() {
+        val engine =
+            engine(
+                """{"formatVersion":"1.5","id":"f","submit":{"label":"S"},"fields":[
+                {"key":"cv","type":"file","label":"CV"},{"key":"docs","type":"file","label":"Docs"},
+                {"key":"ref","type":"file","label":"Ref"},{"key":"note","type":"text","label":"Note"}]}""",
+                """{"cv":"file:///up/cv.pdf","docs":["file:///up/a.pdf","upload-1"],"ref":"upload-2","note":"file:///up/n.pdf"}""",
+                FormEngineOptions(formatRecall = storedFormat),
+            )
+        assertEquals("file:///up/cv.pdf | upload-2", engine.recallText("{{cv}} | {{ref}}"))
+        engine.storedFileName = { it.removePrefix("file:///up/").takeIf { name -> name != it } }
+        assertEquals(
+            "cv.pdf | a.pdf, upload-1 | upload-2 | file:///up/n.pdf",
+            engine.recallText("{{cv}} | {{docs}} | {{ref}} | {{note}}"),
+        )
+    }
+
+    @Test
     fun `the default formatter falls back to the stored text and to en`() {
         assertEquals("2027-02-30", formatted(RecallAnswer.Text("2027-02-30"), "date"))
         assertEquals("1e+21", formatted(RecallAnswer.Number(1e21), "number"))

@@ -8,7 +8,7 @@ import dev.formhaus.core.validation.hasRecallBraces
 internal fun FormEngine.recallScope(): RecallScope {
     val visibility = core.visibility
     val values = core.values.json
-    return RecallScope(visibility, core.getSubmitValues(), options.lang, options.recallFormat) {
+    return RecallScope(visibility, core.getSubmitValues(), options.lang, options.recallFormat, storedFileName) {
         visibility.activeField(it, values)
     }
 }

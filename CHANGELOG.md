@@ -14,6 +14,7 @@
 - `validateSubmission` accepts a file list as an array of string references. A single string counts as a list of one. `""` and `null` entries are dropped. Any other entry fails the field with the `file` message.
 - New renderer API `FormEngine.maxItemsMessage(field)`.
 - New label `fileCount`, `Files: {count}`, in every bundled catalog.
+- New renderer API `FormEngine.storedFileName`. Recall shows the name it returns for each string value of a `file` field, instead of the stored value.
 
 ### formhaus-compose
 
@@ -21,6 +22,7 @@
 - New `FormModel.pickedFiles(key)`.
 - After a restore, a file list drops uploads whose file is gone.
 - The `validateWithRules` engine option reaches `FormhausForm` and `FormModel`.
+- Fixed `{{key}}` recall of a picked file showing its `file://` path instead of its name. `FormModel` keeps a `storedFileName` callback set by the app and asks it first.
 
 ## 0.7.0
 
