@@ -30,6 +30,7 @@ internal fun PickerInput(
     cleared: JsonValue,
     valueText: String,
     open: () -> Unit,
+    below: @Composable () -> Unit = {},
     label: @Composable () -> Unit,
 ) {
     val tokens = LocalFormhausTokens.current
@@ -57,5 +58,6 @@ internal fun PickerInput(
             }
             FieldAccessories(context, clearable) { context.setValue(cleared) }
         }
+        below()
     }
 }

@@ -16,6 +16,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import dev.formhaus.compose.form.FieldContext
 import kotlinx.coroutines.launch
+import java.io.File
 
 internal const val ANY_FILE = "*" + "/" + "*"
 
@@ -31,27 +32,44 @@ internal class FilePicker {
 }
 
 @Composable
-internal fun rememberFilePicker(context: FieldContext): FilePicker {
+internal fun rememberFilePicker(
+    context: FieldContext,
+    receive: (List<File>) -> Unit,
+): FilePicker {
     val android = LocalContext.current
     val types = acceptedTypes(context.field.accept?.stringValue)
     val photos = types.all { it.startsWith("image/") }
     val picker = remember { FilePicker() }
-    val received: (Uri?) -> Unit = { uri ->
+    val received: (List<Uri>) -> Unit = { uris ->
         picker.active = false
-        if (uri != null) {
+        if (uris.isNotEmpty()) {
             context.model.scope.launch {
-                val copy =
-                    UploadStore.copy(
-                        android.cacheDir,
-                        context.model.uploadOwner,
-                        { android.displayName(uri) },
-                    ) { android.contentResolver.openInputStream(uri) }
-                if (copy != null) context.replaceFile(copy)
+                val copies =
+                    uris.mapNotNull { uri ->
+                        UploadStore.copy(
+                            android.cacheDir,
+                            context.model.uploadOwner,
+                            { android.displayName(uri) },
+                        ) { android.contentResolver.openInputStream(uri) }
+                    }
+                if (copies.isNotEmpty()) receive(copies)
             }
         }
     }
-    val documents = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument(), received)
-    val media = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia(), received)
+    val one: (Uri?) -> Unit = { received(listOfNotNull(it)) }
+    val multiple = context.field.isFileList
+    val documents =
+        if (multiple) {
+            rememberLauncherForActivityResult(ActivityResultContracts.OpenMultipleDocuments(), received)
+        } else {
+            rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument(), one)
+        }
+    val media =
+        if (multiple) {
+            rememberLauncherForActivityResult(ActivityResultContracts.PickMultipleVisualMedia(), received)
+        } else {
+            rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia(), one)
+        }
     picker.launch = {
         if (photos) {
             media.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
