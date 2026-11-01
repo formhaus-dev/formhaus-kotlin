@@ -98,6 +98,7 @@ public class FormEngine(
     public val isFirstStep: Boolean get() = core.isFirstStep
     public val isLastStep: Boolean get() = core.isLastStep
     public val canGoNext: Boolean get() = core.canGoNext
+    public val resetCount: Int get() = core.resetCount
 
     public var locale: List<LocaleCatalog>
         get() = core.locale
