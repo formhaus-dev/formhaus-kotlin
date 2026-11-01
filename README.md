@@ -110,6 +110,18 @@ FormhausForm(
 
 A snapshot restores the values, the current step, the skipped steps and the option order seed without running validation. A snapshot of another form or another snapshot version, or one whose step no longer exists, starts the form fresh and reports a `snapshot-mismatch` warning. `restoring` replaces `initialValues` and takes precedence over the state `FormhausForm` saved for process death. A snapshot leaves out the values of `password` fields, so they are empty after a restore. `FormModel` takes the same two parameters, and `FormEngine` takes `restoring` and has `snapshot()`.
 
+### Unsaved changes
+
+`FormModel.dirty` is Compose state that is `true` while the submit payload differs from the values the model started with. `dirtyKeys` lists the changed keys, with `group.0.field` paths for edited group items. `markClean()` takes the current values as the new baseline, and `engine.reset(values)` does too:
+
+```kotlin
+Button(onClick = { save(form.engine.getSubmitValues()); form.markClean() }, enabled = form.dirty) {
+    Text("Save")
+}
+```
+
+Without Compose, `engine.trackDirty()` from `dev.formhaus.core.dirty` returns a `DirtyTracker` with the same `dirty`, `dirtyKeys` and `markClean()`, plus `subscribe` and `stop()`.
+
 ## Quick start without a UI
 
 `FormEngine` runs the same form without a UI, for a renderer of your own or a server. `next`, `back`, `skip` and `submit` are `suspend` functions, because hooks and the submit handler can wait on the network:
