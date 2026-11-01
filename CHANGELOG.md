@@ -1,5 +1,16 @@
 # Changelog
 
+## Unreleased
+
+### formhaus-core
+
+- New `FormEngine.trackDirty()` in `dev.formhaus.core.dirty` returns a `DirtyTracker` with `isDirty`, `dirtyKeys`, `markClean()`, `subscribe` and `stop()`. It compares the submit payload with a baseline, as in `@formhaus/core/dirty`.
+- New `FormEngine.resetCount`.
+
+### formhaus-compose
+
+- New `FormModel.isDirty`, `FormModel.dirtyKeys` and `FormModel.markClean()`.
+
 ## 0.8.1
 
 ### formhaus-compose

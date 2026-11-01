@@ -403,6 +403,7 @@ public final class dev/formhaus/compose/model/FormModel {
 	public final fun getActionError ()Ljava/lang/String;
 	public final fun getActions ()Ldev/formhaus/core/renderer/FormActionsState;
 	public final fun getDefinition ()Ldev/formhaus/core/model/FormDefinition;
+	public final fun getDirtyKeys ()Ljava/util/List;
 	public final fun getDisabled ()Z
 	public final fun getEngine ()Ldev/formhaus/core/engine/FormEngine;
 	public final fun getErrorGroups ()Ljava/util/List;
@@ -419,8 +420,10 @@ public final class dev/formhaus/compose/model/FormModel {
 	public final fun getValuesVersion ()I
 	public final fun getVersion ()I
 	public final fun group (Ljava/lang/String;)Ldev/formhaus/compose/model/GroupState;
+	public final fun isDirty ()Z
 	public final fun label (Ljava/lang/String;Ldev/formhaus/core/json/StringMap;)Ljava/lang/String;
 	public static synthetic fun label$default (Ldev/formhaus/compose/model/FormModel;Ljava/lang/String;Ldev/formhaus/core/json/StringMap;ILjava/lang/Object;)Ljava/lang/String;
+	public final fun markClean ()V
 	public final fun setLoading (Z)V
 	public final fun start ()V
 }

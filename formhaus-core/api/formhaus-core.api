@@ -122,6 +122,18 @@ public final class dev/formhaus/core/definitionvalidation/IssueCode$Companion {
 	public final fun getUNSUPPORTED_FORMAT_VERSION-SGZMid8 ()Ljava/lang/String;
 }
 
+public final class dev/formhaus/core/dirty/DirtyTracker {
+	public final fun getDirtyKeys ()Ljava/util/List;
+	public final fun isDirty ()Z
+	public final fun markClean ()V
+	public final fun stop ()V
+	public final fun subscribe (Lkotlin/jvm/functions/Function0;)Lkotlin/jvm/functions/Function0;
+}
+
+public final class dev/formhaus/core/dirty/DirtyTrackerKt {
+	public static final fun trackDirty (Ldev/formhaus/core/engine/FormEngine;)Ldev/formhaus/core/dirty/DirtyTracker;
+}
+
 public final class dev/formhaus/core/engine/FormEngine {
 	public fun <init> (Ldev/formhaus/core/json/JsonValue;Ldev/formhaus/core/json/StringMap;Ldev/formhaus/core/engine/FormEngineOptions;Ldev/formhaus/core/engine/FormSnapshot;)V
 	public synthetic fun <init> (Ldev/formhaus/core/json/JsonValue;Ldev/formhaus/core/json/StringMap;Ldev/formhaus/core/engine/FormEngineOptions;Ldev/formhaus/core/engine/FormSnapshot;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -138,6 +150,7 @@ public final class dev/formhaus/core/engine/FormEngine {
 	public final fun getFieldLoading ()Ldev/formhaus/core/json/StringMap;
 	public final fun getLocale ()Ljava/util/List;
 	public final fun getProgress ()Ldev/formhaus/core/engine/StepProgress;
+	public final fun getResetCount ()I
 	public final fun getSeed ()Ljava/lang/String;
 	public final fun getStepErrors ()Ldev/formhaus/core/json/StringMap;
 	public final fun getStepValidating ()Z

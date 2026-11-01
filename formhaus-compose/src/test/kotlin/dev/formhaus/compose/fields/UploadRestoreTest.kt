@@ -62,6 +62,7 @@ class UploadRestoreTest {
         val live = stored("kept.pdf").apply { parentFile?.mkdirs() }.apply { writeText("cv") }
         val form = build(snapshot(dead, live))
         if (attachLate) form.attachUploads(cache)
+        assertFalse(form.isDirty)
         val values = form.engine.values
         assertEquals(JsonValue.Null, values["doc"])
         assertEquals(fileValue(live), values["extra"]?.stringValue)

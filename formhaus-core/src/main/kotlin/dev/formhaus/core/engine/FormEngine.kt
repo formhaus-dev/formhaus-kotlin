@@ -20,6 +20,8 @@ internal class Listeners {
     private var next = 0
     private val entries = ArrayList<Pair<Int, () -> Unit>>()
 
+    val isEmpty: Boolean get() = entries.isEmpty()
+
     fun add(listener: () -> Unit): Int {
         next += 1
         entries.add(next to listener)
@@ -98,6 +100,7 @@ public class FormEngine(
     public val isFirstStep: Boolean get() = core.isFirstStep
     public val isLastStep: Boolean get() = core.isLastStep
     public val canGoNext: Boolean get() = core.canGoNext
+    public val resetCount: Int get() = core.resetCount
 
     public var locale: List<LocaleCatalog>
         get() = core.locale

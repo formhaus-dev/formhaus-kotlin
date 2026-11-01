@@ -1,6 +1,7 @@
 package dev.formhaus.compose.model
 
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -9,6 +10,7 @@ import dev.formhaus.compose.fields.UploadStore
 import dev.formhaus.compose.fields.pruneUploads
 import dev.formhaus.compose.fields.reconcileUploads
 import dev.formhaus.compose.fields.releaseUploads
+import dev.formhaus.core.dirty.trackDirty
 import dev.formhaus.core.engine.FormEngine
 import dev.formhaus.core.engine.FormEngineOptions
 import dev.formhaus.core.engine.FormSnapshot
@@ -132,6 +134,13 @@ public class FormModel private constructor(
         }
     public var disabled: Boolean by mutableStateOf(false)
         private set
+    internal val dirtyTracker = engine.trackDirty()
+    private var dirtyWatch: (() -> Unit)? = null
+    private var dirtyKeysState by mutableStateOf(emptyList<String>())
+    private val dirtyState by derivedStateOf { dirtyKeysState.isNotEmpty() }
+    public val isDirty: Boolean get() = watchDirty().let { dirtyState }
+    public val dirtyKeys: List<String> get() = watchDirty().let { dirtyKeysState }
+    internal val watchesDirty: Boolean get() = dirtyWatch != null
 
     internal val fieldStates = mutableMapOf<String, FieldState>()
     private val groupStates = mutableMapOf<String, GroupState>()
@@ -175,10 +184,22 @@ public class FormModel private constructor(
         emitValues()
     }
 
+    public fun markClean() {
+        watchDirty()
+        dirtyTracker.markClean()
+    }
+
+    private fun watchDirty() {
+        if (dirtyWatch != null || closed) return
+        dirtyWatch = dirtyTracker.subscribe { dirtyKeysState = dirtyTracker.dirtyKeys }
+        dirtyKeysState = dirtyTracker.dirtyKeys
+    }
+
     public fun close() {
         if (closed) return
         closed = true
         unsubscribe()
+        dirtyTracker.stop()
         snapshots.close()
         if (!engine.sending) {
             engine.cancelPendingActions()

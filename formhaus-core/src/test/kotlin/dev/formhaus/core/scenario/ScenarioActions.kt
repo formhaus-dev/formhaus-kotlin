@@ -1,5 +1,6 @@
 package dev.formhaus.core.scenario
 
+import dev.formhaus.core.dirty.DirtyTracker
 import dev.formhaus.core.engine.FormEngine
 import dev.formhaus.core.engine.SubmitHandler
 import dev.formhaus.core.engine.SubmitResult
@@ -10,6 +11,7 @@ import dev.formhaus.core.model.FieldOption
 
 class ScenarioActions(
     private val engine: FormEngine,
+    private val tracker: DirtyTracker,
     private val file: ScenarioFile,
     private val script: Script,
     private val log: EventLog,
@@ -34,6 +36,7 @@ class ScenarioActions(
             "validateField" to { step -> engine.validateField(key(step))?.let(JsonValue::String) },
             "goToStepWithField" to { step -> engine.goToStepWithField(key(step)).let { null } },
             "goToStep" to { step -> json(engine.goToStep(step["stepId"]?.stringValue.orEmpty())) },
+            "markClean" to { _ -> tracker.markClean().let { null } },
             "reset" to { step -> engine.reset(step["values"]?.objectValue).let { null } },
             "replaceDefinition" to { step -> engine.replaceDefinition(file.localized(step["definition"] ?: JsonValue.Null)).let { null } },
             "orderOptions" to { step ->
