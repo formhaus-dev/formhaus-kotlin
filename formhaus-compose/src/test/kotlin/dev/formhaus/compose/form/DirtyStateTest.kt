@@ -1,0 +1,52 @@
+package dev.formhaus.compose.form
+
+import androidx.compose.foundation.layout.Column
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
+import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.hasContentDescription
+import androidx.compose.ui.test.hasSetTextAction
+import androidx.compose.ui.test.junit4.v2.createComposeRule
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextInput
+import dev.formhaus.compose.model.model
+import org.junit.Assert.assertEquals
+import org.junit.Rule
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+
+private val profile =
+    """
+    {"id": "profile", "title": "Profile", "submit": {"label": "Send"},
+     "fields": [{"key": "name", "type": "text", "label": "Name"}]}
+    """.trimIndent()
+
+@RunWith(RobolectricTestRunner::class)
+class DirtyStateTest {
+    @get:Rule
+    val compose = createComposeRule()
+
+    @Test
+    fun saveIsEnabledOnlyWhileTheFormHasUnsavedChanges() {
+        val form = model(profile, """{"name": "Ada"}""")
+        compose.setContent {
+            Column {
+                Button(onClick = form::markClean, enabled = form.dirty) { Text("Save changes") }
+                FormhausForm(form)
+            }
+        }
+        val save = compose.onNodeWithText("Save changes")
+        val name = compose.onNode(hasContentDescription("Name") and hasSetTextAction())
+        save.assertIsNotEnabled()
+        name.performTextInput("!")
+        save.assertIsEnabled()
+        assertEquals(listOf("name"), form.dirtyKeys)
+        save.performClick()
+        save.assertIsNotEnabled()
+        name.performTextInput("?")
+        save.assertIsEnabled()
+    }
+}

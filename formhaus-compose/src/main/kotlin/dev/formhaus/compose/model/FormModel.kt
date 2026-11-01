@@ -9,6 +9,7 @@ import dev.formhaus.compose.fields.UploadStore
 import dev.formhaus.compose.fields.pruneUploads
 import dev.formhaus.compose.fields.reconcileUploads
 import dev.formhaus.compose.fields.releaseUploads
+import dev.formhaus.core.dirty.trackDirty
 import dev.formhaus.core.engine.FormEngine
 import dev.formhaus.core.engine.FormEngineOptions
 import dev.formhaus.core.engine.FormSnapshot
@@ -132,6 +133,11 @@ public class FormModel private constructor(
         }
     public var disabled: Boolean by mutableStateOf(false)
         private set
+    private val dirtyTracker = engine.trackDirty()
+    public var dirty: Boolean by mutableStateOf(false)
+        private set
+    public var dirtyKeys: List<String> by mutableStateOf(emptyList())
+        private set
 
     internal val fieldStates = mutableMapOf<String, FieldState>()
     private val groupStates = mutableMapOf<String, GroupState>()
@@ -150,6 +156,10 @@ public class FormModel private constructor(
         val appFileName = engine.storedFileName
         engine.storedFileName = { appFileName?.invoke(it) ?: UploadStore.owned(it, uploadOwner)?.name }
         refreshStatus()
+        dirtyTracker.subscribe {
+            dirtyKeys = dirtyTracker.dirtyKeys
+            dirty = dirtyTracker.dirty
+        }
         unsubscribe = engine.subscribe(::refresh)
         reconcileUploads()
     }
@@ -175,10 +185,15 @@ public class FormModel private constructor(
         emitValues()
     }
 
+    public fun markClean() {
+        dirtyTracker.markClean()
+    }
+
     public fun close() {
         if (closed) return
         closed = true
         unsubscribe()
+        dirtyTracker.stop()
         snapshots.close()
         if (!engine.sending) {
             engine.cancelPendingActions()
