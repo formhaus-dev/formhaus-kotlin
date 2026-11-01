@@ -1,5 +1,6 @@
 package dev.formhaus.core.scenario
 
+import dev.formhaus.core.dirty.trackDirty
 import dev.formhaus.core.engine.FormEngine
 import dev.formhaus.core.engine.SubmitHandler
 import dev.formhaus.core.engine.SubmitResult
@@ -30,8 +31,9 @@ class ScenarioRun(
     private val launched = ArrayList<Job>()
     private val engine =
         FormEngine(file.runtime(scenario), scenario["values"]?.objectValue ?: MutableJsonObject(), hooks.options())
-    private val actions = ScenarioActions(engine, file, script, log)
-    private val reader = EngineReader(engine, log)
+    private val tracker = engine.trackDirty()
+    private val actions = ScenarioActions(engine, tracker, file, script, log)
+    private val reader = EngineReader(engine, tracker, log)
 
     private fun check(
         label: String,

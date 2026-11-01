@@ -1,5 +1,6 @@
 package dev.formhaus.core.scenario
 
+import dev.formhaus.core.dirty.DirtyTracker
 import dev.formhaus.core.engine.FormEngine
 import dev.formhaus.core.json.JsonObject
 import dev.formhaus.core.json.JsonValue
@@ -7,6 +8,7 @@ import dev.formhaus.core.json.MutableJsonObject
 
 class EngineReader(
     private val engine: FormEngine,
+    private val tracker: DirtyTracker,
     private val log: EventLog,
 ) {
     private val plain: Map<String, () -> JsonValue> =
@@ -37,6 +39,8 @@ class EngineReader(
                     "total" to JsonValue.Number(engine.progress.total),
                 )
             },
+            "dirty" to { JsonValue.Bool(tracker.dirty) },
+            "dirtyKeys" to { json(tracker.dirtyKeys) },
             "submitting" to { JsonValue.Bool(engine.submitting) },
             "stepValidating" to { JsonValue.Bool(engine.stepValidating) },
             "fieldLoading" to { objectOf(engine.fieldLoading.map { (key, flag) -> key to JsonValue.Bool(flag) }) },
