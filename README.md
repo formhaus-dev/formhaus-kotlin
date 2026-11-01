@@ -112,15 +112,15 @@ A snapshot restores the values, the current step, the skipped steps and the opti
 
 ### Unsaved changes
 
-`FormModel.dirty` is Compose state that is `true` while the submit payload differs from the values the model started with. A model that never reads `dirty` or `dirtyKeys` compares nothing. `dirtyKeys` lists the changed keys, with `group.0.field` paths for edited group items. `markClean()` takes the current values as the new baseline, and `engine.reset(values)` does too:
+`FormModel.isDirty` is Compose state that is `true` while the submit payload differs from the values the model started with. A model that never reads `isDirty` or `dirtyKeys` compares nothing. `dirtyKeys` lists the changed keys, with `group.0.field` paths for edited group items. `markClean()` takes the current values as the new baseline, and `engine.reset(values)` does too:
 
 ```kotlin
-Button(onClick = { save(form.engine.getSubmitValues()); form.markClean() }, enabled = form.dirty) {
+Button(onClick = { save(form.engine.getSubmitValues()); form.markClean() }, enabled = form.isDirty) {
     Text("Save")
 }
 ```
 
-Without Compose, `engine.trackDirty()` from `dev.formhaus.core.dirty` returns a `DirtyTracker` with the same `dirty`, `dirtyKeys` and `markClean()`, plus `subscribe` and `stop()`.
+Without Compose, `engine.trackDirty()` from `dev.formhaus.core.dirty` returns a `DirtyTracker` with the same `isDirty`, `dirtyKeys` and `markClean()`, plus `subscribe` and `stop()`.
 
 ## Quick start without a UI
 
