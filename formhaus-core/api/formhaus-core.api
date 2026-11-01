@@ -123,8 +123,8 @@ public final class dev/formhaus/core/definitionvalidation/IssueCode$Companion {
 }
 
 public final class dev/formhaus/core/dirty/DirtyTracker {
-	public final fun getDirty ()Z
 	public final fun getDirtyKeys ()Ljava/util/List;
+	public final fun isDirty ()Z
 	public final fun markClean ()V
 	public final fun stop ()V
 	public final fun subscribe (Lkotlin/jvm/functions/Function0;)Lkotlin/jvm/functions/Function0;

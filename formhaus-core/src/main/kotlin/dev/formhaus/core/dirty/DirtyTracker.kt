@@ -13,10 +13,9 @@ private class Baseline(
     val definition: FormDefinition,
     val values: JsonObject,
     val skipped: List<Pair<String, List<String>>>,
-) {
-    var compared: FormDefinition? = null
-    var payload: JsonObject? = null
-}
+    var compared: FormDefinition,
+    var payload: JsonObject,
+)
 
 private class Inputs(
     val definition: FormDefinition,
@@ -45,7 +44,7 @@ public class DirtyTracker internal constructor(
             return keys
         }
 
-    public val dirty: Boolean get() = dirtyKeys.isNotEmpty()
+    public val isDirty: Boolean get() = dirtyKeys.isNotEmpty()
 
     public fun markClean() {
         baseline = capture()
@@ -56,8 +55,8 @@ public class DirtyTracker internal constructor(
     }
 
     public fun subscribe(listener: () -> Unit): () -> Unit {
-        val id = listeners.add(listener)
         refresh()
+        val id = listeners.add(listener)
         return { listeners.remove(id) }
     }
 
@@ -66,7 +65,10 @@ public class DirtyTracker internal constructor(
         unsubscribe()
     }
 
-    private fun capture(): Baseline = Baseline(engine.definition, engine.values, skipped())
+    private fun capture(): Baseline {
+        val definition = engine.definition
+        return Baseline(definition, engine.values, skipped(), definition, engine.getSubmitValues())
+    }
 
     private fun skipped(): List<Pair<String, List<String>>> = engine.core.skipped.map { it.id to it.keys }
 
@@ -92,13 +94,12 @@ public class DirtyTracker internal constructor(
     }
 
     private fun payload(definition: FormDefinition): JsonObject {
-        val known = baseline.payload
-        if (known != null && baseline.compared === definition) return known
+        if (baseline.compared === definition) return baseline.payload
         val options = engine.options
         val shadow =
             EngineCore(baseline.definition, baseline.values, options.validators, keep = options.hiddenValues == HiddenValues.KEEP)
         for ((id, keys) in baseline.skipped) shadow.markSkipped(id, keys)
-        if (definition !== baseline.definition) shadow.replaceDefinition(definition)
+        shadow.replaceDefinition(definition)
         return shadow.getSubmitValues(payload = true).also {
             baseline.compared = definition
             baseline.payload = it

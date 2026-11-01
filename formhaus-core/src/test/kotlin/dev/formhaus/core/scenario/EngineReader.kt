@@ -39,7 +39,7 @@ class EngineReader(
                     "total" to JsonValue.Number(engine.progress.total),
                 )
             },
-            "dirty" to { JsonValue.Bool(tracker.dirty) },
+            "dirty" to { JsonValue.Bool(tracker.isDirty) },
             "dirtyKeys" to { json(tracker.dirtyKeys) },
             "submitting" to { JsonValue.Bool(engine.submitting) },
             "stepValidating" to { JsonValue.Bool(engine.stepValidating) },

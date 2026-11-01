@@ -39,7 +39,7 @@ class DirtyStateTest {
         val form = model(profile, """{"name": "Ada"}""")
         compose.setContent {
             Column {
-                Button(onClick = form::markClean, enabled = form.dirty) { Text("Save changes") }
+                Button(onClick = form::markClean, enabled = form.isDirty) { Text("Save changes") }
                 FormhausForm(form)
             }
         }
@@ -68,7 +68,7 @@ class DirtyStateTest {
     fun editsBeforeTheFirstReadCount() {
         val form = model(profile, """{"name": "Ada"}""")
         form.setValue("name", JsonValue.String("Grace"))
-        assertTrue(form.dirty)
+        assertTrue(form.isDirty)
         assertEquals(listOf("name"), form.dirtyKeys)
     }
 
@@ -77,7 +77,7 @@ class DirtyStateTest {
         val form = model(profile, """{"name": "Ada"}""")
         form.setValue("name", JsonValue.String("Grace"))
         form.engine.reset(values("""{"name": "Lin"}"""))
-        assertFalse(form.dirty)
+        assertFalse(form.isDirty)
         form.setValue("name", JsonValue.String("Ada"))
         assertEquals(listOf("name"), form.dirtyKeys)
     }

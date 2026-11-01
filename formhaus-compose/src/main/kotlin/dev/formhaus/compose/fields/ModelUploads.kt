@@ -49,7 +49,11 @@ internal fun FormModel.attachUploads(cache: File) {
 
 internal fun FormModel.reconcileUploads() {
     val dead = engine.values.mapNotNull { (key, value) -> value.withoutDeadUploads()?.let { key to it } }
-    for ((key, value) in dead) engine.setValue(key, value)
+    if (dead.isNotEmpty()) {
+        val clean = dirtyTracker.dirtyKeys.isEmpty()
+        for ((key, value) in dead) engine.setValue(key, value)
+        if (clean) dirtyTracker.markClean()
+    }
     val files = HashSet<String>()
     for (value in engine.values.values) value.collectFiles(files)
     for (file in files) UploadStore.adopt(file, uploadOwner)

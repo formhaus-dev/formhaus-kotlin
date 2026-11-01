@@ -134,11 +134,11 @@ public class FormModel private constructor(
         }
     public var disabled: Boolean by mutableStateOf(false)
         private set
-    private val dirtyTracker = engine.trackDirty()
+    internal val dirtyTracker = engine.trackDirty()
     private var dirtyWatch: (() -> Unit)? = null
     private var dirtyKeysState by mutableStateOf(emptyList<String>())
     private val dirtyState by derivedStateOf { dirtyKeysState.isNotEmpty() }
-    public val dirty: Boolean get() = watchDirty().let { dirtyState }
+    public val isDirty: Boolean get() = watchDirty().let { dirtyState }
     public val dirtyKeys: List<String> get() = watchDirty().let { dirtyKeysState }
     internal val watchesDirty: Boolean get() = dirtyWatch != null
 

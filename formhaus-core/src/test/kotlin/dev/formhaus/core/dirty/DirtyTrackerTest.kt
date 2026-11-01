@@ -28,11 +28,23 @@ class DirtyTrackerTest {
         assertEquals(1, calls)
         engine.reset(jsonObject("""{"a":"9"}"""))
         assertEquals(2, calls)
-        assertFalse(tracker.dirty)
+        assertFalse(tracker.isDirty)
         unsubscribe()
         engine.setValue("a", text("4"))
         assertEquals(2, calls)
-        assertTrue(tracker.dirty)
+        assertTrue(tracker.isDirty)
+    }
+
+    @Test
+    fun `subscribe never calls the new listener`() {
+        val engine = engine(form)
+        val tracker = engine.trackDirty()
+        engine.setValue("a", text("1"))
+        var calls = 0
+        tracker.subscribe { calls += 1 }
+        assertTrue(tracker.isDirty)
+        assertEquals(listOf("a"), tracker.dirtyKeys)
+        assertEquals(0, calls)
     }
 
     @Test
@@ -49,7 +61,7 @@ class DirtyTrackerTest {
         val engine = engine(form, """{"x":{"b":[0,{"c":1}],"d":true}}""")
         val tracker = engine.trackDirty()
         engine.setValue("x", JsonValue.parse("""{"d":true,"b":[-0,{"c":1.0}]}"""))
-        assertFalse(tracker.dirty)
+        assertFalse(tracker.isDirty)
         engine.setValue("x", JsonValue.parse("""{"d":true,"b":[0,{"c":2}]}"""))
         assertEquals(listOf("x"), tracker.dirtyKeys)
     }
@@ -60,6 +72,6 @@ class DirtyTrackerTest {
         val tracker = engine.trackDirty()
         tracker.stop()
         engine.setValue("a", text("1"))
-        assertFalse(tracker.dirty)
+        assertFalse(tracker.isDirty)
     }
 }
