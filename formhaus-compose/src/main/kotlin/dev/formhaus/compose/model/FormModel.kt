@@ -9,6 +9,7 @@ import dev.formhaus.compose.fields.UploadStore
 import dev.formhaus.compose.fields.pruneUploads
 import dev.formhaus.compose.fields.reconcileUploads
 import dev.formhaus.compose.fields.releaseUploads
+import dev.formhaus.core.dirty.DirtyTracker
 import dev.formhaus.core.dirty.trackDirty
 import dev.formhaus.core.engine.FormEngine
 import dev.formhaus.core.engine.FormEngineOptions
@@ -133,11 +134,12 @@ public class FormModel private constructor(
         }
     public var disabled: Boolean by mutableStateOf(false)
         private set
-    private val dirtyTracker = engine.trackDirty()
-    public var dirty: Boolean by mutableStateOf(false)
-        private set
-    public var dirtyKeys: List<String> by mutableStateOf(emptyList())
-        private set
+    private var dirtyTracker: DirtyTracker? = null
+    private var dirtyState by mutableStateOf(false)
+    private var dirtyKeysState by mutableStateOf(emptyList<String>())
+    public val dirty: Boolean get() = dirtyState.also { trackDirty() }
+    public val dirtyKeys: List<String> get() = dirtyKeysState.also { trackDirty() }
+    internal val tracksDirty: Boolean get() = dirtyTracker != null
 
     internal val fieldStates = mutableMapOf<String, FieldState>()
     private val groupStates = mutableMapOf<String, GroupState>()
@@ -156,10 +158,6 @@ public class FormModel private constructor(
         val appFileName = engine.storedFileName
         engine.storedFileName = { appFileName?.invoke(it) ?: UploadStore.owned(it, uploadOwner)?.name }
         refreshStatus()
-        dirtyTracker.subscribe {
-            dirtyKeys = dirtyTracker.dirtyKeys
-            dirty = dirtyTracker.dirty
-        }
         unsubscribe = engine.subscribe(::refresh)
         reconcileUploads()
     }
@@ -186,14 +184,25 @@ public class FormModel private constructor(
     }
 
     public fun markClean() {
-        dirtyTracker.markClean()
+        trackDirty()?.markClean()
+    }
+
+    private fun trackDirty(): DirtyTracker? {
+        if (closed) return dirtyTracker
+        return dirtyTracker ?: engine.trackDirty().also { tracker ->
+            dirtyTracker = tracker
+            tracker.subscribe {
+                dirtyKeysState = tracker.dirtyKeys
+                dirtyState = tracker.dirty
+            }
+        }
     }
 
     public fun close() {
         if (closed) return
         closed = true
         unsubscribe()
-        dirtyTracker.stop()
+        dirtyTracker?.stop()
         snapshots.close()
         if (!engine.sending) {
             engine.cancelPendingActions()

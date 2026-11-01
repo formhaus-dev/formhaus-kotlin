@@ -13,6 +13,8 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import dev.formhaus.compose.model.model
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -48,5 +50,17 @@ class DirtyStateTest {
         save.assertIsNotEnabled()
         name.performTextInput("?")
         save.assertIsEnabled()
+    }
+
+    @Test
+    fun aModelThatNeverReadsItsDirtyStateComparesNoPayloads() {
+        val form = model(profile, """{"name": "Ada"}""")
+        compose.setContent { FormhausForm(form) }
+        compose.onNode(hasContentDescription("Name") and hasSetTextAction()).performTextInput("!")
+        compose.waitForIdle()
+        assertFalse(form.tracksDirty)
+        form.markClean()
+        assertTrue(form.tracksDirty)
+        assertFalse(form.dirty)
     }
 }

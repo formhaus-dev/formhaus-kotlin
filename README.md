@@ -112,7 +112,7 @@ A snapshot restores the values, the current step, the skipped steps and the opti
 
 ### Unsaved changes
 
-`FormModel.dirty` is Compose state that is `true` while the submit payload differs from the values the model started with. `dirtyKeys` lists the changed keys, with `group.0.field` paths for edited group items. `markClean()` takes the current values as the new baseline, and `engine.reset(values)` does too:
+`FormModel.dirty` is Compose state that is `true` while the submit payload differs from a baseline. Tracking starts on the first read of `dirty` or `dirtyKeys`, or the first `markClean()`, and takes the values at that moment as the baseline. A model that never reads them does no tracking work. `dirtyKeys` lists the changed keys, with `group.0.field` paths for edited group items. `markClean()` takes the current values as the new baseline, and `engine.reset(values)` does too:
 
 ```kotlin
 Button(onClick = { save(form.engine.getSubmitValues()); form.markClean() }, enabled = form.dirty) {
