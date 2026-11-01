@@ -1,6 +1,7 @@
 package dev.formhaus.compose.model
 
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -9,7 +10,6 @@ import dev.formhaus.compose.fields.UploadStore
 import dev.formhaus.compose.fields.pruneUploads
 import dev.formhaus.compose.fields.reconcileUploads
 import dev.formhaus.compose.fields.releaseUploads
-import dev.formhaus.core.dirty.DirtyTracker
 import dev.formhaus.core.dirty.trackDirty
 import dev.formhaus.core.engine.FormEngine
 import dev.formhaus.core.engine.FormEngineOptions
@@ -134,12 +134,13 @@ public class FormModel private constructor(
         }
     public var disabled: Boolean by mutableStateOf(false)
         private set
-    private var dirtyTracker: DirtyTracker? = null
-    private var dirtyState by mutableStateOf(false)
+    private val dirtyTracker = engine.trackDirty()
+    private var dirtyWatch: (() -> Unit)? = null
     private var dirtyKeysState by mutableStateOf(emptyList<String>())
-    public val dirty: Boolean get() = dirtyState.also { trackDirty() }
-    public val dirtyKeys: List<String> get() = dirtyKeysState.also { trackDirty() }
-    internal val tracksDirty: Boolean get() = dirtyTracker != null
+    private val dirtyState by derivedStateOf { dirtyKeysState.isNotEmpty() }
+    public val dirty: Boolean get() = watchDirty().let { dirtyState }
+    public val dirtyKeys: List<String> get() = watchDirty().let { dirtyKeysState }
+    internal val watchesDirty: Boolean get() = dirtyWatch != null
 
     internal val fieldStates = mutableMapOf<String, FieldState>()
     private val groupStates = mutableMapOf<String, GroupState>()
@@ -184,25 +185,21 @@ public class FormModel private constructor(
     }
 
     public fun markClean() {
-        trackDirty()?.markClean()
+        watchDirty()
+        dirtyTracker.markClean()
     }
 
-    private fun trackDirty(): DirtyTracker? {
-        if (closed) return dirtyTracker
-        return dirtyTracker ?: engine.trackDirty().also { tracker ->
-            dirtyTracker = tracker
-            tracker.subscribe {
-                dirtyKeysState = tracker.dirtyKeys
-                dirtyState = tracker.dirty
-            }
-        }
+    private fun watchDirty() {
+        if (dirtyWatch != null || closed) return
+        dirtyWatch = dirtyTracker.subscribe { dirtyKeysState = dirtyTracker.dirtyKeys }
+        dirtyKeysState = dirtyTracker.dirtyKeys
     }
 
     public fun close() {
         if (closed) return
         closed = true
         unsubscribe()
-        dirtyTracker?.stop()
+        dirtyTracker.stop()
         snapshots.close()
         if (!engine.sending) {
             engine.cancelPendingActions()

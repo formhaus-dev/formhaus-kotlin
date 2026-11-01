@@ -11,11 +11,12 @@ import dev.formhaus.core.model.FormDefinition
 
 private class Baseline(
     val definition: FormDefinition,
-    val compared: FormDefinition,
     val values: JsonObject,
     val skipped: List<Pair<String, List<String>>>,
-    val payload: JsonObject,
-)
+) {
+    var compared: FormDefinition? = null
+    var payload: JsonObject? = null
+}
 
 private class Inputs(
     val definition: FormDefinition,
@@ -32,11 +33,17 @@ public class DirtyTracker internal constructor(
     private val listeners = Listeners()
     private var baseline = capture()
     private var resetCount = engine.resetCount
-    private var seen: Inputs? = inputs()
-    private val unsubscribe: () -> Unit = engine.subscribe(::update)
+    private var seen: Inputs? = null
+    private var stale = true
+    private var stopped = false
+    private var keys: List<String> = emptyList()
+    private val unsubscribe: () -> Unit = engine.subscribe(::changed)
 
-    public var dirtyKeys: List<String> = emptyList()
-        private set
+    public val dirtyKeys: List<String>
+        get() {
+            refresh()
+            return keys
+        }
 
     public val dirty: Boolean get() = dirtyKeys.isNotEmpty()
 
@@ -44,50 +51,63 @@ public class DirtyTracker internal constructor(
         baseline = capture()
         resetCount = engine.resetCount
         seen = inputs()
+        stale = false
         publish(emptyList())
     }
 
     public fun subscribe(listener: () -> Unit): () -> Unit {
         val id = listeners.add(listener)
+        refresh()
         return { listeners.remove(id) }
     }
 
     public fun stop() {
+        stopped = true
         unsubscribe()
     }
 
-    private fun capture(): Baseline {
-        val definition = engine.definition
-        return Baseline(definition, definition, engine.values, skipped(), engine.getSubmitValues())
-    }
+    private fun capture(): Baseline = Baseline(engine.definition, engine.values, skipped())
 
     private fun skipped(): List<Pair<String, List<String>>> = engine.core.skipped.map { it.id to it.keys }
 
     private fun inputs(): Inputs = Inputs(engine.definition, engine.values, skipped())
 
-    private fun update() {
-        if (resetCount != engine.resetCount) return markClean()
+    private fun changed() {
+        if (resetCount != engine.resetCount) {
+            baseline = capture()
+            resetCount = engine.resetCount
+            seen = null
+        }
+        stale = true
+        if (!listeners.isEmpty) refresh()
+    }
+
+    private fun refresh() {
+        if (!stale || stopped) return
+        stale = false
         val current = inputs()
         if (current.same(seen)) return
         seen = current
-        if (baseline.compared !== current.definition) {
-            baseline = Baseline(baseline.definition, current.definition, baseline.values, baseline.skipped, replayed(current.definition))
-        }
-        publish(changedKeys(baseline.payload, engine.getSubmitValues()))
+        publish(changedKeys(payload(current.definition), engine.getSubmitValues()))
     }
 
-    private fun replayed(definition: FormDefinition): JsonObject {
+    private fun payload(definition: FormDefinition): JsonObject {
+        val known = baseline.payload
+        if (known != null && baseline.compared === definition) return known
         val options = engine.options
         val shadow =
             EngineCore(baseline.definition, baseline.values, options.validators, keep = options.hiddenValues == HiddenValues.KEEP)
         for ((id, keys) in baseline.skipped) shadow.markSkipped(id, keys)
-        shadow.replaceDefinition(definition)
-        return shadow.getSubmitValues(payload = true)
+        if (definition !== baseline.definition) shadow.replaceDefinition(definition)
+        return shadow.getSubmitValues(payload = true).also {
+            baseline.compared = definition
+            baseline.payload = it
+        }
     }
 
     private fun publish(next: List<String>) {
-        if (next == dirtyKeys) return
-        dirtyKeys = next
+        if (next == keys) return
+        keys = next
         listeners.fire()
     }
 }

@@ -12,6 +12,9 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import dev.formhaus.compose.model.model
+import dev.formhaus.compose.model.setValue
+import dev.formhaus.compose.model.values
+import dev.formhaus.core.json.JsonValue
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -58,9 +61,24 @@ class DirtyStateTest {
         compose.setContent { FormhausForm(form) }
         compose.onNode(hasContentDescription("Name") and hasSetTextAction()).performTextInput("!")
         compose.waitForIdle()
-        assertFalse(form.tracksDirty)
-        form.markClean()
-        assertTrue(form.tracksDirty)
+        assertFalse(form.watchesDirty)
+    }
+
+    @Test
+    fun editsBeforeTheFirstReadCount() {
+        val form = model(profile, """{"name": "Ada"}""")
+        form.setValue("name", JsonValue.String("Grace"))
+        assertTrue(form.dirty)
+        assertEquals(listOf("name"), form.dirtyKeys)
+    }
+
+    @Test
+    fun aResetBeforeTheFirstReadIsTheBaseline() {
+        val form = model(profile, """{"name": "Ada"}""")
+        form.setValue("name", JsonValue.String("Grace"))
+        form.engine.reset(values("""{"name": "Lin"}"""))
         assertFalse(form.dirty)
+        form.setValue("name", JsonValue.String("Ada"))
+        assertEquals(listOf("name"), form.dirtyKeys)
     }
 }
