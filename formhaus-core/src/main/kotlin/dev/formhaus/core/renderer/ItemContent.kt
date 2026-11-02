@@ -15,6 +15,7 @@ private fun hasContent(
 ): Boolean {
     val entry = item.objectValue ?: return false
     return fields.any { field ->
+        if (field.type == "hidden") return@any false
         val raw = entry[field.key]
         val value = raw?.stringValue?.let { JsonValue.String(it.jsTrimmed) } ?: raw
         !isBlank(value) && value != JsonValue.Bool(false) && value != field.defaultValue

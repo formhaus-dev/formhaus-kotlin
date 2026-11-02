@@ -18,21 +18,42 @@ import dev.formhaus.core.visibility.itemPath
 import dev.formhaus.core.visibility.itemScope
 import dev.formhaus.core.visibility.itemsOf
 
+private fun keysOf(
+    nodes: List<FormNode>,
+    errors: FieldErrors,
+    values: JsonObject,
+    hidden: Boolean,
+): List<String> {
+    if (errors.isEmpty()) return emptyList()
+    val own = { field: FormField -> (field.type == "hidden") == hidden }
+    return valueFields(nodes).flatMap { field ->
+        val top = if (own(field) && errors[field.key] != null) listOf(field.key) else emptyList()
+        if (!field.isGroup) return@flatMap top
+        val paths =
+            itemsOf(values[field.key]).indices.flatMap { index ->
+                field.items.filter(own).map { itemPath(field.key, index, it.key) }
+            }
+        top + paths.filter { errors[it] != null }
+    }
+}
+
 internal fun errorKeys(
     nodes: List<FormNode>,
     errors: FieldErrors,
     values: JsonObject,
-): List<String> {
+): List<String> = keysOf(nodes, errors, values, hidden = false)
+
+internal fun hiddenErrorKeys(
+    nodes: List<FormNode>,
+    errors: FieldErrors,
+    values: JsonObject,
+): List<String> = keysOf(nodes, errors, values, hidden = true)
+
+internal fun EngineCore.hiddenErrors(): List<String> {
     if (errors.isEmpty()) return emptyList()
-    return valueFields(nodes).flatMap { field ->
-        val own = if (field.type != "hidden" && errors[field.key] != null) listOf(field.key) else emptyList()
-        if (!field.isGroup) return@flatMap own
-        val paths =
-            itemsOf(values[field.key]).indices.flatMap { index ->
-                field.items.map { itemPath(field.key, index, it.key) }
-            }
-        own + paths.filter { errors[it] != null }
-    }
+    val json = values.json
+    val fields = visibility.allFields.filter { (visibility.activeField(it.key, json) ?: it).ordinal == it.ordinal }
+    return hiddenErrorKeys(fields, errors, json).mapNotNull { key -> errors[key]?.takeIf { it.isNotEmpty() } }
 }
 
 private inline fun <T> EngineCore.unsettleOnWrite(run: () -> T): T {
@@ -118,8 +139,8 @@ internal fun EngineCore.clearError(
 }
 
 internal fun EngineCore.clearPassedErrors(nodes: List<FormNode>) {
-    val hidden = valueFields(nodes).filter { it.type == "hidden" && errors[it.key] != null }.map { it.key }
-    for (key in errorKeys(nodes, errors, values.json) + hidden) clearError(key)
+    val json = values.json
+    for (key in errorKeys(nodes, errors, json) + hiddenErrorKeys(nodes, errors, json)) clearError(key)
 }
 
 internal fun EngineCore.dropServerErrors(keys: Iterable<String>) {

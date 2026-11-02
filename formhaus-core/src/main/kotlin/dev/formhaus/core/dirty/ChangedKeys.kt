@@ -10,7 +10,7 @@ internal fun sameValue(
 ): Boolean =
     when {
         lhs === rhs -> true
-        lhs is JsonValue.Number && rhs is JsonValue.Number -> lhs.value == rhs.value
+        lhs is JsonValue.Number && rhs is JsonValue.Number -> lhs.value == rhs.value || (lhs.value.isNaN() && rhs.value.isNaN())
         lhs is JsonValue.Array && rhs is JsonValue.Array -> sameItems(lhs.items, rhs.items)
         lhs is JsonValue.Object && rhs is JsonValue.Object -> sameMembers(lhs.members, rhs.members)
         else -> lhs == rhs

@@ -20,7 +20,7 @@ private fun StartValues.keptItems(
                 if (entry[field.key] != null) {
                     null
                 } else {
-                    itemStartValue(ids.getOrNull(position), field.key)?.let { field.key to it }
+                    itemStartValue(ids.getOrNull(position), field)?.let { field.key to it }
                 }
             }
         if (missing.isEmpty()) {

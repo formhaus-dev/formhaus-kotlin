@@ -25,12 +25,15 @@ internal class StartValues {
     private val memory = LinkedHashMap<String, ValueSlot>()
     private val itemSeeds = HashMap<Int, JsonObject>()
     private val itemMemory = HashMap<Int, MutableJsonObject>()
+    private val itemHidden = HashMap<Int, MutableSet<String>>()
+    private var groups: List<FormField> = emptyList()
     var itemEpoch = 0
         private set
 
     private fun forgetItems() {
         itemSeeds.clear()
         itemMemory.clear()
+        itemHidden.clear()
         itemEpoch += 1
     }
 
@@ -39,7 +42,7 @@ internal class StartValues {
         val ids = slot.ref?.items.orEmpty()
         itemsOf(slot.value).forEachIndexed { index, item ->
             val entry = item.objectValue ?: return@forEachIndexed
-            if (index < ids.size) itemSeeds[ids[index]] = entry
+            if (index < ids.size) itemSeeds.putIfAbsent(ids[index], entry)
         }
     }
 
@@ -48,6 +51,7 @@ internal class StartValues {
         groups: List<FormField>,
     ) {
         seeds = values.copy()
+        this.groups = groups
         memory.clear()
         forgetItems()
         for (group in groups) seedItems(values.slot(group.key))
@@ -72,7 +76,28 @@ internal class StartValues {
     ) {
         if (!remembering) return
         memory[key] = slot
-        if (written) writeWatch?.keys?.add(key)
+        if (!written) return
+        writeWatch?.keys?.add(key)
+        val group = groups.firstOrNull { it.key == key } ?: return
+        val ids = slot.ref?.items.orEmpty()
+        itemsOf(slot.value).forEachIndexed { index, item ->
+            val entry = item.objectValue ?: return@forEachIndexed
+            val id = ids.getOrNull(index) ?: return@forEachIndexed
+            if (id !in itemSeeds) itemSeeds[id] = writtenSeed(group, entry)
+        }
+    }
+
+    private fun writtenSeed(
+        group: FormField,
+        entry: JsonObject,
+    ): JsonObject {
+        val seed = MutableJsonObject()
+        for (field in group.items) {
+            val value = field.defaultValue
+            if (value == null) seed.remove(field.key) else seed[field.key] = value
+        }
+        for ((name, value) in entry) seed[name] = value
+        return seed
     }
 
     fun watchWrites(): Int = freshToken().also { writeWatch = WriteWatch(it) }
@@ -96,7 +121,20 @@ internal class StartValues {
         if (id == null) return
         itemSeeds.remove(id)
         itemMemory.remove(id)
+        itemHidden.remove(id)
     }
+
+    fun hideItem(
+        id: Int?,
+        key: String,
+    ) {
+        if (id != null) itemHidden.getOrPut(id, ::HashSet).add(key)
+    }
+
+    fun revealItem(
+        id: Int?,
+        key: String,
+    ): Boolean = id != null && itemHidden[id]?.remove(key) == true
 
     fun reseed(
         keys: List<String>,
@@ -130,10 +168,11 @@ internal class StartValues {
 
     fun itemStartValue(
         id: Int?,
-        key: String,
+        field: FormField,
     ): JsonValue? {
         if (id == null) return null
-        itemMemory[id]?.let { remembered -> if (key in remembered) return remembered[key] }
+        val key = field.key
+        if (field.type != "hidden") itemMemory[id]?.let { remembered -> if (key in remembered) return remembered[key] }
         return itemSeeds[id]?.get(key)
     }
 }

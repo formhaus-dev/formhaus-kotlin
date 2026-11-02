@@ -110,21 +110,7 @@ public class FormEngine(
                 core.notify()
             }
 
-    public val topLevelErrors: List<String>
-        get() {
-            val errors = core.errors
-            if (errors.isEmpty()) return core.topLevelErrors
-            val visibility = core.visibility
-            val hidden =
-                visibility.allFields.mapNotNull { field ->
-                    val message =
-                        errors[field.key]?.takeIf { field.type == "hidden" && it.isNotEmpty() }
-                            ?: return@mapNotNull null
-                    val active = visibility.activeField(field.key, core.values.json) ?: field
-                    if (active.ordinal == field.ordinal) message else null
-                }
-            return core.topLevelErrors + hidden
-        }
+    public val topLevelErrors: List<String> get() = core.topLevelErrors + core.hiddenErrors()
 
     public val stepErrors: StringMap<List<String>>
         get() {
