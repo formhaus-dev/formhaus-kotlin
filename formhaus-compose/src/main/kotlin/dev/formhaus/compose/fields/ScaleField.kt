@@ -20,6 +20,7 @@ import dev.formhaus.compose.components.FieldShell
 import dev.formhaus.compose.components.FieldShellVariant
 import dev.formhaus.compose.components.selectableSurface
 import dev.formhaus.compose.form.FieldContext
+import dev.formhaus.compose.form.readOnlyState
 import dev.formhaus.compose.model.formhausTestId
 import dev.formhaus.compose.theme.LocalFormhausTokens
 import dev.formhaus.compose.theme.TextRole
@@ -34,7 +35,7 @@ public fun ScaleField(context: FieldContext) {
     val focus = remember { ScaleFocus() }
     FieldShell(context, variant = FieldShellVariant.GROUP) {
         Column(Modifier.scaleInput(context, scale, current, focus), verticalArrangement = Arrangement.spacedBy(tokens.spacing.s2)) {
-            ColumnGrid(tokens.spacing.s2, ::scaleColumns, Modifier.scaleRing(focus).selectableGroup()) {
+            ColumnGrid(tokens.spacing.s2, ::scaleColumns, Modifier.scaleRing(focus).selectableGroup().readOnlyState(context)) {
                 for (point in scale.points) {
                     ScaleBox(
                         "$point",
@@ -74,7 +75,7 @@ private fun ScaleBox(
         modifier
             .fillMaxWidth()
             .heightIn(min = maxOf(tokens.controls.height, tokens.controls.hitTarget))
-            .selectableSurface(selected, invalid, solid = true, enabled = enabled, source = source)
+            .selectableSurface(selected, invalid, solid = true, enabled = enabled, source = source, readOnly = readOnly)
             .point(selected, source, enabled, readOnly, choose)
             .semantics { contentDescription = description },
         contentAlignment = Alignment.Center,

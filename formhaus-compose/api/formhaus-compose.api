@@ -58,7 +58,7 @@ public final class dev/formhaus/compose/components/IndicatorShape : java/lang/En
 
 public final class dev/formhaus/compose/components/InputChromeKt {
 	public static final fun focusRing-UuyPYSY (Landroidx/compose/ui/Modifier;ZFFLandroidx/compose/runtime/Composer;II)Landroidx/compose/ui/Modifier;
-	public static final fun inputChrome (Landroidx/compose/ui/Modifier;ZZZZZLandroidx/compose/runtime/Composer;II)Landroidx/compose/ui/Modifier;
+	public static final fun inputChrome (Landroidx/compose/ui/Modifier;ZZZZLandroidx/compose/runtime/Composer;II)Landroidx/compose/ui/Modifier;
 }
 
 public final class dev/formhaus/compose/components/OptionCardKt {

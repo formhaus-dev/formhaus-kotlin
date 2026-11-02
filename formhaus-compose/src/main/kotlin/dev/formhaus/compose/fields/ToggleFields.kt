@@ -36,6 +36,7 @@ import dev.formhaus.compose.components.formhausFocus
 import dev.formhaus.compose.components.readOnlyChoice
 import dev.formhaus.compose.components.textBottom
 import dev.formhaus.compose.form.FieldContext
+import dev.formhaus.compose.form.withReadOnly
 import dev.formhaus.compose.theme.LocalFormhausTokens
 import dev.formhaus.compose.theme.TextRole
 import dev.formhaus.compose.theme.textStyle
@@ -53,7 +54,7 @@ public fun CheckboxField(context: FieldContext) {
             context.label,
             Modifier
                 .formhausFocus(context, requester)
-                .semantics { contentDescription = context.accessibilityName },
+                .semantics { contentDescription = context.withReadOnly(context.accessibilityName) },
             invalid = context.isInvalid,
             enabled = !context.isLocked,
             readOnly = context.isReadOnly,
@@ -95,7 +96,7 @@ internal fun FormhausCheckbox(
         horizontalArrangement = Arrangement.spacedBy(tokens.spacing.s5),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        ChoiceIndicator(IndicatorShape.CHECKBOX, checked, alignedToText().focusRing(focused, tokens.radii.indicator), invalid)
+        ChoiceIndicator(IndicatorShape.CHECKBOX, checked, alignedToText().focusRing(focused, tokens.radii.indicator), invalid, readOnly)
         Text(label, Modifier.weight(1f).alignBy(FirstBaseline).textBottom(), style = tokens.textStyle(TextRole.option))
     }
 }
@@ -118,7 +119,7 @@ public fun SwitchField(context: FieldContext) {
                 .focusable(!context.isLocked && !context.isReadOnly, source)
                 .toggle(checked, source, !context.isLocked, context.isReadOnly, Role.Switch) {
                     context.setValue(JsonValue.Bool(it))
-                }.semantics { contentDescription = context.accessibilityName },
+                }.semantics { contentDescription = context.withReadOnly(context.accessibilityName) },
             horizontalArrangement = Arrangement.spacedBy(tokens.spacing.s5),
             verticalAlignment = Alignment.CenterVertically,
         ) {

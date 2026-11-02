@@ -76,12 +76,14 @@ private val workspace =
         {"value": "pro", "label": "Pro", "description": "Any number of seats"},
         {"value": "legacy", "label": "Legacy", "description": "No longer offered", "disabled": true}]},
       {"key": "seats", "type": "number", "label": "Seats", "readOnly": true},
+      {"key": "addons", "type": "multiselect", "label": "Add-ons", "readOnly": true, "options": [
+        {"value": "sso", "label": "Single sign-on"}, {"value": "audit", "label": "Audit log"}]},
       {"key": "tasks", "type": "group", "label": "Tasks", "reorderable": true, "itemLabel": "Task {index}", "fields": [
         {"key": "title", "type": "text", "label": "Title"}]}]}
     """.trimIndent()
 
 private const val WORKSPACE_VALUES =
-    """{"account": "acct-1042", "plan": "pro", "seats": 8, "tasks": [{"title": "Invite the team"}, {"title": "Set up billing"}]}"""
+    """{"account": "acct-1042", "plan": "pro", "seats": 8, "addons": ["audit"], "tasks": [{"title": "Invite the team"}, {"title": "Set up billing"}]}"""
 
 private const val GRADES = """[{"value": "1", "label": "Poor"}, {"value": "2", "label": "Fair"}, {"value": "3", "label": "Good"}]"""
 

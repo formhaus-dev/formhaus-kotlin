@@ -23,6 +23,7 @@ import dev.formhaus.compose.components.FieldShell
 import dev.formhaus.compose.components.FieldShellVariant
 import dev.formhaus.compose.components.FormhausIcons
 import dev.formhaus.compose.form.FieldContext
+import dev.formhaus.compose.form.readOnlyState
 import dev.formhaus.compose.model.formhausTestId
 import dev.formhaus.compose.theme.LocalFormhausTokens
 import dev.formhaus.core.json.JsonValue
@@ -49,7 +50,8 @@ public fun RatingField(context: FieldContext) {
                     .offset(x = -tokens.spacing.s1 / 2)
                     .scaleRing(focus)
                     .alpha(if (context.isLocked) DISABLED_ALPHA else 1f)
-                    .selectableGroup(),
+                    .selectableGroup()
+                    .readOnlyState(context),
             ) {
                 scale.points.forEachIndexed { index, point ->
                     Star(

@@ -57,7 +57,7 @@ internal fun ChoiceCard(
             Column(verticalArrangement = Arrangement.spacedBy(tokens.spacing.s3)) {
                 if (shown != null) OptionImage(shown)
                 Column(verticalArrangement = Arrangement.spacedBy(tokens.spacing.s1)) {
-                    OptionRow(shape, option.label ?: value, selected, invalid = invalid)
+                    OptionRow(shape, option.label ?: value, selected, Modifier, invalid, readOnly)
                     option.description?.takeIf { it.isNotEmpty() }?.let {
                         Text(
                             it,

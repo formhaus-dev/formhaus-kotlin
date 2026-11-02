@@ -1,6 +1,9 @@
 package dev.formhaus.compose.form
 
 import androidx.compose.runtime.Stable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import dev.formhaus.compose.model.FieldState
 import dev.formhaus.compose.model.FormModel
 import dev.formhaus.compose.model.commitValue
@@ -57,6 +60,7 @@ public class FieldContext internal constructor(
     private val counted: FieldValidation? get() = this.field.validation.takeIf { this.field.type in countedTypes }
     public val advancesOnCommit: Boolean get() = !isItem && this.field.advancesOnCommit
     public val accessibilityName: String get() = if (isRequired) "$label, ${text("required")}" else label
+    internal val readOnlyState: String? get() = if (isReadOnly) text("readOnly") else null
     public val testId: String? get() = model.testId(TestIdTarget.Kind.FIELD, key)
 
     public val text: String
@@ -95,3 +99,8 @@ public class FieldContext internal constructor(
 internal fun numberText(number: Double): String = JsonValue.Number(number).toJsonString()
 
 private val countedTypes = setOf("text", "email", "phone", "password", "textarea")
+
+internal fun Modifier.readOnlyState(context: FieldContext): Modifier =
+    context.readOnlyState?.let { state -> semantics { stateDescription = state } } ?: this
+
+internal fun FieldContext.withReadOnly(text: String): String = readOnlyState?.let { if (text.isEmpty()) it else "$text, $it" } ?: text

@@ -65,7 +65,7 @@ internal fun OptionCardBox(
         modifier
             .fillMaxWidth()
             .heightIn(min = tokens.controls.hitTarget)
-            .selectableSurface(selected, invalid, solid = false, enabled = enabled, source = source, card = true)
+            .selectableSurface(selected, invalid, solid = false, enabled = enabled, source = source, card = true, readOnly = readOnly)
             .focusable(enabled && !readOnly, source)
             .choice(selected, shape, enabled, source, readOnly, onClick)
             .padding(start = tokens.spacing.s6, end = tokens.spacing.s6, top = top, bottom = tokens.spacing.s5),
@@ -108,17 +108,23 @@ internal fun Modifier.selectableSurface(
     enabled: Boolean,
     source: MutableInteractionSource,
     card: Boolean = false,
+    readOnly: Boolean = false,
 ): Modifier {
     val tokens = LocalFormhausTokens.current
     val colors = tokens.colors
-    val fill = if (selected) (if (solid) colors.primary else colors.primarySoft) else colors.background
+    val fill =
+        when {
+            selected -> if (solid) colors.primary else colors.primarySoft
+            readOnly && !card -> colors.backgroundDisabled
+            else -> colors.background
+        }
     val border =
         when {
             selected -> colors.primary
             invalid -> colors.error
             else -> colors.inputBorder
         }
-    val quiet = selected || !enabled
+    val quiet = selected || !enabled || readOnly
     val style =
         SurfaceStyle(
             tokens.controlShape,
@@ -128,7 +134,7 @@ internal fun Modifier.selectableSurface(
             hoverBorder = if (quiet || invalid) border else colors.inputBorderHover,
             ring = if (card) colors.focus else Color.Unspecified,
             ringRadius = tokens.radii.control,
-            pressScale = if (card) PRESSED_SCALE else 1f,
+            pressScale = if (card && !readOnly) PRESSED_SCALE else 1f,
         )
     return (if (enabled) this else alpha(DISABLED_ALPHA)).animatedSurface(style, tokens.quickMotion, source)
 }
@@ -141,9 +147,21 @@ public fun OptionRow(
     modifier: Modifier = Modifier,
     invalid: Boolean = false,
 ) {
+    OptionRow(shape, label, selected, modifier, invalid, readOnly = false)
+}
+
+@Composable
+internal fun OptionRow(
+    shape: IndicatorShape,
+    label: String,
+    selected: Boolean,
+    modifier: Modifier,
+    invalid: Boolean,
+    readOnly: Boolean,
+) {
     val tokens = LocalFormhausTokens.current
     Row(modifier, horizontalArrangement = Arrangement.spacedBy(tokens.spacing.s5)) {
-        ChoiceIndicator(shape, selected, alignedToText(), invalid)
+        ChoiceIndicator(shape, selected, alignedToText(), invalid, readOnly)
         Text(label, Modifier.weight(1f).alignBy(FirstBaseline), style = tokens.textStyle(TextRole.option))
     }
 }

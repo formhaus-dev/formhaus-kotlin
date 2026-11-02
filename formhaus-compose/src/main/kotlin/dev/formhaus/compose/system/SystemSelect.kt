@@ -22,6 +22,7 @@ import dev.formhaus.compose.components.marked
 import dev.formhaus.compose.fields.ChoiceSelection
 import dev.formhaus.compose.form.FieldContext
 import dev.formhaus.compose.form.formhausScrollAnchor
+import dev.formhaus.compose.form.readOnlyState
 import dev.formhaus.compose.model.formhausTestId
 import dev.formhaus.compose.theme.LocalFormhausTokens
 
@@ -51,7 +52,8 @@ internal fun SystemSelect(context: FieldContext) {
                 .fillMaxWidth()
                 .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable, enabled)
                 .formhausFocus(context, requester)
-                .semantics { contentDescription = context.accessibilityName },
+                .semantics { contentDescription = context.accessibilityName }
+                .readOnlyState(context),
             enabled = enabled,
             readOnly = true,
             label = { Text(tokens.marked(context.label, context.isRequired)) },

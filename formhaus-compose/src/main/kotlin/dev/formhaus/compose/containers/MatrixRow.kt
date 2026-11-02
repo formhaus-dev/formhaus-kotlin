@@ -35,6 +35,7 @@ import dev.formhaus.compose.components.marked
 import dev.formhaus.compose.fields.ChoiceSelection
 import dev.formhaus.compose.form.FieldContext
 import dev.formhaus.compose.form.formhausScrollAnchor
+import dev.formhaus.compose.form.readOnlyState
 import dev.formhaus.compose.model.FormModel
 import dev.formhaus.compose.model.formhausTestId
 import dev.formhaus.compose.theme.LocalFormhausTokens
@@ -64,6 +65,7 @@ internal fun MatrixRow(
             .background(if (context.focused) tokens.colors.backgroundHover else Color.Transparent)
             .formhausFocus(context, requester)
             .semantics { contentDescription = context.accessibilityName }
+            .readOnlyState(context)
             .formhausTestId(context.testId)
             .formhausScrollAnchor(context),
     ) {
@@ -132,7 +134,7 @@ private fun MatrixCell(
         verticalArrangement = Arrangement.spacedBy(tokens.spacing.s1, if (caption) Alignment.Top else Alignment.CenterVertically),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        ChoiceIndicator(shape, selected, Modifier.focusRing(focused, tokens.radii.indicator), context.isInvalid)
+        ChoiceIndicator(shape, selected, Modifier.focusRing(focused, tokens.radii.indicator), context.isInvalid, context.isReadOnly)
         if (caption) Text(option.label ?: value, textAlign = TextAlign.Center, style = tokens.textStyle(TextRole.caption))
     }
 }

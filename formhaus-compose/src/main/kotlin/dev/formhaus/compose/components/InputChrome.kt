@@ -20,7 +20,15 @@ public fun Modifier.inputChrome(
     invalid: Boolean,
     disabled: Boolean,
     padded: Boolean = true,
-    readOnly: Boolean = false,
+): Modifier = inputChrome(focused, invalid, disabled, padded, readOnly = false)
+
+@Composable
+internal fun Modifier.inputChrome(
+    focused: Boolean,
+    invalid: Boolean,
+    disabled: Boolean,
+    padded: Boolean = true,
+    readOnly: Boolean,
 ): Modifier {
     val tokens = LocalFormhausTokens.current
     val colors = tokens.colors

@@ -34,6 +34,8 @@ import dev.formhaus.compose.fields.ChoiceSelection
 import dev.formhaus.compose.form.FieldContext
 import dev.formhaus.compose.form.LocalFieldReveals
 import dev.formhaus.compose.form.formhausScrollAnchor
+import dev.formhaus.compose.form.readOnlyState
+import dev.formhaus.compose.form.withReadOnly
 import dev.formhaus.compose.model.formhausTestId
 import dev.formhaus.compose.theme.LocalFormhausTokens
 import dev.formhaus.core.json.JsonValue
@@ -50,7 +52,7 @@ internal fun SystemChoiceList(context: FieldContext) {
     val target = focusedOption(context)
     val reveals = LocalFieldReveals.current
     SystemBlock(context, errorFirst = reveals != null) {
-        Column(Modifier.formhausOptionsFocus(context, requester).selectableGroup()) {
+        Column(Modifier.formhausOptionsFocus(context, requester).selectableGroup().readOnlyState(context)) {
             context.options.forEachIndexed { index, option ->
                 val value = option.value.orEmpty()
                 val selected = selection.isSelected(value)
@@ -105,7 +107,7 @@ internal fun SystemToggle(
                             context.setValue(JsonValue.Bool(it))
                         }
                     },
-                ).semantics { contentDescription = context.accessibilityName },
+                ).semantics { contentDescription = context.withReadOnly(context.accessibilityName) },
         ) {
             if (!switch) Checkbox(checked, null, enabled = enabled)
             Text(

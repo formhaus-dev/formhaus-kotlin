@@ -20,6 +20,7 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import dev.formhaus.compose.form.FieldContext
+import dev.formhaus.compose.form.withReadOnly
 import dev.formhaus.compose.theme.LocalFormhausTokens
 import dev.formhaus.core.json.JsonValue
 
@@ -54,7 +55,7 @@ internal fun PickerInput(
                     .pressable(source, !locked, context.isReadOnly, Role.Button, open)
                     .semantics {
                         contentDescription = context.accessibilityName
-                        stateDescription = valueText
+                        stateDescription = context.withReadOnly(valueText)
                     },
             ) {
                 Box(Modifier.clearAndSetSemantics {}) { label() }

@@ -33,6 +33,7 @@ import dev.formhaus.compose.components.formhausFocus
 import dev.formhaus.compose.components.inputChrome
 import dev.formhaus.compose.components.pressable
 import dev.formhaus.compose.form.FieldContext
+import dev.formhaus.compose.form.withReadOnly
 import dev.formhaus.compose.theme.LocalFormhausTokens
 import dev.formhaus.compose.theme.TextRole
 import dev.formhaus.compose.theme.textStyle
@@ -59,7 +60,7 @@ public fun SelectField(context: FieldContext) {
                     .pressable(source, !context.isLocked, context.isReadOnly, Role.DropdownList) { open = true }
                     .semantics {
                         contentDescription = context.accessibilityName
-                        stateDescription = selected.orEmpty()
+                        stateDescription = context.withReadOnly(selected.orEmpty())
                     },
                 horizontalArrangement = Arrangement.spacedBy(tokens.spacing.s3),
                 verticalAlignment = Alignment.CenterVertically,

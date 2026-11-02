@@ -74,6 +74,9 @@ class OptionRulesTest {
         val starter = compose.onNode(hasText("Starter") and hasText("Up to 5 seats"))
         starter.assert(hasNoClick).assertIsEnabled()
         starter.assert(focusable)
+        compose
+            .onNode(SemanticsMatcher.expectValue(SemanticsProperties.StateDescription, "Read only"))
+            .assertExists()
     }
 
     @Test
