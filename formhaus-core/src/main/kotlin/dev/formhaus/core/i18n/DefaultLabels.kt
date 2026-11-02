@@ -29,6 +29,7 @@ internal val defaultLabels: Map<String, String> =
         "moveUp" to "Move up",
         "moveDown" to "Move down",
         "itemMoved" to "{item} moved to position {position}",
+        "readOnly" to "Read only",
         "or" to "or",
         "select" to "Select",
     )

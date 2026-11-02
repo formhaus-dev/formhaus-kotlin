@@ -4,6 +4,7 @@ import dev.formhaus.core.support.definition
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertSame
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 class DomIdsTest {
@@ -31,6 +32,102 @@ class DomIdsTest {
         nodes: List<String>,
         formId: String? = "form",
     ) = Ids(formId, definition("""{"id":"f","submit":{"label":"S"},"fields":[${nodes.joinToString(",")}]}""").domIds)
+
+    private fun node(
+        key: String,
+        type: String,
+        extra: String = "",
+    ) = """{"key":"$key","type":"$type","label":"$key"$extra}"""
+
+    private fun form(
+        version: String,
+        nodes: List<String>,
+    ) = Ids(
+        "f",
+        definition("""{"id":"f","formatVersion":"$version","submit":{"label":"S"},"fields":[${nodes.joinToString(",")}]}""").domIds,
+    )
+
+    @Test
+    fun `keeps the ids of a form whose keys only look alike`() {
+        val nodes =
+            listOf(
+                node("address", "text"),
+                node("address-2", "text"),
+                node("name", "text"),
+                node("name-error-free", "text"),
+                node("company", "text"),
+                node("company-description", "text"),
+                node("size", "radio", ""","options":[{"value":"s","label":"S"}]"""),
+                node("size-2", "text"),
+                node("size-0-description", "text"),
+                node("nps", "scale", ""","validation":{"min":0,"max":3}"""),
+                node("nps-9", "text"),
+                node("nps-anchor-0", "text"),
+                node("crew", "group", ""","fields":[${node("name", "text")}]"""),
+                node("crew-label", "text"),
+                node("crew-helper", "text"),
+            )
+        val keys = nodes.map { Regex("\"key\":\"([^\"]+)\"").find(it)!!.groupValues[1] }
+        val ids = form("1.1", nodes)
+        assertEquals(keys.map { "f-$it" }, keys.map(ids::field))
+    }
+
+    @Test
+    fun `moves a field id off the generated ids of another node`() {
+        val described = ""","options":[{"value":"a","label":"A","description":"First"},{"value":"b","label":"B","description":"Second"}]"""
+        val keys =
+            listOf(
+                "plan",
+                "plan-helper",
+                "plan-1",
+                "plan-0-description",
+                "plan-description",
+                "nps",
+                "nps-anchor",
+                "nps-3",
+                "city",
+                "city-list",
+                "city-label",
+                "docs",
+                "docs-notice",
+                "crew",
+                "crew-confirm",
+                "crew-error",
+            )
+        val nodes =
+            listOf(
+                node("plan", "radio", "$described,\"helperText\":\"Pick\""),
+                node("plan-helper", "text"),
+                node("plan-1", "text"),
+                node("plan-0-description", "text"),
+                node("plan-description", "text"),
+                node("nps", "scale", ""","validation":{"min":0,"max":3},"options":[{"value":"0","label":"Low"}]"""),
+                node("nps-anchor", "radio", ""","options":[{"value":"x","label":"X"}]"""),
+                node("nps-3", "text"),
+                node("city", "autocomplete", described),
+                node("city-list", "text"),
+                node("city-label", "text"),
+                node("docs", "file", ""","multiple":true"""),
+                node("docs-notice", "text"),
+                node("crew", "group", ""","fields":[${node("name", "text")},${node("name-error", "text")}]"""),
+                node("crew-confirm", "text"),
+                node("crew-error", "text"),
+            )
+        val ids = form("1.7", nodes)
+        val assigned = keys.map(ids::field)
+        assertEquals(
+            listOf("f-plan", "f-nps", "f-city", "f-docs", "f-crew-confirm", "f-crew-error"),
+            assigned.filterIndexed { index, id -> id == "f-${keys[index]}" },
+        )
+        assigned.forEachIndexed { index, id -> assertTrue(Regex("^f-${keys[index]}(-[0-9a-z]+)?$").matches(id), id) }
+        assertTrue(Regex("^f-crew-[0-9a-z]+--0--name$").matches(ids.item("crew", 0, "name")))
+        assertTrue(Regex("^f-crew-[0-9a-z]+--0--name-error-[0-9a-z]+$").matches(ids.item("crew", 0, "name-error")))
+    }
+
+    @Test
+    fun `collapses the dashes before reveal`() {
+        assertEquals("fh-a-reveal", ids(emptyList(), null).field("a--reveal"))
+    }
 
     @Test
     fun `keeps the id of keys that collide with no other key`() {
