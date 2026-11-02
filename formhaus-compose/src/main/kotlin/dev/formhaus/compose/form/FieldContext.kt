@@ -1,11 +1,15 @@
 package dev.formhaus.compose.form
 
 import androidx.compose.runtime.Stable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import dev.formhaus.compose.model.FieldState
 import dev.formhaus.compose.model.FormModel
 import dev.formhaus.compose.model.commitValue
 import dev.formhaus.compose.model.options
 import dev.formhaus.compose.model.performPrimaryAction
+import dev.formhaus.compose.model.rules
 import dev.formhaus.compose.model.setValue
 import dev.formhaus.compose.model.testId
 import dev.formhaus.compose.model.texts
@@ -44,6 +48,8 @@ public class FieldContext internal constructor(
             val source = loaded ?: field.options.orEmpty()
             if (field.randomize) state.ordered(source) { model.engine.orderOptions(key, loaded) } else source
         }
+    private val rules = model.rules(field, key, options)
+    public val isReadOnly: Boolean = rules.readOnly
 
     public val isItem: Boolean get() = key != this.field.key
     public val isInvalid: Boolean get() = !error.isNullOrEmpty()
@@ -54,6 +60,7 @@ public class FieldContext internal constructor(
     private val counted: FieldValidation? get() = this.field.validation.takeIf { this.field.type in countedTypes }
     public val advancesOnCommit: Boolean get() = !isItem && this.field.advancesOnCommit
     public val accessibilityName: String get() = if (isRequired) "$label, ${text("required")}" else label
+    internal val readOnlyState: String? get() = if (isReadOnly) text("readOnly") else null
     public val testId: String? get() = model.testId(TestIdTarget.Kind.FIELD, key)
 
     public val text: String
@@ -67,11 +74,15 @@ public class FieldContext internal constructor(
 
     public fun optionTestId(value: String): String? = model.testId(TestIdTarget.Kind.OPTION, key, value)
 
+    public fun isOptionDisabled(option: FieldOption): Boolean = rules.isDisabled(option)
+
     public fun setValue(value: JsonValue?) {
+        if (isReadOnly) return
         model.setValue(key, value)
     }
 
     public fun commit(value: JsonValue?) {
+        if (isReadOnly) return
         if (advancesOnCommit) model.commitValue(key, value) else model.setValue(key, value)
     }
 
@@ -88,3 +99,8 @@ public class FieldContext internal constructor(
 internal fun numberText(number: Double): String = JsonValue.Number(number).toJsonString()
 
 private val countedTypes = setOf("text", "email", "phone", "password", "textarea")
+
+internal fun Modifier.readOnlyState(context: FieldContext): Modifier =
+    context.readOnlyState?.let { state -> semantics { stateDescription = state } } ?: this
+
+internal fun FieldContext.withReadOnly(text: String): String = readOnlyState?.let { if (text.isEmpty()) it else "$text, $it" } ?: text

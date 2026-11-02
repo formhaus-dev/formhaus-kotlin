@@ -1,8 +1,10 @@
 package dev.formhaus.compose.fields
 
 import androidx.compose.foundation.focusable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
@@ -23,12 +25,14 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.key.utf16CodePoint
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.formhaus.compose.components.focusRing
 import dev.formhaus.compose.components.formhausFocus
+import dev.formhaus.compose.components.readOnlyChoice
 import dev.formhaus.compose.form.FieldContext
 import dev.formhaus.compose.theme.LocalFormhausTokens
 import dev.formhaus.compose.theme.TextRole
@@ -162,3 +166,16 @@ private inline fun move(
     select(next)
     return true
 }
+
+internal fun Modifier.point(
+    selected: Boolean,
+    source: MutableInteractionSource,
+    enabled: Boolean,
+    readOnly: Boolean,
+    choose: () -> Unit,
+): Modifier =
+    if (readOnly) {
+        readOnlyChoice(selected, Role.RadioButton, source)
+    } else {
+        selectable(selected, source, null, enabled, Role.RadioButton, choose)
+    }

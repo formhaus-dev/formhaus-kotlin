@@ -15,7 +15,7 @@ internal enum class NodeKind(
     SECTION(listOf("title", "description")),
     FIELD(listOf("label", "placeholder", "helperText")),
     GROUP(listOf("label", "helperText", "itemLabel", "addLabel", "removeLabel")),
-    OPTION(listOf("label")),
+    OPTION(listOf("label", "description")),
     ACTION(listOf("label")),
     VALIDATION(listOf("required", "minLength", "maxLength", "min", "max", "pattern", "matchField")),
 }
@@ -121,4 +121,9 @@ internal fun slotAddress(
     kind: NodeKind,
     address: List<String>,
     slot: String,
-): List<String> = if (kind == NodeKind.OPTION) address else address + slot
+): List<String> =
+    when {
+        kind != NodeKind.OPTION -> address + slot
+        slot == "description" -> address.dropLast(2) + "optionDescriptions" + address.last()
+        else -> address
+    }

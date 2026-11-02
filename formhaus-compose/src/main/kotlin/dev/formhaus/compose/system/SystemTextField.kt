@@ -58,6 +58,7 @@ internal fun SystemTextField(context: FieldContext) {
             .formhausTestId(context.testId)
             .formhausScrollAnchor(context),
         enabled = !context.isLocked,
+        readOnly = context.isReadOnly,
         label = { Text(tokens.marked(context.label, context.isRequired)) },
         placeholder = prompt?.let { { Text(it) } },
         trailingIcon = if (context.loading) ({ CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp) }) else null,

@@ -76,7 +76,8 @@ internal fun Modifier.formhausOptionsFocus(
 internal fun focusedOption(context: FieldContext): Int? {
     val options = context.options
     if (options.isEmpty()) return null
-    if (context.field.type != "radio") return 0
+    val first = options.indexOfFirst { !context.isOptionDisabled(it) }.takeIf { it >= 0 } ?: 0
+    if (context.field.type != "radio") return first
     val checked = ChoiceSelection.values(context.value, false)
-    return options.indexOfFirst { it.value.orEmpty() in checked }.takeIf { it >= 0 } ?: 0
+    return options.indexOfFirst { it.value.orEmpty() in checked && !context.isOptionDisabled(it) }.takeIf { it >= 0 } ?: first
 }

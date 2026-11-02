@@ -42,7 +42,8 @@ public class FormDefinition internal constructor(
     public constructor(json: JsonValue) : this(checkedRoot(json))
 
     internal val listsFiles: Boolean = formatAtLeast(json["formatVersion"], FILE_LISTS_MINOR)
-    private val reader = NodeReader(listsFiles)
+    internal val optionRules: Boolean = formatAtLeast(json["formatVersion"], OPTION_RULES_MINOR)
+    private val reader = NodeReader(listsFiles, optionRules)
     public val id: String = json["id"]?.stringValue ?: ""
     public val submit: FormAction = FormAction(json["submit"]?.objectValue ?: MutableJsonObject())
     public val cancel: FormAction? = json["cancel"]?.objectValue?.let(::FormAction)
@@ -68,7 +69,7 @@ public class FormDefinition internal constructor(
     internal val domIds: DomIds by lazy { DomIds(this) }
 
     public companion object {
-        public const val SUPPORTED_FORMAT_VERSION: String = "1.7"
+        public const val SUPPORTED_FORMAT_VERSION: String = "1.8"
     }
 }
 
@@ -83,6 +84,7 @@ public fun parseDefinition(json: JsonValue): FormDefinition = FormDefinition(jso
 
 internal const val RECALL_MINOR = 5
 internal const val FILE_LISTS_MINOR = 7
+internal const val OPTION_RULES_MINOR = 8
 
 internal fun formatAtLeast(
     version: JsonValue?,

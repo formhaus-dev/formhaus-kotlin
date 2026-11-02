@@ -1,6 +1,5 @@
 package dev.formhaus.compose.fields
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
@@ -19,6 +18,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -31,11 +31,15 @@ import dev.formhaus.compose.components.FormhausIcons
 import dev.formhaus.compose.components.LoadingIndicator
 import dev.formhaus.compose.components.formhausFocus
 import dev.formhaus.compose.components.inputChrome
+import dev.formhaus.compose.components.pressable
 import dev.formhaus.compose.form.FieldContext
+import dev.formhaus.compose.form.withReadOnly
 import dev.formhaus.compose.theme.LocalFormhausTokens
 import dev.formhaus.compose.theme.TextRole
 import dev.formhaus.compose.theme.textStyle
 import dev.formhaus.core.json.JsonValue
+
+private const val DISABLED_OPTION_ALPHA = 0.6f
 
 @Composable
 public fun SelectField(context: FieldContext) {
@@ -50,13 +54,13 @@ public fun SelectField(context: FieldContext) {
         Box {
             Row(
                 Modifier
-                    .inputChrome(focused || open, context.isInvalid, context.isLocked)
+                    .inputChrome(focused || open, context.isInvalid, context.isLocked, readOnly = context.isReadOnly)
                     .formhausFocus(context, requester)
                     .focusable(!context.isLocked, source)
-                    .clickable(source, null, !context.isLocked, role = Role.DropdownList) { open = true }
+                    .pressable(source, !context.isLocked, context.isReadOnly, Role.DropdownList) { open = true }
                     .semantics {
                         contentDescription = context.accessibilityName
-                        stateDescription = selected.orEmpty()
+                        stateDescription = context.withReadOnly(selected.orEmpty())
                     },
                 horizontalArrangement = Arrangement.spacedBy(tokens.spacing.s3),
                 verticalAlignment = Alignment.CenterVertically,
@@ -98,12 +102,20 @@ private fun SelectMenu(
     DropdownMenu(open, close, containerColor = colors.background) {
         for (option in context.options) {
             val value = option.value.orEmpty()
+            val disabled = context.isOptionDisabled(option)
             DropdownMenuItem(
-                { Text(option.label ?: value, style = tokens.textStyle(TextRole.option)) },
+                {
+                    Text(
+                        option.label ?: value,
+                        Modifier.alpha(if (disabled) DISABLED_OPTION_ALPHA else 1f),
+                        style = tokens.textStyle(TextRole.option),
+                    )
+                },
                 {
                     close()
                     context.setValue(JsonValue.String(value))
                 },
+                enabled = !disabled,
                 trailingIcon =
                     if (value == context.text) {
                         { Icon(FormhausIcons.check, null, Modifier.size(tokens.controls.indicator), tint = colors.primary) }

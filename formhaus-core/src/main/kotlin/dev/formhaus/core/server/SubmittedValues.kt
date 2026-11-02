@@ -6,6 +6,7 @@ import dev.formhaus.core.json.JsonObject
 import dev.formhaus.core.json.JsonValue
 import dev.formhaus.core.json.MutableJsonObject
 import dev.formhaus.core.model.FormField
+import dev.formhaus.core.validation.ItemHolds
 import dev.formhaus.core.validation.ResolveMessage
 import dev.formhaus.core.validation.Validators
 import dev.formhaus.core.validation.fieldValueError
@@ -118,6 +119,7 @@ private class HiddenKeeper(
     private val submitted: MutableJsonObject,
     private val skipped: List<String>,
     private val validators: Validators,
+    private val previous: JsonObject?,
 ) {
     private val source = resolved.values
     private val scope = source.merging(submitted)
@@ -131,7 +133,7 @@ private class HiddenKeeper(
         if (key in skipped) return
         val field = resolved.field(key) ?: fields.firstOrNull { it.key == key } ?: return
         val shown = key in submitted
-        if (!shown && !valid(field, value, scope)) return
+        if (!shown && !valid(field, value, scope, previous?.get(field.key))) return
         val kept = if (shown) submitted[key] else value
         val list = value.arrayValue
         val sent = kept?.arrayValue
@@ -146,14 +148,16 @@ private class HiddenKeeper(
         field: FormField,
         value: JsonValue?,
         values: JsonObject,
-    ): Boolean = fieldValueError(field, value, values, validators, null, required = false) == null
+        held: JsonValue?,
+    ): Boolean = fieldValueError(field, value, values, validators, null, required = false, previous = held) == null
 
     private fun items(
         group: FormField,
         value: List<JsonValue>,
         kept: List<JsonValue>,
-    ): JsonValue =
-        JsonValue.Array(
+    ): JsonValue {
+        val holds = ItemHolds(group, previous, value)
+        return JsonValue.Array(
             kept.mapIndexed { index, item ->
                 val entry = item.objectValue
                 val from = value.getOrNull(index)?.objectValue
@@ -162,21 +166,23 @@ private class HiddenKeeper(
                 ) {
                     item
                 } else {
-                    JsonValue.Object(fill(group, itemScope(group, value[index], scope), entry, from))
+                    JsonValue.Object(fill(group, itemScope(group, value[index], scope), entry, from) { holds.previous(index, it) })
                 }
             },
         )
+    }
 
     private fun fill(
         group: FormField,
         own: JsonObject,
         entry: JsonObject,
         from: JsonObject,
+        held: (FormField) -> JsonValue?,
     ): JsonObject {
         val filled = entry.toMutableStringMap()
         for (field in group.items) {
             val restored = from[field.key]
-            if (restored != null && field.key !in entry && valid(field, restored, own)) filled[field.key] = restored
+            if (restored != null && field.key !in entry && valid(field, restored, own, held(field))) filled[field.key] = restored
         }
         return filled
     }
@@ -188,4 +194,5 @@ internal fun keepHidden(
     submitted: MutableJsonObject,
     skipped: List<String>,
     validators: Validators,
-) = HiddenKeeper(fields, resolved, submitted, skipped, validators).run()
+    previous: JsonObject?,
+) = HiddenKeeper(fields, resolved, submitted, skipped, validators, previous).run()

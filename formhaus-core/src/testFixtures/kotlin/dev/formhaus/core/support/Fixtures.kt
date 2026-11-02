@@ -14,6 +14,7 @@ object Fixtures {
     val root: Path = Path.of(requireNotNull(Fixtures::class.java.getResource("/fixtures")).toURI())
     val conformance: Path = root.resolve("conformance")
     val scenarios: Path = conformance.resolve("scenarios")
+    val submissions: Path = root.resolve("submissions")
     val regex: Path = root.resolve("regex")
 
     val version: Map<String, String> by lazy {
@@ -25,6 +26,8 @@ object Fixtures {
     val conformanceNames: List<String> by lazy { jsonFiles(conformance) }
 
     val scenarioNames: List<String> by lazy { jsonFiles(scenarios).filter { it != "scenario.schema" } }
+
+    val submissionNames: List<String> by lazy { jsonFiles(submissions) }
 
     fun jsonFiles(directory: Path): List<String> =
         directory
@@ -46,6 +49,8 @@ object Fixtures {
     fun conformanceFile(name: String): JsonValue = load(conformance.resolve("$name.json"))
 
     fun scenarioFile(name: String): JsonValue = load(scenarios.resolve("$name.json"))
+
+    fun submissionFile(name: String): JsonValue = load(submissions.resolve("$name.json"))
 
     fun orders(name: String): List<RawJson> {
         val raw =

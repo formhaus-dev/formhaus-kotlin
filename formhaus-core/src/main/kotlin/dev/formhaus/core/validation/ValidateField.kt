@@ -11,15 +11,30 @@ import dev.formhaus.core.model.FieldValidation
 import dev.formhaus.core.model.FormField
 import dev.formhaus.core.regex.CallBudget
 import dev.formhaus.core.regex.JsRegex
+import dev.formhaus.core.visibility.ListLimits
 import dev.formhaus.core.visibility.isBlank
 
 public typealias ValidatorFn = (JsonValue, JsonObject) -> String?
 public typealias Validators = StringMap<ValidatorFn>
 
-public class ValidateOptions(
-    public val validators: Validators = stringMapOf(),
-    public val messages: MessageSource? = null,
-)
+public class ValidateOptions private constructor(
+    public val previousValues: JsonObject?,
+    public val validators: Validators,
+    public val messages: MessageSource?,
+) {
+    public constructor() : this(null, stringMapOf(), null)
+
+    public constructor(
+        validators: Validators = stringMapOf(),
+        messages: MessageSource? = null,
+    ) : this(null, validators, messages)
+
+    public constructor(
+        validators: Validators = stringMapOf(),
+        messages: MessageSource? = null,
+        previousValues: JsonObject?,
+    ) : this(previousValues, validators, messages)
+}
 
 private fun isEmptyValue(
     value: JsonValue?,
@@ -127,7 +142,10 @@ public fun validateFieldValue(
     input: JsonValue?,
     allValues: JsonObject,
     options: ValidateOptions = defaultOptions,
-): String? = CallBudget.run { fieldValueError(field, input, allValues, options.validators, options.messages) }
+): String? =
+    CallBudget.run {
+        fieldValueError(field, input, allValues, options.validators, options.messages, previous = options.previousValues?.get(field.key))
+    }
 
 internal fun fieldValueError(
     field: FormField,
@@ -136,12 +154,15 @@ internal fun fieldValueError(
     validators: Validators,
     messages: MessageSource?,
     required: Boolean = true,
+    previous: JsonValue? = null,
+    limits: ListLimits = ListLimits.STANDARD,
 ): String? {
     val value = if (field.isFileList) JsonValue.Array(fileItems(input)) else trimValue(field, input)
     val rules = if (field.isFileList) fileListRules(field) else field.validation ?: FieldValidation(noParams)
     val resolve = if (messages == null) defaultResolver else namedResolver(messageResolver(messages))
     if (value == null || isEmptyValue(value, field)) return emptyValueError(field, rules, allValues, required, resolve)
     clientTypeError(field, value, resolve)?.takeIf { it.isNotEmpty() }?.let { return it }
+    if (heldOut(field, value, allValues, previous, limits)) return resolve(MessageKey.OPTION, noParams, field)
     val issue =
         sizeError(value, rules, field, resolve)
             ?: patternError(value, rules) { resolve(MessageKey.PATTERN, noParams, field) }

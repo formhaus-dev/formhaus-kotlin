@@ -16,9 +16,11 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import dev.formhaus.compose.form.FieldContext
+import dev.formhaus.compose.form.withReadOnly
 import dev.formhaus.compose.theme.LocalFormhausTokens
 import dev.formhaus.core.json.JsonValue
 
@@ -41,7 +43,7 @@ internal fun PickerInput(
     val locked = context.isLocked || !enabled
     FieldShell(context) {
         Row(
-            Modifier.inputChrome(focused || active, context.isInvalid, locked),
+            Modifier.inputChrome(focused || active, context.isInvalid, locked, readOnly = context.isReadOnly),
             horizontalArrangement = Arrangement.spacedBy(tokens.spacing.s3),
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -50,10 +52,10 @@ internal fun PickerInput(
                     .weight(1f)
                     .formhausFocus(context, requester)
                     .focusable(!locked, source)
-                    .clickable(source, null, !locked, role = Role.Button, onClick = open)
+                    .pressable(source, !locked, context.isReadOnly, Role.Button, open)
                     .semantics {
                         contentDescription = context.accessibilityName
-                        stateDescription = valueText
+                        stateDescription = context.withReadOnly(valueText)
                     },
             ) {
                 Box(Modifier.clearAndSetSemantics {}) { label() }
@@ -63,3 +65,11 @@ internal fun PickerInput(
         below()
     }
 }
+
+internal fun Modifier.pressable(
+    source: MutableInteractionSource,
+    enabled: Boolean,
+    readOnly: Boolean,
+    role: Role,
+    onClick: () -> Unit,
+): Modifier = if (readOnly) semantics { this.role = role } else clickable(source, null, enabled, role = role, onClick = onClick)

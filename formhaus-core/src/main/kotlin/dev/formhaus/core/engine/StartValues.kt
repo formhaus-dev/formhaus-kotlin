@@ -19,6 +19,7 @@ private class WriteWatch(
 
 internal class StartValues {
     private var seeds = Values()
+    private var stored: JsonObject? = null
     private var remembering = true
     private var writeWatch: WriteWatch? = null
     private val memory = LinkedHashMap<String, ValueSlot>()
@@ -51,6 +52,12 @@ internal class StartValues {
         forgetItems()
         for (group in groups) seedItems(values.slot(group.key))
     }
+
+    fun storeValues(values: JsonObject) {
+        stored = values
+    }
+
+    fun previousValues(): JsonObject = stored ?: seeds.json
 
     fun loadPayload() {
         remembering = false

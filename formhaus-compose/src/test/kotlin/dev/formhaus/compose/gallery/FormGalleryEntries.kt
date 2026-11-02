@@ -67,6 +67,24 @@ private val booking =
       {"id": "review", "title": "Review", "fields": [{"key": "notes", "type": "textarea", "label": "Notes"}]}]}
     """.trimIndent()
 
+private val workspace =
+    """
+    {"formatVersion": "1.8", "id": "workspace", "title": "Workspace", "submit": {"label": "Save"}, "fields": [
+      {"key": "account", "type": "text", "label": "Account ID", "readOnly": true},
+      {"key": "plan", "type": "radio", "label": "Plan", "options": [
+        {"value": "starter", "label": "Starter", "description": "Up to 5 seats", "disabled": [{"field": "seats", "gt": 5}]},
+        {"value": "pro", "label": "Pro", "description": "Any number of seats"},
+        {"value": "legacy", "label": "Legacy", "description": "No longer offered", "disabled": true}]},
+      {"key": "seats", "type": "number", "label": "Seats", "readOnly": true},
+      {"key": "addons", "type": "multiselect", "label": "Add-ons", "readOnly": true, "options": [
+        {"value": "sso", "label": "Single sign-on"}, {"value": "audit", "label": "Audit log"}]},
+      {"key": "tasks", "type": "group", "label": "Tasks", "reorderable": true, "itemLabel": "Task {index}", "fields": [
+        {"key": "title", "type": "text", "label": "Title"}]}]}
+    """.trimIndent()
+
+private const val WORKSPACE_VALUES =
+    """{"account": "acct-1042", "plan": "pro", "seats": 8, "addons": ["audit"], "tasks": [{"title": "Invite the team"}, {"title": "Set up billing"}]}"""
+
 private const val GRADES = """[{"value": "1", "label": "Poor"}, {"value": "2", "label": "Fair"}, {"value": "3", "label": "Good"}]"""
 
 private val signup =
@@ -195,4 +213,6 @@ val formEntries: List<FormEntry> =
         FormEntry("form-reveal-required", behavior = revealing, prepare = { submit() }) { model(reach) },
         FormEntry("form-reveal-rtl", behavior = revealing, rtl = true) { model(updates, """{"channels": ["post"]}""") },
         FormEntry("system-reveal", FormComponents.system, revealing) { model(reach, """{"contact": "phone", "when": "evening"}""") },
+        FormEntry("form-option-rules") { model(workspace, WORKSPACE_VALUES) },
+        FormEntry("system-option-rules", FormComponents.system) { model(workspace, WORKSPACE_VALUES) },
     )

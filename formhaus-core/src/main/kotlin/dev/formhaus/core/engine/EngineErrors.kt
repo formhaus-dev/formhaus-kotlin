@@ -9,6 +9,7 @@ import dev.formhaus.core.model.FormField
 import dev.formhaus.core.model.FormNode
 import dev.formhaus.core.model.valueFields
 import dev.formhaus.core.regex.CallBudget
+import dev.formhaus.core.validation.ItemHolds
 import dev.formhaus.core.validation.MessageSource
 import dev.formhaus.core.validation.ShownChecks
 import dev.formhaus.core.validation.fieldValueError
@@ -49,7 +50,8 @@ internal fun EngineCore.fieldsErrors(
 ): FieldErrors {
     val values = submitValues ?: getSubmitValues()
     val scope = visibility.conditionValues(this.values.json)
-    val checks = ShownChecks(validators, messageSource, visibility.limits(this.values.json))
+    val previous = visibility.starts.previousValues()
+    val checks = ShownChecks(validators, messageSource, visibility.limits(this.values.json), previous)
     return CallBudget.run { unsettleOnWrite { validateShown(nodes, values, scope, checks) } }
 }
 
@@ -57,16 +59,21 @@ internal fun EngineCore.fieldError(
     field: FormField,
     value: JsonValue?,
     allValues: JsonObject? = null,
+    previous: JsonValue? = visibility.starts.previousValues()[field.key],
 ): String? {
     val all = allValues ?: getSubmitValues()
-    return CallBudget.run { unsettleOnWrite { fieldValueError(field, value, all, validators, messageSource) } }
+    val limits = visibility.limits(this.values.json)
+    return CallBudget.run {
+        unsettleOnWrite { fieldValueError(field, value, all, validators, messageSource, previous = previous, limits = limits) }
+    }
 }
 
 internal fun EngineCore.itemError(item: ItemField): String? {
     val values = getSubmitValues()
     val items = itemsOf(values[item.group.key])
     val scope = itemScope(item.group, items.getOrNull(item.index) ?: JsonValue.Null, values)
-    return fieldError(item.field, scope[item.field.key], scope)
+    val held = ItemHolds(item.group, visibility.starts.previousValues(), items).previous(item.index, item.field)
+    return fieldError(item.field, scope[item.field.key], scope, held)
 }
 
 internal fun EngineCore.applyValidationErrors(

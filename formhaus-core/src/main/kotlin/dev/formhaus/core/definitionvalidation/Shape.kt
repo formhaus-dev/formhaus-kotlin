@@ -29,6 +29,11 @@ private fun condition(
     path: String,
 ) = typedProperties(value, conditionRules, path)
 
+internal fun conditionList(
+    value: JsonValue?,
+    path: String,
+): List<DefinitionIssue> = objectList(value, path, "a condition object", ::condition)
+
 private fun conditionLists(
     value: JsonObject,
     path: String,

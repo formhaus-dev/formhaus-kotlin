@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedCard
@@ -79,6 +80,10 @@ private fun SystemGroupItem(item: GroupItemContext) {
         Column(Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Row(Modifier.fillMaxWidth().heightIn(min = 48.dp), verticalAlignment = Alignment.CenterVertically) {
                 Text(item.title, Modifier.weight(1f).semantics { heading() }, style = MaterialTheme.typography.titleSmall)
+                if (item.reorderable) {
+                    SystemMoveButton(item, up = true)
+                    SystemMoveButton(item, up = false)
+                }
                 if (item.canRemove) {
                     TextButton(
                         item.requestRemove,
@@ -91,4 +96,22 @@ private fun SystemGroupItem(item: GroupItemContext) {
             item.content()
         }
     }
+}
+
+@Composable
+private fun SystemMoveButton(
+    item: GroupItemContext,
+    up: Boolean,
+) {
+    val requester = remember { FocusRequester() }
+    val enabled = !item.disabled && (if (up) item.canMoveUp else item.canMoveDown)
+    val focus = if (up) item.moveUpFocus else item.moveDownFocus
+    if (focus != null) OnFormhausFocus(focus, item.model, !enabled) { requester.requestFocus() }
+    IconButton(
+        { item.move(if (up) item.index - 1 else item.index + 1) },
+        Modifier.focusRequester(requester).semantics {
+            contentDescription = "${if (up) item.moveUpLabel else item.moveDownLabel}, ${item.title}"
+        },
+        enabled = enabled,
+    ) { Icon(if (up) FormhausIcons.arrowUp else FormhausIcons.arrowDown, null, Modifier.size(ButtonDefaults.IconSize)) }
 }

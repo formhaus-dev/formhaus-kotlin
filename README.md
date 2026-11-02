@@ -316,7 +316,7 @@ if (result.errors.isEmpty()) {
 }
 ```
 
-The body is the values object. `result.values` holds the values of the active path, and `result.errors` maps keys to messages. `SubmissionOptions` also takes custom `validators`, `messages` and `hiddenValues`. `checkDefinition(definition)` lists the issues of a definition before you use it:
+The body is the values object. `result.values` holds the values of the active path, and `result.errors` maps keys to messages. `SubmissionOptions` also takes custom `validators`, `messages` and `hiddenValues`. A disabled option fails with the `option` message unless the stored answer holds it: pass the stored record as `previousValues`, never values from the request. `checkDefinition(definition)` lists the issues of a definition before you use it:
 
 ```kotlin
 import dev.formhaus.core.definitionvalidation.checkDefinition

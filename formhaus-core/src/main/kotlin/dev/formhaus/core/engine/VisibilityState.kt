@@ -181,7 +181,7 @@ internal class VisibilityState(
         canGoNextDirty = false
         if (step != null && step.ordinal in customSteps) settled = false
         val scope = conditionValues(values)
-        val checks = ShownChecks(validators, null, limits(values))
+        val checks = ShownChecks(validators, null, limits(values), starts.previousValues())
         val errors: FieldErrors =
             step?.let { CallBudget.run { validateShown(it.fields, scope, scope, checks) } } ?: MutableStringMap()
         canGoNext = definition.isMultiStep && errors.isEmpty()

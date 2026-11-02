@@ -207,6 +207,8 @@ public final class dev/formhaus/compose/form/FieldContext {
 	public final fun isInvalid ()Z
 	public final fun isItem ()Z
 	public final fun isLocked ()Z
+	public final fun isOptionDisabled (Ldev/formhaus/core/model/FieldOption;)Z
+	public final fun isReadOnly ()Z
 	public final fun isRequired ()Z
 	public final fun optionTestId (Ljava/lang/String;)Ljava/lang/String;
 	public final fun performPrimaryAction ()V
@@ -290,15 +292,22 @@ public final class dev/formhaus/compose/form/GroupContext {
 
 public final class dev/formhaus/compose/form/GroupItemContext {
 	public static final field $stable I
+	public final fun getCanMoveDown ()Z
+	public final fun getCanMoveUp ()Z
 	public final fun getCanRemove ()Z
 	public final fun getContent ()Lkotlin/jvm/functions/Function2;
+	public final fun getCount ()I
 	public final fun getDisabled ()Z
 	public final fun getHasContent ()Z
 	public final fun getId ()Ljava/lang/String;
 	public final fun getIndex ()I
+	public final fun getMove ()Lkotlin/jvm/functions/Function1;
+	public final fun getMoveDownLabel ()Ljava/lang/String;
+	public final fun getMoveUpLabel ()Ljava/lang/String;
 	public final fun getRemove ()Lkotlin/jvm/functions/Function0;
 	public final fun getRemoveLabel ()Ljava/lang/String;
 	public final fun getRemoveName ()Ljava/lang/String;
+	public final fun getReorderable ()Z
 	public final fun getRequestRemove ()Lkotlin/jvm/functions/Function0;
 	public final fun getTitle ()Ljava/lang/String;
 }
@@ -445,6 +454,7 @@ public final class dev/formhaus/compose/model/FormModelActionsKt {
 public final class dev/formhaus/compose/model/FormModelGroupsKt {
 	public static final fun addItem (Ldev/formhaus/compose/model/FormModel;Ljava/lang/String;)Z
 	public static final fun itemTitle (Ldev/formhaus/compose/model/FormModel;ILjava/lang/String;)Ljava/lang/String;
+	public static final fun moveItem (Ldev/formhaus/compose/model/FormModel;Ljava/lang/String;II)Z
 	public static final fun removeItem (Ldev/formhaus/compose/model/FormModel;ILjava/lang/String;)Z
 }
 

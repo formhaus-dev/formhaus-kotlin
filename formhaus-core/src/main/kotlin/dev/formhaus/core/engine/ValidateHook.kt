@@ -16,7 +16,7 @@ private fun EngineCore.validateNodes(submit: Boolean): List<FormNode> =
 private fun EngineCore.shownPaths(submit: Boolean): List<String> {
     val paths = ArrayList<String>()
     val state = values.json
-    visitShown(validateNodes(submit), getSubmitValues(), visibility.conditionValues(state), visibility.limits(state)) { path, _, _ ->
+    visitShown(validateNodes(submit), getSubmitValues(), visibility.conditionValues(state), visibility.limits(state)) { path, _, _, _ ->
         paths.add(path)
     }
     return paths

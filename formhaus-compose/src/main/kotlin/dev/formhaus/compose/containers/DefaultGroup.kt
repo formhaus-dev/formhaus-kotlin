@@ -27,6 +27,7 @@ import dev.formhaus.compose.components.FieldLabel
 import dev.formhaus.compose.components.FormButton
 import dev.formhaus.compose.components.FormButtonVariant
 import dev.formhaus.compose.components.FormhausIcons
+import dev.formhaus.compose.components.IconButton
 import dev.formhaus.compose.components.OnFormhausFocus
 import dev.formhaus.compose.components.controlShape
 import dev.formhaus.compose.form.GroupContext
@@ -89,6 +90,10 @@ internal fun DefaultGroupItem(context: GroupItemContext) {
     ) {
         Row(Modifier.fillMaxWidth().heightIn(min = 32.dp), verticalAlignment = Alignment.CenterVertically) {
             Text(context.title, Modifier.weight(1f).semantics { heading() }, style = tokens.textStyle(TextRole.itemTitle))
+            if (context.reorderable) {
+                MoveButton(context, up = true)
+                MoveButton(context, up = false)
+            }
             if (context.canRemove) {
                 FormButton(
                     context.removeLabel,
@@ -106,4 +111,21 @@ internal fun DefaultGroupItem(context: GroupItemContext) {
         Spacer(Modifier.height(tokens.spacing.s7))
         context.content()
     }
+}
+
+@Composable
+private fun MoveButton(
+    context: GroupItemContext,
+    up: Boolean,
+) {
+    val requester = remember { FocusRequester() }
+    val enabled = !context.disabled && (if (up) context.canMoveUp else context.canMoveDown)
+    val focus = if (up) context.moveUpFocus else context.moveDownFocus
+    if (focus != null) OnFormhausFocus(focus, context.model, !enabled) { requester.requestFocus() }
+    IconButton(
+        if (up) FormhausIcons.arrowUp else FormhausIcons.arrowDown,
+        "${if (up) context.moveUpLabel else context.moveDownLabel}, ${context.title}",
+        Modifier.focusRequester(requester),
+        enabled = enabled,
+    ) { context.move(if (up) context.index - 1 else context.index + 1) }
 }

@@ -6,6 +6,7 @@ import dev.formhaus.core.model.FormDefinition
 import dev.formhaus.core.model.FormField
 import dev.formhaus.core.model.FormNode
 import dev.formhaus.core.model.ShowCondition
+import dev.formhaus.core.model.conditions
 
 internal class FieldEntry(
     val field: FormField,
@@ -98,6 +99,15 @@ private fun nodeEntries(definition: FormDefinition): List<NodeEntry> {
     return nodes
 }
 
+private fun ruleLists(node: FormNode): List<Pair<String, List<ShowCondition>?>> {
+    val json = node.json
+    val options =
+        json["options"]?.arrayValue.orEmpty().mapIndexed { index, option ->
+            "options/$index/disabled" to conditions(option.objectValue?.get("disabled"))
+        }
+    return listOf("readOnly" to conditions(json["readOnly"])) + options
+}
+
 private fun conditionEntries(
     definition: FormDefinition,
     nodes: List<NodeEntry>,
@@ -126,6 +136,14 @@ private fun conditionEntries(
                     ConditionOwner.ACTION,
                     index,
                 ).entries(disabledLists(step.button(name).action))
+        }
+    }
+    if (definition.optionRules) {
+        for (entry in nodes) {
+            if (entry.node !is FormField) continue
+            entries +=
+                ConditionSite(entry.path, ConditionOwner.FIELD, entry.step, entry.node.key, entry.group?.key)
+                    .entries(ruleLists(entry.node))
         }
     }
     val submit = definition.json["submit"]?.objectValue?.let(::FormAction)

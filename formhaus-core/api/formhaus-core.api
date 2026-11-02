@@ -59,6 +59,7 @@ public final class dev/formhaus/core/definitionvalidation/IssueCode$Companion {
 	public final fun getCONTAINS_NOT_IN_OPTIONS-SGZMid8 ()Ljava/lang/String;
 	public final fun getCONTAINS_NOT_LIST-SGZMid8 ()Ljava/lang/String;
 	public final fun getCUSTOM_TYPE_NAME-SGZMid8 ()Ljava/lang/String;
+	public final fun getDEFAULT_DISABLED_OPTION-SGZMid8 ()Ljava/lang/String;
 	public final fun getDEFAULT_ITEMS_GREATER_THAN_MAX-SGZMid8 ()Ljava/lang/String;
 	public final fun getDEFAULT_NOT_IN_OPTIONS-SGZMid8 ()Ljava/lang/String;
 	public final fun getDEFINITION_RESET-SGZMid8 ()Ljava/lang/String;
@@ -170,6 +171,7 @@ public final class dev/formhaus/core/engine/FormEngine {
 	public final fun isMultiStep ()Z
 	public final fun isStepSkipped (Ljava/lang/String;)Z
 	public final fun items (Ljava/lang/String;)Ljava/util/List;
+	public final fun moveItem (Ljava/lang/String;II)Z
 	public final fun next (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun orderOptions (Ljava/lang/String;Ljava/util/List;)Ljava/util/List;
 	public static synthetic fun orderOptions$default (Ldev/formhaus/core/engine/FormEngine;Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)Ljava/util/List;
@@ -826,6 +828,27 @@ public final class dev/formhaus/core/json/ValuePartsKt {
 	public static final fun partsHash (Ljava/util/List;)I
 }
 
+public abstract class dev/formhaus/core/model/ConditionRule {
+}
+
+public final class dev/formhaus/core/model/ConditionRule$Always : dev/formhaus/core/model/ConditionRule {
+	public static final field INSTANCE Ldev/formhaus/core/model/ConditionRule$Always;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/formhaus/core/model/ConditionRule$When : dev/formhaus/core/model/ConditionRule {
+	public fun <init> (Ljava/util/List;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun copy (Ljava/util/List;)Ldev/formhaus/core/model/ConditionRule$When;
+	public static synthetic fun copy$default (Ldev/formhaus/core/model/ConditionRule$When;Ljava/util/List;ILjava/lang/Object;)Ldev/formhaus/core/model/ConditionRule$When;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getConditions ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public abstract interface class dev/formhaus/core/model/Conditional {
 	public abstract fun getShow ()Ljava/util/List;
 	public abstract fun getShowAny ()Ljava/util/List;
@@ -833,6 +856,8 @@ public abstract interface class dev/formhaus/core/model/Conditional {
 
 public final class dev/formhaus/core/model/FieldOption {
 	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDescription ()Ljava/lang/String;
+	public final fun getDisabled ()Ldev/formhaus/core/model/ConditionRule;
 	public final fun getExclusive ()Z
 	public final fun getImage ()Ljava/lang/String;
 	public final fun getLabel ()Ljava/lang/String;
@@ -915,7 +940,9 @@ public final class dev/formhaus/core/model/FormField : dev/formhaus/core/model/F
 	public final fun getPlaceholder ()Ljava/lang/String;
 	public final fun getProps ()Ldev/formhaus/core/json/StringMap;
 	public final fun getRandomize ()Z
+	public final fun getReadOnly ()Ldev/formhaus/core/model/ConditionRule;
 	public final fun getRemoveLabel ()Ljava/lang/String;
+	public final fun getReorderable ()Z
 	public final fun getRows ()Ldev/formhaus/core/json/JsonValue;
 	public final fun getScaleRange ()Ldev/formhaus/core/model/ScaleRange;
 	public fun getShow ()Ljava/util/List;
@@ -1094,6 +1121,16 @@ public final class dev/formhaus/core/renderer/ErrorSummaryOptions {
 	public final fun getLabels ()Ldev/formhaus/core/renderer/LabelSource;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
+}
+
+public final class dev/formhaus/core/renderer/FieldRules {
+	public final fun getReadOnly ()Z
+	public final fun isDisabled (Ldev/formhaus/core/model/FieldOption;)Z
+}
+
+public final class dev/formhaus/core/renderer/FieldRulesKt {
+	public static final fun fieldRules (Ldev/formhaus/core/engine/FormEngine;Ldev/formhaus/core/model/FormField;Ljava/lang/String;)Ldev/formhaus/core/renderer/FieldRules;
+	public static synthetic fun fieldRules$default (Ldev/formhaus/core/engine/FormEngine;Ldev/formhaus/core/model/FormField;Ljava/lang/String;ILjava/lang/Object;)Ldev/formhaus/core/renderer/FieldRules;
 }
 
 public final class dev/formhaus/core/renderer/FileListsKt {
@@ -1287,10 +1324,15 @@ public final class dev/formhaus/core/server/SubmissionOptions {
 	public fun <init> ()V
 	public fun <init> (Ldev/formhaus/core/json/JsonValue;Ldev/formhaus/core/json/StringMap;Ldev/formhaus/core/validation/MessageSource;Ldev/formhaus/core/engine/HiddenValues;)V
 	public synthetic fun <init> (Ldev/formhaus/core/json/JsonValue;Ldev/formhaus/core/json/StringMap;Ldev/formhaus/core/validation/MessageSource;Ldev/formhaus/core/engine/HiddenValues;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ldev/formhaus/core/json/JsonValue;Ldev/formhaus/core/json/StringMap;Ldev/formhaus/core/validation/MessageSource;Ldev/formhaus/core/engine/HiddenValues;Ldev/formhaus/core/json/StringMap;)V
+	public synthetic fun <init> (Ldev/formhaus/core/json/JsonValue;Ldev/formhaus/core/json/StringMap;Ldev/formhaus/core/validation/MessageSource;Ldev/formhaus/core/engine/HiddenValues;Ldev/formhaus/core/json/StringMap;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun <init> (Ljava/util/List;Ldev/formhaus/core/json/StringMap;Ldev/formhaus/core/validation/MessageSource;Ldev/formhaus/core/engine/HiddenValues;)V
 	public synthetic fun <init> (Ljava/util/List;Ldev/formhaus/core/json/StringMap;Ldev/formhaus/core/validation/MessageSource;Ldev/formhaus/core/engine/HiddenValues;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/util/List;Ldev/formhaus/core/json/StringMap;Ldev/formhaus/core/validation/MessageSource;Ldev/formhaus/core/engine/HiddenValues;Ldev/formhaus/core/json/StringMap;)V
+	public synthetic fun <init> (Ljava/util/List;Ldev/formhaus/core/json/StringMap;Ldev/formhaus/core/validation/MessageSource;Ldev/formhaus/core/engine/HiddenValues;Ldev/formhaus/core/json/StringMap;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun getHiddenValues ()Ldev/formhaus/core/engine/HiddenValues;
 	public final fun getMessages ()Ldev/formhaus/core/validation/MessageSource;
+	public final fun getPreviousValues ()Ldev/formhaus/core/json/StringMap;
 	public final fun getSkippedSteps ()Ldev/formhaus/core/json/JsonValue;
 	public final fun getValidators ()Ldev/formhaus/core/json/StringMap;
 }
@@ -1387,7 +1429,10 @@ public final class dev/formhaus/core/validation/ValidateOptions {
 	public fun <init> ()V
 	public fun <init> (Ldev/formhaus/core/json/StringMap;Ldev/formhaus/core/validation/MessageSource;)V
 	public synthetic fun <init> (Ldev/formhaus/core/json/StringMap;Ldev/formhaus/core/validation/MessageSource;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ldev/formhaus/core/json/StringMap;Ldev/formhaus/core/validation/MessageSource;Ldev/formhaus/core/json/StringMap;)V
+	public synthetic fun <init> (Ldev/formhaus/core/json/StringMap;Ldev/formhaus/core/validation/MessageSource;Ldev/formhaus/core/json/StringMap;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun getMessages ()Ldev/formhaus/core/validation/MessageSource;
+	public final fun getPreviousValues ()Ldev/formhaus/core/json/StringMap;
 	public final fun getValidators ()Ldev/formhaus/core/json/StringMap;
 }
 

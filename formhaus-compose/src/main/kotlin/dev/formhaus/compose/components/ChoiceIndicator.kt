@@ -20,21 +20,34 @@ public fun ChoiceIndicator(
     modifier: Modifier = Modifier,
     invalid: Boolean = false,
 ) {
+    ChoiceIndicator(shape, selected, modifier, invalid, readOnly = false)
+}
+
+@Composable
+internal fun ChoiceIndicator(
+    shape: IndicatorShape,
+    selected: Boolean,
+    modifier: Modifier,
+    invalid: Boolean,
+    readOnly: Boolean,
+) {
     val tokens = LocalFormhausTokens.current
     val colors = tokens.colors
     val size = tokens.controls.indicator
     val stroke =
         when {
             selected -> colors.primary
+            readOnly -> colors.inputBorder
             invalid -> colors.error
             else -> colors.control
         }
+    val empty = if (readOnly) colors.backgroundDisabled else colors.background
     Box(modifier.size(size).clearAndSetSemantics {}, contentAlignment = Alignment.Center) {
         if (shape == IndicatorShape.RADIO) {
-            Box(Modifier.size(size).surface(CircleShape, colors.background, stroke, 2.dp))
+            Box(Modifier.size(size).surface(CircleShape, empty, stroke, 2.dp))
             Box(Modifier.size(size * 4 / 9).fade(selected, tokens.quickMotion).background(colors.primary, CircleShape))
         } else {
-            val fill = if (selected) colors.primary else colors.background
+            val fill = if (selected) colors.primary else empty
             Box(Modifier.size(size).surface(RoundedCornerShape(tokens.radii.indicator), fill, stroke, 1.5.dp))
             Icon(FormhausIcons.check, null, Modifier.size(size * 0.72f).fade(selected, tokens.quickMotion), tint = colors.onPrimary)
         }

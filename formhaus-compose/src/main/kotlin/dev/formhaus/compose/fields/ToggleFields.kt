@@ -33,8 +33,10 @@ import dev.formhaus.compose.components.LoadingIndicator
 import dev.formhaus.compose.components.alignedToText
 import dev.formhaus.compose.components.focusRing
 import dev.formhaus.compose.components.formhausFocus
+import dev.formhaus.compose.components.readOnlyChoice
 import dev.formhaus.compose.components.textBottom
 import dev.formhaus.compose.form.FieldContext
+import dev.formhaus.compose.form.withReadOnly
 import dev.formhaus.compose.theme.LocalFormhausTokens
 import dev.formhaus.compose.theme.TextRole
 import dev.formhaus.compose.theme.textStyle
@@ -52,9 +54,10 @@ public fun CheckboxField(context: FieldContext) {
             context.label,
             Modifier
                 .formhausFocus(context, requester)
-                .semantics { contentDescription = context.accessibilityName },
+                .semantics { contentDescription = context.withReadOnly(context.accessibilityName) },
             invalid = context.isInvalid,
             enabled = !context.isLocked,
+            readOnly = context.isReadOnly,
         )
     }
 }
@@ -68,6 +71,19 @@ public fun FormhausCheckbox(
     invalid: Boolean = false,
     enabled: Boolean = true,
 ) {
+    FormhausCheckbox(checked, onCheckedChange, label, modifier, invalid, enabled, readOnly = false)
+}
+
+@Composable
+internal fun FormhausCheckbox(
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    label: String,
+    modifier: Modifier,
+    invalid: Boolean,
+    enabled: Boolean,
+    readOnly: Boolean,
+) {
     val tokens = LocalFormhausTokens.current
     val source = remember { MutableInteractionSource() }
     val focused by source.collectIsFocusedAsState()
@@ -75,12 +91,12 @@ public fun FormhausCheckbox(
         modifier
             .fillMaxWidth()
             .heightIn(min = tokens.controls.hitTarget)
-            .focusable(enabled, source)
-            .toggleable(checked, source, null, enabled, Role.Checkbox, onCheckedChange),
+            .focusable(enabled && !readOnly, source)
+            .toggle(checked, source, enabled, readOnly, Role.Checkbox, onCheckedChange),
         horizontalArrangement = Arrangement.spacedBy(tokens.spacing.s5),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        ChoiceIndicator(IndicatorShape.CHECKBOX, checked, alignedToText().focusRing(focused, tokens.radii.indicator), invalid)
+        ChoiceIndicator(IndicatorShape.CHECKBOX, checked, alignedToText().focusRing(focused, tokens.radii.indicator), invalid, readOnly)
         Text(label, Modifier.weight(1f).alignBy(FirstBaseline).textBottom(), style = tokens.textStyle(TextRole.option))
     }
 }
@@ -100,10 +116,10 @@ public fun SwitchField(context: FieldContext) {
                 .fillMaxWidth()
                 .heightIn(min = tokens.controls.hitTarget)
                 .formhausFocus(context, requester)
-                .focusable(!context.isLocked, source)
-                .toggleable(checked, source, null, !context.isLocked, Role.Switch) {
+                .focusable(!context.isLocked && !context.isReadOnly, source)
+                .toggle(checked, source, !context.isLocked, context.isReadOnly, Role.Switch) {
                     context.setValue(JsonValue.Bool(it))
-                }.semantics { contentDescription = context.accessibilityName },
+                }.semantics { contentDescription = context.withReadOnly(context.accessibilityName) },
             horizontalArrangement = Arrangement.spacedBy(tokens.spacing.s5),
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -134,3 +150,12 @@ public fun SwitchField(context: FieldContext) {
         }
     }
 }
+
+internal fun Modifier.toggle(
+    checked: Boolean,
+    source: MutableInteractionSource,
+    enabled: Boolean,
+    readOnly: Boolean,
+    role: Role,
+    onCheckedChange: (Boolean) -> Unit,
+): Modifier = if (readOnly) readOnlyChoice(checked, role, source) else toggleable(checked, source, null, enabled, role, onCheckedChange)

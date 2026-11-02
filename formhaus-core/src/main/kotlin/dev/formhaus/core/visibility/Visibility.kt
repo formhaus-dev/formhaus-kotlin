@@ -7,6 +7,7 @@ import dev.formhaus.core.json.isBlankText
 import dev.formhaus.core.json.jsNumber
 import dev.formhaus.core.json.sameValueZero
 import dev.formhaus.core.json.strictEquals
+import dev.formhaus.core.model.ConditionRule
 import dev.formhaus.core.model.Conditional
 import dev.formhaus.core.model.FormAction
 import dev.formhaus.core.model.FormField
@@ -102,6 +103,17 @@ internal fun isActionDisabled(
     val disabled = action?.disabled?.takeIf { it.isNotEmpty() } ?: return false
     return disabled.all { evaluateCondition(it, values, limits) }
 }
+
+internal fun conditionsMet(
+    rule: ConditionRule?,
+    values: JsonObject,
+    limits: ListLimits,
+): Boolean =
+    when (rule) {
+        null -> false
+        ConditionRule.Always -> true
+        is ConditionRule.When -> rule.conditions.isNotEmpty() && rule.conditions.all { evaluateCondition(it, values, limits) }
+    }
 
 internal fun shownFields(
     nodes: List<FormNode>,

@@ -30,6 +30,7 @@ import dev.formhaus.compose.components.formhausOptionsFocus
 import dev.formhaus.compose.form.FieldContext
 import dev.formhaus.compose.form.LocalFieldReveals
 import dev.formhaus.compose.form.numberText
+import dev.formhaus.compose.form.readOnlyState
 import dev.formhaus.compose.theme.FormhausTokens
 import dev.formhaus.compose.theme.LocalFormhausTokens
 import dev.formhaus.core.json.JsonValue
@@ -112,7 +113,7 @@ private fun ChoiceList(
     val reveals = LocalFieldReveals.current
     ChoiceScope(context) { actions ->
         FieldShell(context, Modifier, FieldShellVariant.GROUP, errorFirst = reveals != null) {
-            val modifier = Modifier.formhausOptionsFocus(context, requester).selectableGroup()
+            val modifier = Modifier.formhausOptionsFocus(context, requester).selectableGroup().readOnlyState(context)
             ChoiceOptions(context, shape, arrangement, options.indices, spec::columnCount, actions, modifier, requester)
         }
     }
@@ -159,7 +160,8 @@ internal fun ChoiceOptions(
     val card: @Composable (Int) -> Unit = { index ->
         val option = options[index]
         val card = if (focus != null && index == target) Modifier.focusRequester(focus) else Modifier
-        ChoiceCard(option, shape, option.value.orEmpty() in selected, picture, enabled, invalid, actions, card)
+        val usable = enabled && !context.isOptionDisabled(option)
+        ChoiceCard(option, shape, option.value.orEmpty() in selected, picture, usable, invalid, actions, card, context.isReadOnly)
     }
     when (arrangement) {
         ChoiceArrangement.PICTURES -> {

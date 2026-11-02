@@ -63,7 +63,7 @@ The copy in `formhaus-core/src/test/resources/fixtures/conformance` is synced, n
 ./scripts/sync-fixtures.sh <git-ref> [path-to-formhaus-repo]
 ```
 
-`fixtures/VERSION` records the ref and the resolved sha. The same script copies the locale catalogs of `@formhaus/core` to `formhaus-core/src/main/resources/dev/formhaus/core/locales`, with their own `VERSION`. The definition corpus runs `checkDefinition`, overlays, text slots, value cases and recall cases. Every scenario in `fixtures/conformance/scenarios` runs through `FormEngine` as its own test.
+`fixtures/VERSION` records the ref and the resolved sha. The same script copies the locale catalogs of `@formhaus/core` to `formhaus-core/src/main/resources/dev/formhaus/core/locales`, with their own `VERSION`. The definition corpus runs `checkDefinition`, overlays, text slots, value cases and recall cases. Every scenario in `fixtures/conformance/scenarios` runs through `FormEngine` as its own test. The script also copies the server cases of `packages/core/fixtures/submissions` to `fixtures/submissions`, and each case runs through `validateSubmission`.
 
 ## Generated data
 

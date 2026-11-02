@@ -6,14 +6,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -22,6 +20,7 @@ import dev.formhaus.compose.components.FieldShell
 import dev.formhaus.compose.components.FieldShellVariant
 import dev.formhaus.compose.components.selectableSurface
 import dev.formhaus.compose.form.FieldContext
+import dev.formhaus.compose.form.readOnlyState
 import dev.formhaus.compose.model.formhausTestId
 import dev.formhaus.compose.theme.LocalFormhausTokens
 import dev.formhaus.compose.theme.TextRole
@@ -36,7 +35,7 @@ public fun ScaleField(context: FieldContext) {
     val focus = remember { ScaleFocus() }
     FieldShell(context, variant = FieldShellVariant.GROUP) {
         Column(Modifier.scaleInput(context, scale, current, focus), verticalArrangement = Arrangement.spacedBy(tokens.spacing.s2)) {
-            ColumnGrid(tokens.spacing.s2, ::scaleColumns, Modifier.scaleRing(focus).selectableGroup()) {
+            ColumnGrid(tokens.spacing.s2, ::scaleColumns, Modifier.scaleRing(focus).selectableGroup().readOnlyState(context)) {
                 for (point in scale.points) {
                     ScaleBox(
                         "$point",
@@ -45,6 +44,7 @@ public fun ScaleField(context: FieldContext) {
                         context.isInvalid,
                         pointDescription(point, scale.anchor(point)),
                         Modifier.formhausTestId(context.optionTestId("$point")),
+                        context.isReadOnly,
                     ) { context.commit(JsonValue.Number(point.toDouble())) }
                 }
             }
@@ -66,6 +66,7 @@ private fun ScaleBox(
     invalid: Boolean,
     description: String,
     modifier: Modifier,
+    readOnly: Boolean,
     choose: () -> Unit,
 ) {
     val tokens = LocalFormhausTokens.current
@@ -74,8 +75,8 @@ private fun ScaleBox(
         modifier
             .fillMaxWidth()
             .heightIn(min = maxOf(tokens.controls.height, tokens.controls.hitTarget))
-            .selectableSurface(selected, invalid, solid = true, enabled = enabled, source = source)
-            .selectable(selected, source, null, enabled, Role.RadioButton, choose)
+            .selectableSurface(selected, invalid, solid = true, enabled = enabled, source = source, readOnly = readOnly)
+            .point(selected, source, enabled, readOnly, choose)
             .semantics { contentDescription = description },
         contentAlignment = Alignment.Center,
     ) {

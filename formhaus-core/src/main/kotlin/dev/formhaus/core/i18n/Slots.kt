@@ -107,7 +107,11 @@ private fun nodeSlots(
 ): List<Slot> {
     val keys = text.node["i18n"]?.objectValue ?: noParams
     return text.kind.slots.mapNotNull { slot ->
-        if (text.kind == NodeKind.VALIDATION) ruleSlot(definition, text, slot, keys) else textSlot(text, slot, keys)
+        when {
+            text.kind == NodeKind.VALIDATION -> ruleSlot(definition, text, slot, keys)
+            text.kind == NodeKind.OPTION && slot == "description" && !definition.optionRules -> null
+            else -> textSlot(text, slot, keys)
+        }
     }
 }
 
@@ -187,6 +191,7 @@ private fun usedLabels(definition: FormDefinition): Set<String> {
     add(fields.any { it.type in pickerTypes }, listOf("done"))
     add(fields.any { it.type == "file" }, listOf("chooseFile"))
     add(fields.any { it.isFileList }, fileListLabels)
+    add(nodes.any { it.reorderable }, listOf("moveUp", "moveDown", "itemMoved"))
     return labels
 }
 

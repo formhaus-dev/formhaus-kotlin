@@ -2,6 +2,7 @@ package dev.formhaus.core.definitionvalidation
 
 import dev.formhaus.core.model.FILE_LISTS_MINOR
 import dev.formhaus.core.model.FormField
+import dev.formhaus.core.model.OPTION_RULES_MINOR
 import dev.formhaus.core.model.formatParts
 import dev.formhaus.core.model.scaleTypes
 
@@ -47,10 +48,25 @@ private fun latestOutdated(context: CheckContext): Outdated? {
 
 private fun setsOrder(field: FormField): Boolean = "randomize" in field.json || field.options.orEmpty().any { "pinned" in it.json }
 
+private fun newerProperty(entry: NodeEntry): String? {
+    val json = entry.node.json
+    listOf("readOnly", "reorderable").firstOrNull { it in json }?.let { return "${entry.path}/$it" }
+    json["options"]?.arrayValue?.forEachIndexed { index, option ->
+        val members = option.objectValue ?: return@forEachIndexed
+        listOf("description", "disabled").firstOrNull { it in members }?.let { return "${entry.path}/options/$index/$it" }
+    }
+    return null
+}
+
 private fun newestOutdated(
     context: CheckContext,
     minor: Double,
 ): Outdated? {
+    if (minor < OPTION_RULES_MINOR) {
+        context.nodes.firstNotNullOfOrNull(::newerProperty)?.let {
+            return Outdated("$it is set", OPTION_RULES_MINOR, "Below 1.8 renderers and validation ignore it")
+        }
+    }
     if (minor < FILE_LISTS_MINOR) {
         context.entries.firstOrNull { it.field.type == "file" && "multiple" in it.field.json }?.let {
             return Outdated("${it.path} sets \"multiple\"", FILE_LISTS_MINOR, "Below 1.7 the field keeps one file")

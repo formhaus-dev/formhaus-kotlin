@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -17,6 +19,8 @@ import dev.formhaus.compose.components.ZoomButton
 import dev.formhaus.compose.form.FieldContext
 import dev.formhaus.compose.model.formhausTestId
 import dev.formhaus.compose.theme.LocalFormhausTokens
+import dev.formhaus.compose.theme.TextRole
+import dev.formhaus.compose.theme.textStyle
 import dev.formhaus.core.json.JsonValue
 import dev.formhaus.core.json.stringMapOf
 import dev.formhaus.core.model.FieldOption
@@ -32,6 +36,7 @@ internal fun ChoiceCard(
     invalid: Boolean,
     actions: ChoiceActions,
     focus: Modifier = Modifier,
+    readOnly: Boolean = false,
 ) {
     val tokens = LocalFormhausTokens.current
     val value = option.value.orEmpty()
@@ -47,10 +52,20 @@ internal fun ChoiceCard(
             enabled = enabled,
             shape = shape,
             top = if (picture) tokens.spacing.s3 else tokens.spacing.s5,
+            readOnly = readOnly,
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(tokens.spacing.s3)) {
                 if (shown != null) OptionImage(shown)
-                OptionRow(shape, option.label ?: value, selected, invalid = invalid)
+                Column(verticalArrangement = Arrangement.spacedBy(tokens.spacing.s1)) {
+                    OptionRow(shape, option.label ?: value, selected, Modifier, invalid, readOnly)
+                    option.description?.takeIf { it.isNotEmpty() }?.let {
+                        Text(
+                            it,
+                            Modifier.padding(start = tokens.controls.indicator + tokens.spacing.s5),
+                            style = tokens.textStyle(TextRole.helper),
+                        )
+                    }
+                }
             }
         }
         if (shown != null) {

@@ -76,11 +76,15 @@ internal fun EngineCore.setValue(
     writeValue(key, ValueSlot.fresh(exclusiveWrite(visibility.fieldOf(key, values.json), values[key], value)))
 }
 
-internal fun EngineCore.loadSubmitted(submitted: JsonObject) {
+internal fun EngineCore.loadSubmitted(
+    submitted: JsonObject,
+    previous: JsonObject,
+) {
     replaceValues(Values(submitted))
     reconcileHidden(initial = true)
     visibility.markChanged(structureChanged = true, valuesChanged = true)
     visibility.starts.loadPayload()
+    visibility.starts.storeValues(previous)
     visibility.unsettle()
 }
 
@@ -122,19 +126,29 @@ internal fun EngineCore.addItem(key: String): Boolean {
     return true
 }
 
-private fun <V : Any> shift(
+private fun <V : Any> reindex(
     map: MutableStringMap<V>,
     key: String,
-    removed: Int,
+    place: (Int) -> Int?,
 ) {
     val moved = MutableStringMap<V>()
     for (errorKey in map.keys) {
         val (index, field) = splitPath(key, errorKey) ?: continue
-        if (index < removed) continue
-        if (index > removed) map[errorKey]?.let { moved[itemPath(key, index - 1, field)] = it }
+        val target = place(index)
+        if (target == index) continue
+        if (target != null) map[errorKey]?.let { moved[itemPath(key, target, field)] = it }
         map.remove(errorKey)
     }
     map.merge(moved)
+}
+
+private fun EngineCore.reindexItems(
+    key: String,
+    place: (Int) -> Int?,
+) {
+    reindex(errors, key, place)
+    reindex(serverErrors, key, place)
+    reindex(fieldLoading, key, place)
 }
 
 internal fun EngineCore.removeItem(
@@ -146,24 +160,39 @@ internal fun EngineCore.removeItem(
     if (index !in items.indices || items.size.toDouble() <= group.itemLimits.min) return false
     val ids = values.itemIds(key).toMutableList()
     visibility.starts.dropItem(values.itemId(key, index))
-    shift(errors, key, index)
-    shift(serverErrors, key, index)
-    shift(fieldLoading, key, index)
+    reindexItems(key) { position -> if (position == index) null else position - (if (position > index) 1 else 0) }
     if (index < ids.size) ids.removeAt(index)
-    writeValue(
-        key,
-        ValueSlot(
-            JsonValue.Array(
-                items.filterIndexed {
-                    position,
-                    _,
-                    ->
-                    position != index
-                },
-            ),
-            Ref(freshToken(), ids),
-        ),
-    )
+    writeValue(key, ValueSlot(JsonValue.Array(items.filterIndexed { position, _ -> position != index }), Ref(freshToken(), ids)))
+    return true
+}
+
+private fun <T> MutableList<T>.move(
+    from: Int,
+    to: Int,
+) {
+    add(to, removeAt(from))
+}
+
+internal fun EngineCore.moveItem(
+    key: String,
+    from: Int,
+    to: Int,
+): Boolean {
+    val items = itemsOf(values[key]).toMutableList()
+    activeGroup(key) ?: return false
+    if (from !in items.indices || to !in items.indices || from == to) return false
+    val ids = values.itemIds(key).toMutableList()
+    reindexItems(key) { position ->
+        if (position == from) {
+            to
+        } else {
+            val shifted = position - (if (position > from) 1 else 0)
+            shifted + (if (shifted >= to) 1 else 0)
+        }
+    }
+    items.move(from, to)
+    ids.move(from, to)
+    writeValue(key, ValueSlot(JsonValue.Array(items), Ref(freshToken(), ids)))
     return true
 }
 

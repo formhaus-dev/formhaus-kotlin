@@ -39,4 +39,25 @@ public fun FormModel.removeItem(
     return true
 }
 
+public fun FormModel.moveItem(
+    group: String,
+    from: Int,
+    to: Int,
+): Boolean {
+    val name = itemTitle(from, group)
+    val count = group(group).items.size
+    if (!changeItems(group) { engine.moveItem(group, from, to) }) return false
+    val up = to < from
+    requestFocus(moveKey(group, to, up != (if (up) to == 0 else to == count - 1)))
+    val params = stringMapOf("item" to JsonValue.String(name), "position" to JsonValue.Number(to + 1.0))
+    alerts.announce(label("itemMoved", params))
+    return true
+}
+
+internal fun moveKey(
+    group: String,
+    index: Int,
+    up: Boolean,
+): String = "$group#${if (up) "up" else "down"}$index"
+
 internal fun FormModel.groupField(key: String): FormField? = structure.visibleFields.firstOrNull { it.key == key && it.isGroup }

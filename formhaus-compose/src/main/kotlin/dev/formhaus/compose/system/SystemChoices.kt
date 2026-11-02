@@ -18,6 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.semantics.Role
@@ -28,14 +29,18 @@ import dev.formhaus.compose.components.focusedOption
 import dev.formhaus.compose.components.formhausFocus
 import dev.formhaus.compose.components.formhausOptionsFocus
 import dev.formhaus.compose.components.marked
+import dev.formhaus.compose.components.readOnlyChoice
 import dev.formhaus.compose.fields.ChoiceSelection
 import dev.formhaus.compose.form.FieldContext
 import dev.formhaus.compose.form.LocalFieldReveals
 import dev.formhaus.compose.form.formhausScrollAnchor
+import dev.formhaus.compose.form.readOnlyState
+import dev.formhaus.compose.form.withReadOnly
 import dev.formhaus.compose.model.formhausTestId
 import dev.formhaus.compose.theme.LocalFormhausTokens
 import dev.formhaus.core.json.JsonValue
 
+private const val DISABLED_ALPHA = 0.38f
 private val rowHeight = 48.dp
 private val revealInset = 10.dp
 
@@ -47,23 +52,29 @@ internal fun SystemChoiceList(context: FieldContext) {
     val target = focusedOption(context)
     val reveals = LocalFieldReveals.current
     SystemBlock(context, errorFirst = reveals != null) {
-        Column(Modifier.formhausOptionsFocus(context, requester).selectableGroup()) {
+        Column(Modifier.formhausOptionsFocus(context, requester).selectableGroup().readOnlyState(context)) {
             context.options.forEachIndexed { index, option ->
                 val value = option.value.orEmpty()
                 val selected = selection.isSelected(value)
+                val enabled = !context.isLocked && !context.isOptionDisabled(option)
+                val role = if (multiple) Role.Checkbox else Role.RadioButton
                 ChoiceRow(
                     Modifier
                         .then(if (index == target) Modifier.focusRequester(requester) else Modifier)
-                        .selectable(selected, enabled = !context.isLocked, role = if (multiple) Role.Checkbox else Role.RadioButton) {
-                            selection.choose(value)
-                        }.formhausTestId(context.optionTestId(value)),
+                        .then(
+                            if (context.isReadOnly) {
+                                Modifier.readOnlyChoice(selected, role)
+                            } else {
+                                Modifier.selectable(selected, enabled = enabled, role = role) { selection.choose(value) }
+                            },
+                        ).formhausTestId(context.optionTestId(value)),
                 ) {
                     if (multiple) {
-                        Checkbox(selected, null, enabled = !context.isLocked)
+                        Checkbox(selected, null, enabled = enabled)
                     } else {
-                        RadioButton(selected, null, enabled = !context.isLocked)
+                        RadioButton(selected, null, enabled = enabled)
                     }
-                    Text(option.label ?: value, Modifier.weight(1f), style = MaterialTheme.typography.bodyLarge)
+                    SystemOptionText(option.label ?: value, option.description, enabled)
                 }
                 reveals?.Block(value, revealInset, MaterialTheme.colorScheme.outlineVariant)
             }
@@ -88,9 +99,15 @@ internal fun SystemToggle(
         ChoiceRow(
             Modifier
                 .formhausFocus(context, requester)
-                .toggleable(checked, enabled = enabled, role = if (switch) Role.Switch else Role.Checkbox) {
-                    context.setValue(JsonValue.Bool(it))
-                }.semantics { contentDescription = context.accessibilityName },
+                .then(
+                    if (context.isReadOnly) {
+                        Modifier.readOnlyChoice(checked, if (switch) Role.Switch else Role.Checkbox)
+                    } else {
+                        Modifier.toggleable(checked, enabled = enabled, role = if (switch) Role.Switch else Role.Checkbox) {
+                            context.setValue(JsonValue.Bool(it))
+                        }
+                    },
+                ).semantics { contentDescription = context.withReadOnly(context.accessibilityName) },
         ) {
             if (!switch) Checkbox(checked, null, enabled = enabled)
             Text(
@@ -101,6 +118,21 @@ internal fun SystemToggle(
             if (switch) Switch(checked, null, enabled = enabled)
         }
         SystemNotes(context)
+    }
+}
+
+@Composable
+private fun RowScope.SystemOptionText(
+    label: String,
+    description: String?,
+    enabled: Boolean,
+) {
+    val colors = MaterialTheme.colorScheme
+    Column(Modifier.weight(1f).alpha(if (enabled) 1f else DISABLED_ALPHA)) {
+        Text(label, style = MaterialTheme.typography.bodyLarge)
+        description?.takeIf { it.isNotEmpty() }?.let {
+            Text(it, color = colors.onSurfaceVariant, style = MaterialTheme.typography.bodyMedium)
+        }
     }
 }
 

@@ -96,6 +96,7 @@ private fun FileRow(
             overflow = TextOverflow.MiddleEllipsis,
             style = tokens.textStyle(TextRole.body, colored = false),
         )
+        if (context.isReadOnly) return@Row
         DescribedButton(
             remove,
             FormButtonVariant.TEXT,

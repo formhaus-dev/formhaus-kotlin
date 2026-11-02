@@ -165,6 +165,12 @@ public class FormEngine(
         index: Int,
     ): Boolean = mutating("removeItem") { core.removeItem(key, index) }
 
+    public fun moveItem(
+        key: String,
+        from: Int,
+        to: Int,
+    ): Boolean = mutating("moveItem") { core.moveItem(key, from, to) }
+
     public fun setItemValue(
         key: String,
         index: Int,

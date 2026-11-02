@@ -18,6 +18,7 @@ import dev.formhaus.compose.components.formhausFocus
 import dev.formhaus.compose.form.FieldContext
 import dev.formhaus.compose.form.FormComponents
 import dev.formhaus.compose.form.formhausScrollAnchor
+import dev.formhaus.compose.form.readOnlyState
 import dev.formhaus.compose.model.FormModel
 import dev.formhaus.compose.model.formhausTestId
 import dev.formhaus.compose.model.options
@@ -122,7 +123,7 @@ internal fun ChoiceRow(
             plan.range(row),
             { _, _ -> plan.columns },
             actions,
-            focus.selectableGroup(),
+            focus.selectableGroup().readOnlyState(context),
         )
     }
 }

@@ -26,6 +26,9 @@ internal val defaultLabels: Map<String, String> =
         "stepTitle" to "Step {index}",
         "stepErrors" to "Errors: {count}",
         "fileCount" to "Files: {count}",
+        "moveUp" to "Move up",
+        "moveDown" to "Move down",
+        "itemMoved" to "{item} moved to position {position}",
         "or" to "or",
         "select" to "Select",
     )
