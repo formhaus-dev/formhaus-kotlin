@@ -51,6 +51,7 @@ public class FormDefinition internal constructor(
     public val steps: List<FormStep>? =
         json["steps"]?.arrayValue?.mapNotNull { item -> item.objectValue?.let { FormStep(it, reader) } }
     internal val recallsAnswers: Boolean = formatAtLeast(json["formatVersion"], RECALL_MINOR)
+    internal val hiddenInGroups: Boolean = formatAtLeast(json["formatVersion"], HIDDEN_IN_GROUPS_MINOR)
 
     public val title: String? get() = json["title"]?.stringValue
     public val description: String? get() = json["description"]?.stringValue
@@ -69,7 +70,7 @@ public class FormDefinition internal constructor(
     internal val domIds: DomIds by lazy { DomIds(this) }
 
     public companion object {
-        public const val SUPPORTED_FORMAT_VERSION: String = "1.8"
+        public const val SUPPORTED_FORMAT_VERSION: String = "1.9"
     }
 }
 
@@ -85,6 +86,7 @@ public fun parseDefinition(json: JsonValue): FormDefinition = FormDefinition(jso
 internal const val RECALL_MINOR = 5
 internal const val FILE_LISTS_MINOR = 7
 internal const val OPTION_RULES_MINOR = 8
+internal const val HIDDEN_IN_GROUPS_MINOR = 9
 
 internal fun formatAtLeast(
     version: JsonValue?,

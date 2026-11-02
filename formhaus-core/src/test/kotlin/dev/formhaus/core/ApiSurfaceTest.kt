@@ -123,7 +123,7 @@ class ApiSurfaceTest {
         assertTrue(engine.isMultiStep)
         assertEquals("one", engine.currentStep?.id)
         assertTrue(engine.validate().isEmpty())
-        assertEquals("1.8", FormDefinition.SUPPORTED_FORMAT_VERSION)
+        assertEquals("1.9", FormDefinition.SUPPORTED_FORMAT_VERSION)
     }
 
     @Test

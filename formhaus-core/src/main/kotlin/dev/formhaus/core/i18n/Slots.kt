@@ -192,6 +192,7 @@ private fun usedLabels(definition: FormDefinition): Set<String> {
     add(fields.any { it.type == "file" }, listOf("chooseFile"))
     add(fields.any { it.isFileList }, fileListLabels)
     add(nodes.any { it.reorderable }, listOf("moveUp", "moveDown", "itemMoved"))
+    add(fields.any { it.readOnly != null && it.json["readOnly"]?.arrayValue?.isEmpty() != true }, listOf("readOnly"))
     return labels
 }
 

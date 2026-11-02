@@ -175,6 +175,12 @@ internal fun sourceIssues(context: CheckContext): List<DefinitionIssue> =
     context.entries.flatMap { entry ->
         val source = entry.field.source ?: return@flatMap emptyList()
         val at = "${entry.path}/source"
+        val group = entry.group
+        if (group != null && entry.field.type == "hidden") {
+            val message = "a hidden field inside the group \"${group.key}\" cannot read a source"
+            val hint = "Remove \"source\" and pass the value in the initial values of each item, or move the field out of the group"
+            return@flatMap listOf(error(IssueCode.SOURCE_IN_GROUP, at, message, hint))
+        }
         val name = source.stringValue
         if (name != null) {
             if (name in sourceNames) return@flatMap emptyList()

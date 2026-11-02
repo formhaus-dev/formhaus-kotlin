@@ -278,6 +278,14 @@ FormhausTheme(brand) {
 
 Custom components read the resolved tokens from `LocalFormhausTokens.current` and style text with `tokens.textStyle(TextRole.body)`. When the system contrast setting is raised, on Android 14 and later, the built-in palettes switch to the `contrast: more` values of the tokens. Set `lightIncreased` and `darkIncreased` to choose those colors yourself.
 
+## Read-only forms
+
+`readOnly` in `FormRendererOptions` makes every field read-only and hides Add, Remove and Move on groups:
+
+```kotlin
+FormhausForm(definition, values, renderer = FormRendererOptions(readOnly = true)) { _, _ -> SubmitResult.Ok }
+```
+
 ## UI tests
 
 Set `testIds` to tag the form for Compose UI tests. They are off by default:

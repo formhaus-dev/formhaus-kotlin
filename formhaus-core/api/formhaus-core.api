@@ -107,6 +107,7 @@ public final class dev/formhaus/core/definitionvalidation/IssueCode$Companion {
 	public final fun getSLOW_PATTERN-SGZMid8 ()Ljava/lang/String;
 	public final fun getSNAPSHOT_MISMATCH-SGZMid8 ()Ljava/lang/String;
 	public final fun getSNAPSHOT_TOO_LARGE-SGZMid8 ()Ljava/lang/String;
+	public final fun getSOURCE_IN_GROUP-SGZMid8 ()Ljava/lang/String;
 	public final fun getSOURCE_NOT_APPLICABLE-SGZMid8 ()Ljava/lang/String;
 	public final fun getUNKNOWN_AUTOCOMPLETE_TOKEN-SGZMid8 ()Ljava/lang/String;
 	public final fun getUNKNOWN_FIELD-SGZMid8 ()Ljava/lang/String;

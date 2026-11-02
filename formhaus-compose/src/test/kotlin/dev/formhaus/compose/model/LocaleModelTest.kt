@@ -34,6 +34,28 @@ class LocaleModelTest {
         }
 
     @Test
+    fun theReadOnlyStateComesFromEveryBundledCatalog() {
+        val expected =
+            mapOf(
+                "de" to "Schreibgeschützt",
+                "en" to "Read only",
+                "es" to "Solo lectura",
+                "fr" to "Lecture seule",
+                "fr-CA" to "Lecture seule",
+                "it" to "Sola lettura",
+                "ja" to "読み取り専用",
+                "pt-BR" to "Somente leitura",
+                "ru" to "Только для чтения",
+                "uk" to "Лише для читання",
+                "zh-CN" to "只读",
+            )
+        for ((tag, text) in expected) {
+            assertEquals(text, stepsModel(FormEngineOptions(locale = listOfNotNull(LocaleCatalog.bundled(tag)))).label("readOnly"))
+        }
+        assertEquals("Read only", stepsModel(FormEngineOptions()).label("readOnly"))
+    }
+
+    @Test
     fun onValidateRunsThroughTheModelAndItsFormErrorsClearOnContinue() =
         runTest {
             var down = true

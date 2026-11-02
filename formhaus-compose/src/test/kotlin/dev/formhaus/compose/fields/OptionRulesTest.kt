@@ -4,16 +4,22 @@ import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.v2.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithContentDescription
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import dev.formhaus.compose.form.FormhausForm
 import dev.formhaus.compose.model.FormModel
+import dev.formhaus.compose.model.FormRendererOptions
+import dev.formhaus.compose.model.addItem
 import dev.formhaus.compose.model.model
 import dev.formhaus.compose.model.setValue
 import dev.formhaus.core.json.JsonValue
@@ -36,6 +42,14 @@ private val workspace =
         {"key": "title", "type": "text", "label": "Title"}]}]}
     """.trimIndent()
 
+private val team =
+    """
+    {"formatVersion": "1.9", "id": "t", "title": "T", "submit": {"label": "Save"}, "fields": [
+      {"key": "members", "type": "group", "label": "Members", "itemLabel": "Member {index}", "fields": [
+        {"key": "id", "type": "hidden", "label": "Member id", "defaultValue": "new"},
+        {"key": "name", "type": "text", "label": "Name"}]}]}
+    """.trimIndent()
+
 private val readOnlyText = SemanticsMatcher.expectValue(SemanticsProperties.IsEditable, false)
 
 private val focusable = SemanticsMatcher.keyIsDefined(SemanticsProperties.Focused)
@@ -48,8 +62,12 @@ class OptionRulesTest {
     @get:Rule
     val compose = createComposeRule()
 
-    private fun render(values: String): FormModel {
-        val form = model(workspace, values)
+    private fun render(
+        values: String,
+        options: FormRendererOptions = FormRendererOptions(),
+        definition: String = workspace,
+    ): FormModel {
+        val form = model(definition, values, options)
         compose.setContent { Themed { FormhausForm(form) } }
         compose.waitForIdle()
         return form
@@ -89,5 +107,33 @@ class OptionRulesTest {
         assertEquals(JsonValue.parse("""[{"title": "B"}, {"title": "A"}]"""), form.engine.values["tasks"])
         assertEquals("Task 1 moved to position 2", form.alerts.announcement?.text)
         compose.onNodeWithContentDescription("Move up, Task 2").assertIsFocused()
+    }
+
+    @Test
+    fun theReadOnlyOptionLocksEveryFieldAndHidesItemButtons() {
+        assertEquals(FormRendererOptions(readOnly = true), FormRendererOptions().copy(readOnly = true))
+        assertEquals(true, FormRendererOptions(readOnly = true).copy(lang = "de").readOnly)
+        val form = render("""{"seats": 2, "tasks": [{"title": "A"}, {"title": "B"}]}""", FormRendererOptions(readOnly = true))
+        compose.onNode(hasContentDescription("Seats") and readOnlyText).assert(focusable)
+        compose.onNode(hasText("Starter") and hasText("Up to 5 seats")).assert(hasNoClick)
+        compose.onAllNodesWithText("Add").assertCountEquals(0)
+        compose.onAllNodesWithContentDescription("Move down, Task 1").assertCountEquals(0)
+        compose.onAllNodesWithContentDescription("Remove Task 1").assertCountEquals(0)
+        compose.runOnIdle { form.updateHandlers(options = FormRendererOptions()) }
+        compose.onNodeWithContentDescription("Move down, Task 1").assertExists()
+        compose.onNodeWithContentDescription("Remove Task 1").assertExists()
+        compose.onNodeWithText("Add").assertExists()
+    }
+
+    @Test
+    fun aHiddenItemFieldRendersNothingAndKeepsItsValue() {
+        val form = render("""{"members": [{"id": "m-1", "name": "Ada"}]}""", definition = team)
+        compose.onAllNodesWithContentDescription("Member id").assertCountEquals(0)
+        compose.onAllNodesWithText("m-1").assertCountEquals(0)
+        compose.runOnIdle { form.addItem("members") }
+        assertEquals(
+            JsonValue.parse("""[{"id": "m-1", "name": "Ada"}, {"id": "new"}]"""),
+            form.engine.values["members"],
+        )
     }
 }

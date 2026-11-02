@@ -64,6 +64,8 @@ private class GroupActions(
     private val setConfirming: (String?) -> Unit,
 ) {
     private val removeLabel: String = group.removeLabel ?: model.label("removeItem")
+    private val editable: Boolean = !model.readOnly
+    private val reorderable: Boolean = editable && group.reorderable
 
     fun context(
         items: List<GroupItem>,
@@ -77,7 +79,7 @@ private class GroupActions(
                     item,
                     index,
                     items.size,
-                    items.size > limits.min,
+                    editable && items.size > limits.min,
                     hasContent.getOrNull(index) == true,
                 )
             }
@@ -87,7 +89,7 @@ private class GroupActions(
             texts.helperText,
             model.field(group.key).error,
             entries,
-            items.size < limits.max,
+            editable && items.size < limits.max,
             group.addLabel ?: model.label("addItem"),
             model.disabled,
             { model.addItem(group.key) },
@@ -129,7 +131,7 @@ private class GroupActions(
             model.field(removeKey(index)),
             model,
             item.fields,
-            group.reorderable,
+            reorderable,
             count,
             model.label("moveUp"),
             model.label("moveDown"),
@@ -149,7 +151,7 @@ private class GroupActions(
     private fun moveFocus(
         index: Int,
         up: Boolean,
-    ): FieldState? = if (group.reorderable) model.field(moveKey(group.key, index, up)) else null
+    ): FieldState? = if (reorderable) model.field(moveKey(group.key, index, up)) else null
 
     private fun removeKey(index: Int): String = "${group.key}#remove$index"
 

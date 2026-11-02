@@ -32,10 +32,11 @@ private fun VisibilityState.reconcileItem(
         val shown = fields.filter { isVisible(it, inner, limits) }
         val visible = shown.mapTo(HashSet()) { it.ordinal }
         val hidden = fields.filter { it.ordinal !in visible && entry[it.key] != null }
+        for (field in fields) if (field.ordinal !in visible) starts.hideItem(id, field.key)
         val restored = MutableJsonObject()
         for (field in shown) {
-            if (entry[field.key] != null) continue
-            starts.itemStartValue(id, field.key)?.let { restored[field.key] = it }
+            if (entry[field.key] != null || !starts.revealItem(id, field.key)) continue
+            starts.itemStartValue(id, field)?.let { restored[field.key] = it }
         }
         if (hidden.isEmpty() && restored.isEmpty()) return ReconciledItem(JsonValue.Object(entry), cleared, true)
         val previous = entry

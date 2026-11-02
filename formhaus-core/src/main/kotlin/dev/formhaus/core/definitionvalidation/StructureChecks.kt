@@ -171,23 +171,22 @@ private fun keyIssues(context: CheckContext): List<DefinitionIssue> {
     }
 }
 
-private val groupedTypes = listOf("group", "file", "hidden")
-
-private fun nestingIssues(context: CheckContext): List<DefinitionIssue> =
-    context.nodes.mapNotNull { entry ->
+private fun nestingIssues(context: CheckContext): List<DefinitionIssue> {
+    val hidden = context.definition.hiddenInGroups
+    return context.nodes.mapNotNull { entry ->
         val parent = entry.parent ?: return@mapNotNull null
-        if (entry.node !is FormSection &&
-            !(entry.group != null && entry.node.type in groupedTypes)
-        ) {
-            return@mapNotNull null
-        }
-        error(
-            IssueCode.INVALID_NESTING,
-            "${entry.path}/type",
-            "a ${entry.node.type} cannot be inside a ${parent.type}",
-            "Move it to the fields of the step",
-        )
+        val type = entry.node.type
+        val grouped = type == "group" || type == "file" || (type == "hidden" && !hidden)
+        if (entry.node !is FormSection && !(entry.group != null && grouped)) return@mapNotNull null
+        val hint =
+            if (type == "hidden" && entry.node !is FormSection) {
+                "Set \"formatVersion\": \"1.9\" or move it to the fields of the step"
+            } else {
+                "Move it to the fields of the step"
+            }
+        error(IssueCode.INVALID_NESTING, "${entry.path}/type", "a $type cannot be inside a ${parent.type}", hint)
     }
+}
 
 internal fun structureIssues(context: CheckContext): List<DefinitionIssue> {
     val definition = context.definition
