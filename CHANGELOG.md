@@ -1,5 +1,25 @@
 # Changelog
 
+## Unreleased
+
+### formhaus-core
+
+- Passes the conformance suite of `@formhaus/core` 1.10.0.
+- Supports form definition format 1.9. `SUPPORTED_FORMAT_VERSION` is `1.9`.
+- A group may contain `hidden` fields. Below format 1.9 they stay an `invalid-nesting` error.
+- A hidden field in a group is submitted with its item, and moves and is removed with it.
+- Errors of hidden fields in a group are listed in `topLevelErrors`.
+- New issue code `IssueCode.SOURCE_IN_GROUP` for a `source` on a hidden field in a group.
+- New `readOnly` label in every bundled catalog.
+- `trackDirty` counts `NaN` as equal to `NaN`.
+- A field in a group item written with `setValue` gets its `defaultValue` when it is shown again.
+- Error summary ids match the field ids of `@formhaus/core` 1.10.0. A field keyed `plan-helper` next to `plan` gets a short stable suffix.
+
+### formhaus-compose
+
+- New `readOnly` in `FormRendererOptions` makes every field read-only and hides Add, Remove and Move on groups.
+- The "Read only" state comes from the locale catalogs.
+
 ## 0.9.0
 
 ### formhaus-core
