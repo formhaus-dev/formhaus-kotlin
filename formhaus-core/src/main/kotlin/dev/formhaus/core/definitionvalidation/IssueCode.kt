@@ -63,6 +63,7 @@ public value class IssueCode(
         public val UNKNOWN_LABEL_KEY: IssueCode = IssueCode("unknown-label-key")
         public val I18N_UNSAFE_IDENTIFIER: IssueCode = IssueCode("i18n-unsafe-identifier")
         public val UNKNOWN_SOURCE: IssueCode = IssueCode("unknown-source")
+        public val SOURCE_IN_GROUP: IssueCode = IssueCode("source-in-group")
         public val SOURCE_NOT_APPLICABLE: IssueCode = IssueCode("source-not-applicable")
         public val COLUMNS_NOT_APPLICABLE: IssueCode = IssueCode("columns-not-applicable")
         public val UNKNOWN_AUTOCOMPLETE_TOKEN: IssueCode = IssueCode("unknown-autocomplete-token")
