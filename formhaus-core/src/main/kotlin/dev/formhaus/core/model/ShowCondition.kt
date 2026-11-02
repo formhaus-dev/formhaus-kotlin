@@ -40,9 +40,19 @@ public sealed class ConditionRule {
     internal companion object {
         fun of(value: JsonValue?): ConditionRule? =
             when {
-                value == JsonValue.Bool(true) -> Always
-                value is JsonValue.Array -> When(conditions(value).orEmpty())
-                else -> null
+                value == JsonValue.Bool(true) -> {
+                    Always
+                }
+
+                value is JsonValue.Array -> {
+                    When(
+                        if (value.items.all { it is JsonValue.Object }) conditions(value).orEmpty() else emptyList(),
+                    )
+                }
+
+                else -> {
+                    null
+                }
             }
     }
 }

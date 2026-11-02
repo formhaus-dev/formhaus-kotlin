@@ -1322,8 +1322,12 @@ public final class dev/formhaus/core/renderer/TestIdTarget$Kind : java/lang/Enum
 
 public final class dev/formhaus/core/server/SubmissionOptions {
 	public fun <init> ()V
+	public fun <init> (Ldev/formhaus/core/json/JsonValue;Ldev/formhaus/core/json/StringMap;Ldev/formhaus/core/validation/MessageSource;Ldev/formhaus/core/engine/HiddenValues;)V
+	public synthetic fun <init> (Ldev/formhaus/core/json/JsonValue;Ldev/formhaus/core/json/StringMap;Ldev/formhaus/core/validation/MessageSource;Ldev/formhaus/core/engine/HiddenValues;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun <init> (Ldev/formhaus/core/json/JsonValue;Ldev/formhaus/core/json/StringMap;Ldev/formhaus/core/validation/MessageSource;Ldev/formhaus/core/engine/HiddenValues;Ldev/formhaus/core/json/StringMap;)V
 	public synthetic fun <init> (Ldev/formhaus/core/json/JsonValue;Ldev/formhaus/core/json/StringMap;Ldev/formhaus/core/validation/MessageSource;Ldev/formhaus/core/engine/HiddenValues;Ldev/formhaus/core/json/StringMap;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/util/List;Ldev/formhaus/core/json/StringMap;Ldev/formhaus/core/validation/MessageSource;Ldev/formhaus/core/engine/HiddenValues;)V
+	public synthetic fun <init> (Ljava/util/List;Ldev/formhaus/core/json/StringMap;Ldev/formhaus/core/validation/MessageSource;Ldev/formhaus/core/engine/HiddenValues;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun <init> (Ljava/util/List;Ldev/formhaus/core/json/StringMap;Ldev/formhaus/core/validation/MessageSource;Ldev/formhaus/core/engine/HiddenValues;Ldev/formhaus/core/json/StringMap;)V
 	public synthetic fun <init> (Ljava/util/List;Ldev/formhaus/core/json/StringMap;Ldev/formhaus/core/validation/MessageSource;Ldev/formhaus/core/engine/HiddenValues;Ldev/formhaus/core/json/StringMap;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun getHiddenValues ()Ldev/formhaus/core/engine/HiddenValues;
@@ -1423,6 +1427,8 @@ public final class dev/formhaus/core/validation/ValidateFieldKt {
 
 public final class dev/formhaus/core/validation/ValidateOptions {
 	public fun <init> ()V
+	public fun <init> (Ldev/formhaus/core/json/StringMap;Ldev/formhaus/core/validation/MessageSource;)V
+	public synthetic fun <init> (Ldev/formhaus/core/json/StringMap;Ldev/formhaus/core/validation/MessageSource;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun <init> (Ldev/formhaus/core/json/StringMap;Ldev/formhaus/core/validation/MessageSource;Ldev/formhaus/core/json/StringMap;)V
 	public synthetic fun <init> (Ldev/formhaus/core/json/StringMap;Ldev/formhaus/core/validation/MessageSource;Ldev/formhaus/core/json/StringMap;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun getMessages ()Ldev/formhaus/core/validation/MessageSource;

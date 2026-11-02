@@ -170,7 +170,7 @@ private fun <T> MutableList<T>.move(
     from: Int,
     to: Int,
 ) {
-    if (from in indices && to in indices) add(to, removeAt(from))
+    add(to, removeAt(from))
 }
 
 internal fun EngineCore.moveItem(

@@ -89,4 +89,21 @@ class OptionRulesTest {
         assertTrue(engine.moveItem("list", 0, 1))
         assertEquals(jsonObject("""{"on":true,"list":[{"a":"2"},{"a":"1"}]}"""), engine.values)
     }
+
+    @Test
+    fun `a condition list with an entry that is not an object never matches`() {
+        val broken =
+            definition(
+                """{"formatVersion":"1.8","id":"f","submit":{"label":"S"},"fields":[
+                    {"key":"seats","type":"number","label":"Seats"},
+                    {"key":"plan","type":"radio","label":"Plan","readOnly":[{"field":"seats","gt":1},5],"options":[
+                        {"value":"a","label":"A","disabled":[{"field":"seats","gt":1},"x"]}]}]}""",
+            )
+        val plan = broken.allFields[1]
+        val values = jsonObject("""{"seats":3}""")
+        assertNull(validateFieldValue(plan, text("a"), values))
+        val engine = FormEngine(broken, values, FormEngineOptions(onWarning = {}))
+        assertFalse(engine.fieldRules(plan).readOnly)
+        assertFalse(engine.fieldRules(plan).isDisabled(plan.options.orEmpty().first()))
+    }
 }

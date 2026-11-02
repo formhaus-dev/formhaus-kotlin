@@ -17,11 +17,24 @@ import dev.formhaus.core.visibility.isBlank
 public typealias ValidatorFn = (JsonValue, JsonObject) -> String?
 public typealias Validators = StringMap<ValidatorFn>
 
-public class ValidateOptions(
-    public val validators: Validators = stringMapOf(),
-    public val messages: MessageSource? = null,
-    public val previousValues: JsonObject? = null,
-)
+public class ValidateOptions private constructor(
+    public val previousValues: JsonObject?,
+    public val validators: Validators,
+    public val messages: MessageSource?,
+) {
+    public constructor() : this(null, stringMapOf(), null)
+
+    public constructor(
+        validators: Validators = stringMapOf(),
+        messages: MessageSource? = null,
+    ) : this(null, validators, messages)
+
+    public constructor(
+        validators: Validators = stringMapOf(),
+        messages: MessageSource? = null,
+        previousValues: JsonObject?,
+    ) : this(previousValues, validators, messages)
+}
 
 private fun isEmptyValue(
     value: JsonValue?,

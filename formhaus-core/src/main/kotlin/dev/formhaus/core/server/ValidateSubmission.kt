@@ -29,20 +29,48 @@ import dev.formhaus.core.validation.namedResolver
 import dev.formhaus.core.validation.noParams
 import dev.formhaus.core.validation.typeError
 
-public class SubmissionOptions(
-    public val skippedSteps: JsonValue? = null,
-    public val validators: Validators = stringMapOf(),
-    public val messages: MessageSource? = null,
-    public val hiddenValues: HiddenValues = HiddenValues.CLEAR,
-    public val previousValues: JsonObject? = null,
+public class SubmissionOptions private constructor(
+    public val previousValues: JsonObject?,
+    public val skippedSteps: JsonValue?,
+    public val validators: Validators,
+    public val messages: MessageSource?,
+    public val hiddenValues: HiddenValues,
 ) {
+    public constructor() : this(null, null, stringMapOf(), null, HiddenValues.CLEAR)
+
+    public constructor(
+        skippedSteps: JsonValue? = null,
+        validators: Validators = stringMapOf(),
+        messages: MessageSource? = null,
+        hiddenValues: HiddenValues = HiddenValues.CLEAR,
+    ) : this(null, skippedSteps, validators, messages, hiddenValues)
+
+    public constructor(
+        skippedSteps: JsonValue? = null,
+        validators: Validators = stringMapOf(),
+        messages: MessageSource? = null,
+        hiddenValues: HiddenValues = HiddenValues.CLEAR,
+        previousValues: JsonObject?,
+    ) : this(previousValues, skippedSteps, validators, messages, hiddenValues)
+
     public constructor(
         skippedSteps: List<String>,
         validators: Validators = stringMapOf(),
         messages: MessageSource? = null,
         hiddenValues: HiddenValues = HiddenValues.CLEAR,
-        previousValues: JsonObject? = null,
-    ) : this(JsonValue.Array(skippedSteps.map(JsonValue::String)), validators, messages, hiddenValues, previousValues)
+    ) : this(null, steps(skippedSteps), validators, messages, hiddenValues)
+
+    public constructor(
+        skippedSteps: List<String>,
+        validators: Validators = stringMapOf(),
+        messages: MessageSource? = null,
+        hiddenValues: HiddenValues = HiddenValues.CLEAR,
+        previousValues: JsonObject?,
+    ) : this(previousValues, steps(skippedSteps), validators, messages, hiddenValues)
+
+    private companion object {
+        fun steps(ids: List<String>): JsonValue = JsonValue.Array(ids.map(JsonValue::String))
+    }
 }
 
 public class SubmissionResult internal constructor(
