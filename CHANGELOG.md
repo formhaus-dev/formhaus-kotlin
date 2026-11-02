@@ -1,32 +1,27 @@
 # Changelog
 
-## Unreleased
+## 0.9.0
 
 ### formhaus-core
 
-- New `FormEngine.trackDirty()` in `dev.formhaus.core.dirty` returns a `DirtyTracker` with `isDirty`, `dirtyKeys`, `markClean()`, `subscribe` and `stop()`. It compares the submit payload with a baseline, as in `@formhaus/core/dirty`.
-- New `FormEngine.resetCount`.
-- Passes the conformance suite of `@formhaus/core` 1.9.0, including its server submission cases.
+- Passes the conformance suite of `@formhaus/core` 1.9.0.
 - Supports form definition format 1.8. `SUPPORTED_FORMAT_VERSION` is `1.8`.
-- New `FieldOption.description` and `FieldOption.disabled`, `FormField.readOnly` and `FormField.reorderable`. `disabled` and `readOnly` are a `ConditionRule`: `Always` or `When(conditions)`. Below format 1.8 they are ignored and reported as `unknown-property` and `outdated-format-version`.
-- A value that holds a disabled option fails with the `option` message unless the stored answer holds it. The stored answers are the initial values, `reset(values)`, field sources and the `defaultValue`. In a group, each stored disabled option is held once.
-- New `previousValues` on `ValidateOptions` and `SubmissionOptions`, the stored answers.
-- `readOnly` does not change validation.
-- New `FormEngine.moveItem(key, from, to)` moves a group item with its values, id, errors and loading state.
-- New issue code `IssueCode.DEFAULT_DISABLED_OPTION`. `checkDefinition` reports `invalid-type` for the format 1.8 properties and `disabled-not-applicable` for `disabled` on an option of a field other than `radio`, `select` and `multiselect`.
-- The `unknown-property` warning for a property from a newer format names the format it needs.
+- New `FieldOption.description`, `FieldOption.disabled`, `FormField.readOnly` and `FormField.reorderable`. `disabled` and `readOnly` are a `ConditionRule`: `Always` or `When(conditions)`. Below format 1.8 they are ignored.
+- A disabled option fails validation with the `option` message unless the stored answer holds it.
+- New `previousValues` option on `ValidateOptions` and `SubmissionOptions` passes the stored answers.
+- New `FormEngine.moveItem(key, from, to)` and `FormEngine.resetCount`.
+- New `FormEngine.trackDirty()` in `dev.formhaus.core.dirty` returns a `DirtyTracker` with `isDirty`, `dirtyKeys`, `markClean()`, `subscribe` and `stop()`.
+- New issue code `IssueCode.DEFAULT_DISABLED_OPTION`.
 - Option descriptions are translatable under `fields.<key>.optionDescriptions.<value>`.
-- New labels `moveUp`, `moveDown` and `itemMoved` in every bundled catalog.
-- New renderer API `FormEngine.fieldRules(field, key)`.
+- New `moveUp`, `moveDown` and `itemMoved` labels in every bundled catalog.
 
 ### formhaus-compose
 
-- New `FormModel.isDirty`, `FormModel.dirtyKeys` and `FormModel.markClean()`.
-- Options show their `description` under the label, and screen readers read it with the option.
-- Disabled options are drawn disabled and cannot be picked. In a `select` they are disabled menu items.
-- Read-only fields stay focusable, keep full contrast and report "Read only" to screen readers through the `readOnly` label. Inputs and unchecked indicators use the disabled background, as in the web renderers. Text inputs are not editable, other controls ignore changes and expose no click action, and date, time, select and file pickers do not open.
-- A reorderable group shows Move up and Move down buttons on each item. A move announces the item and its new position and keeps focus on a move button.
-- New `FieldContext.isReadOnly`, `FieldContext.isOptionDisabled(option)`, `FormModel.moveItem(group, from, to)`, and the `reorderable`, `count`, `move`, `moveUpLabel`, `moveDownLabel`, `canMoveUp` and `canMoveDown` of `GroupItemContext`.
+- Options show their description and draw disabled options disabled.
+- Read-only fields stay focusable, ignore changes and report "Read only" to screen readers.
+- Reorderable groups show Move up and Move down buttons on each item.
+- New `FormModel.isDirty`, `FormModel.dirtyKeys`, `FormModel.markClean()` and `FormModel.moveItem(group, from, to)`.
+- New `FieldContext.isReadOnly`, `FieldContext.isOptionDisabled(option)` and the move properties of `GroupItemContext`.
 
 ## 0.8.1
 
