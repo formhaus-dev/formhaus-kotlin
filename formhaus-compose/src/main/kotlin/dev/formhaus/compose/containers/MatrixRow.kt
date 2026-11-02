@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.selection.selectable
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -16,9 +15,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -29,6 +28,7 @@ import dev.formhaus.compose.components.ColumnGrid
 import dev.formhaus.compose.components.FieldError
 import dev.formhaus.compose.components.GridSpec
 import dev.formhaus.compose.components.IndicatorShape
+import dev.formhaus.compose.components.choice
 import dev.formhaus.compose.components.focusRing
 import dev.formhaus.compose.components.formhausFocus
 import dev.formhaus.compose.components.marked
@@ -44,6 +44,7 @@ import dev.formhaus.core.model.FieldOption
 import dev.formhaus.core.model.FormField
 
 private const val CELL_MINIMUM = 60
+private const val DISABLED_CELL_ALPHA = 0.6f
 
 @Composable
 internal fun MatrixRow(
@@ -119,16 +120,12 @@ private fun MatrixCell(
     val selected = selection.isSelected(value)
     val source = remember { MutableInteractionSource() }
     val focused by source.collectIsFocusedAsState()
+    val enabled = !context.isLocked && !context.isOptionDisabled(option)
     Column(
         Modifier
             .heightIn(min = 48.dp)
-            .selectable(
-                selected,
-                source,
-                null,
-                enabled = !context.isLocked,
-                role = if (shape == IndicatorShape.RADIO) Role.RadioButton else Role.Checkbox,
-            ) { selection.choose(value) }
+            .alpha(if (enabled) 1f else DISABLED_CELL_ALPHA)
+            .choice(selected, shape, enabled, source, context.isReadOnly) { selection.choose(value) }
             .semantics { contentDescription = option.label ?: value }
             .formhausTestId(context.optionTestId(value))
             .padding(vertical = if (caption) tokens.spacing.s2 else 0.dp),

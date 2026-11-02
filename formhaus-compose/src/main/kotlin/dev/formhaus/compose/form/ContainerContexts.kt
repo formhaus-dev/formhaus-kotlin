@@ -46,7 +46,17 @@ public class GroupItemContext internal constructor(
     internal val removeFocus: FieldState,
     internal val model: FormModel,
     internal val fields: List<FormField>,
-)
+    public val reorderable: Boolean,
+    public val count: Int,
+    public val moveUpLabel: String,
+    public val moveDownLabel: String,
+    public val move: (Int) -> Unit,
+    internal val moveUpFocus: FieldState?,
+    internal val moveDownFocus: FieldState?,
+) {
+    public val canMoveUp: Boolean get() = reorderable && index > 0
+    public val canMoveDown: Boolean get() = reorderable && index < count - 1
+}
 
 @Stable
 public class ConfirmContext internal constructor(

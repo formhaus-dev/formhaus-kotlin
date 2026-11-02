@@ -38,7 +38,7 @@ internal fun SystemSelect(context: FieldContext) {
     val enabled = !context.isLocked
     ExposedDropdownMenuBox(
         open,
-        { open = it && enabled },
+        { open = it && enabled && !context.isReadOnly },
         Modifier
             .fillMaxWidth()
             .formhausTestId(context.testId)
@@ -71,6 +71,7 @@ internal fun SystemSelect(context: FieldContext) {
                         selection.choose(value)
                     },
                     Modifier.formhausTestId(context.optionTestId(value)),
+                    enabled = !context.isOptionDisabled(option),
                     contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
                 )
             }

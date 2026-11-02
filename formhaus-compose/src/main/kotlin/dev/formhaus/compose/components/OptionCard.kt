@@ -20,6 +20,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.FirstBaseline
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.toggleableState
+import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.unit.Dp
 import dev.formhaus.compose.theme.LocalFormhausTokens
 import dev.formhaus.compose.theme.TextRole
@@ -39,7 +44,7 @@ public fun OptionCard(
     shape: IndicatorShape = IndicatorShape.RADIO,
     content: @Composable () -> Unit,
 ) {
-    OptionCardBox(selected, onClick, modifier, invalid, enabled, shape, LocalFormhausTokens.current.spacing.s5, content)
+    OptionCardBox(selected, onClick, modifier, invalid, enabled, shape, LocalFormhausTokens.current.spacing.s5, content = content)
 }
 
 @Composable
@@ -51,6 +56,7 @@ internal fun OptionCardBox(
     enabled: Boolean,
     shape: IndicatorShape,
     top: Dp,
+    readOnly: Boolean = false,
     content: @Composable () -> Unit,
 ) {
     val tokens = LocalFormhausTokens.current
@@ -60,8 +66,8 @@ internal fun OptionCardBox(
             .fillMaxWidth()
             .heightIn(min = tokens.controls.hitTarget)
             .selectableSurface(selected, invalid, solid = false, enabled = enabled, source = source, card = true)
-            .focusable(enabled, source)
-            .choice(selected, shape, enabled, source, onClick)
+            .focusable(enabled && !readOnly, source)
+            .choice(selected, shape, enabled, source, readOnly, onClick)
             .padding(start = tokens.spacing.s6, end = tokens.spacing.s6, top = top, bottom = tokens.spacing.s5),
     ) {
         content()
@@ -73,13 +79,26 @@ internal fun Modifier.choice(
     shape: IndicatorShape,
     enabled: Boolean,
     source: MutableInteractionSource,
+    readOnly: Boolean,
     onClick: () -> Unit,
-): Modifier =
-    if (shape == IndicatorShape.CHECKBOX) {
-        toggleable(selected, source, null, enabled, Role.Checkbox) { onClick() }
-    } else {
-        selectable(selected, source, null, enabled, Role.RadioButton, onClick)
+): Modifier {
+    val role = if (shape == IndicatorShape.CHECKBOX) Role.Checkbox else Role.RadioButton
+    return when {
+        readOnly -> readOnlyChoice(selected, role, source)
+        role == Role.Checkbox -> toggleable(selected, source, null, enabled, role) { onClick() }
+        else -> selectable(selected, source, null, enabled, role, onClick)
     }
+}
+
+internal fun Modifier.readOnlyChoice(
+    selected: Boolean,
+    role: Role,
+    source: MutableInteractionSource? = null,
+): Modifier =
+    semantics(mergeDescendants = true) {
+        this.role = role
+        if (role == Role.RadioButton) this.selected = selected else toggleableState = ToggleableState(selected)
+    }.focusable(interactionSource = source)
 
 @Composable
 internal fun Modifier.selectableSurface(

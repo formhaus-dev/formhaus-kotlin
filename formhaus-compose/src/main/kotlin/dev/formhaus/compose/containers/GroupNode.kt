@@ -18,9 +18,12 @@ import dev.formhaus.compose.form.GroupItemContext
 import dev.formhaus.compose.form.LocalFormBehavior
 import dev.formhaus.compose.form.LocalFormComponents
 import dev.formhaus.compose.form.Slot
+import dev.formhaus.compose.model.FieldState
 import dev.formhaus.compose.model.FormModel
 import dev.formhaus.compose.model.addItem
 import dev.formhaus.compose.model.itemTitle
+import dev.formhaus.compose.model.moveItem
+import dev.formhaus.compose.model.moveKey
 import dev.formhaus.compose.model.removeItem
 import dev.formhaus.compose.model.requestFocus
 import dev.formhaus.compose.model.texts
@@ -73,6 +76,7 @@ private class GroupActions(
                 itemContext(
                     item,
                     index,
+                    items.size,
                     items.size > limits.min,
                     hasContent.getOrNull(index) == true,
                 )
@@ -106,6 +110,7 @@ private class GroupActions(
     private fun itemContext(
         item: GroupItem,
         index: Int,
+        count: Int,
         canRemove: Boolean,
         hasContent: Boolean,
     ): GroupItemContext =
@@ -124,6 +129,13 @@ private class GroupActions(
             model.field(removeKey(index)),
             model,
             item.fields,
+            group.reorderable,
+            count,
+            model.label("moveUp"),
+            model.label("moveDown"),
+            { to -> model.moveItem(group.key, index, to) },
+            moveFocus(index, up = true),
+            moveFocus(index, up = false),
         )
 
     private fun title(index: Int): String = model.itemTitle(index, group.key)
@@ -133,6 +145,11 @@ private class GroupActions(
             "removeItemNamed",
             stringMapOf("label" to JsonValue.String(removeLabel), "item" to JsonValue.String(title(index))),
         )
+
+    private fun moveFocus(
+        index: Int,
+        up: Boolean,
+    ): FieldState? = if (group.reorderable) model.field(moveKey(group.key, index, up)) else null
 
     private fun removeKey(index: Int): String = "${group.key}#remove$index"
 

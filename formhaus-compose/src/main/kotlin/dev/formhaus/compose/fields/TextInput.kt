@@ -42,7 +42,7 @@ internal fun TextInput(
     val requester = remember { FocusRequester() }
     val locked = context.isLocked
     Row(
-        Modifier.inputChrome(focused, context.isInvalid, locked),
+        Modifier.inputChrome(focused, context.isInvalid, locked, readOnly = context.isReadOnly),
         horizontalArrangement = Arrangement.spacedBy(tokens.spacing.s3),
         verticalAlignment = alignment,
     ) {
@@ -54,6 +54,7 @@ internal fun TextInput(
                 .formhausFocus(context, requester)
                 .semantics { contentDescription = context.accessibilityName },
             enabled = !locked,
+            readOnly = context.isReadOnly,
             textStyle =
                 tokens.textStyle(TextRole.body, colored = false).copy(color = if (locked) tokens.colors.textMuted else tokens.colors.text),
             keyboardOptions = look.keyboard,

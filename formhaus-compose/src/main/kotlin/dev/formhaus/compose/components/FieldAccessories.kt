@@ -8,6 +8,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -17,6 +18,8 @@ import androidx.compose.ui.unit.dp
 import dev.formhaus.compose.form.FieldContext
 import dev.formhaus.compose.theme.LocalFormhausTokens
 
+private const val DISABLED_ICON_ALPHA = 0.38f
+
 @Composable
 internal fun FieldAccessories(
     context: FieldContext,
@@ -24,7 +27,7 @@ internal fun FieldAccessories(
     clear: () -> Unit,
 ) {
     LoadingIndicator(context.loading)
-    if (clearable && !context.isRequired && !context.isLocked) {
+    if (clearable && !context.isRequired && !context.isLocked && !context.isReadOnly) {
         IconButton(FormhausIcons.clear, "${context.text("clear")}, ${context.label}", embedded = true, action = clear)
     }
 }
@@ -50,6 +53,7 @@ internal fun IconButton(
     label: String,
     modifier: Modifier = Modifier,
     embedded: Boolean = false,
+    enabled: Boolean = true,
     action: () -> Unit,
 ) {
     val tokens = LocalFormhausTokens.current
@@ -58,10 +62,10 @@ internal fun IconButton(
     Box(
         modifier
             .size(side)
-            .clickable(role = Role.Button, onClick = action)
+            .clickable(enabled = enabled, role = Role.Button, onClick = action)
             .semantics { contentDescription = label },
         contentAlignment = Alignment.Center,
     ) {
-        Icon(icon, null, Modifier.size(glyph), tint = tokens.colors.textMuted)
+        Icon(icon, null, Modifier.size(glyph).alpha(if (enabled) 1f else DISABLED_ICON_ALPHA), tint = tokens.colors.textMuted)
     }
 }

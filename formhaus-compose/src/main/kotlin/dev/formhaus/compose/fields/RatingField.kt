@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
@@ -17,7 +16,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
@@ -64,6 +62,7 @@ public fun RatingField(context: FieldContext) {
                         sources[index],
                         pointDescription(point, scale.anchor(point)),
                         Modifier.formhausTestId(context.optionTestId("$point")),
+                        context.isReadOnly,
                     ) { context.commit(JsonValue.Number(point.toDouble())) }
                 }
             }
@@ -83,6 +82,7 @@ private fun Star(
     source: MutableInteractionSource,
     description: String,
     modifier: Modifier,
+    readOnly: Boolean,
     choose: () -> Unit,
 ) {
     val tokens = LocalFormhausTokens.current
@@ -96,7 +96,7 @@ private fun Star(
     Box(
         modifier
             .size(width, maxOf(tokens.controls.hitTarget, width))
-            .selectable(selected, source, null, enabled, Role.RadioButton, choose)
+            .point(selected, source, enabled, readOnly, choose)
             .semantics { contentDescription = description },
         contentAlignment = Alignment.Center,
     ) {

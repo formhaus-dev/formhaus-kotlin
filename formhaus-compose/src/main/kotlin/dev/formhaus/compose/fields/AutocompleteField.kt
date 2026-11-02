@@ -49,7 +49,7 @@ public fun AutocompleteField(context: FieldContext) {
                 source,
             )
             val matches = suggestions(context)
-            if (focused && matches.isNotEmpty()) SuggestionList(matches) { context.setValue(JsonValue.String(it)) }
+            if (focused && !context.isReadOnly && matches.isNotEmpty()) SuggestionList(matches) { context.setValue(JsonValue.String(it)) }
         }
     }
 }

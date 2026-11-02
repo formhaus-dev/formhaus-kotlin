@@ -57,6 +57,8 @@ internal object FormhausIcons {
     val arrowDropDown: ImageVector by lazy { lucide("arrow-drop-down", "M7 10l5 5 5-5z", filled = true, stroke = null) }
     val maximize: ImageVector by lazy { lucide("maximize-2", "M15 3h6v6", "m21 3-7 7", "m3 21 7-7", "M9 21H3v-6", stroke = 2.5f) }
     val plus: ImageVector by lazy { lucide("plus", "M5 12h14", "M12 5v14", stroke = 2.5f) }
+    val arrowUp: ImageVector by lazy { lucide("arrow-up", "M12 19V5", "m5 12 7-7 7 7", stroke = 2.25f) }
+    val arrowDown: ImageVector by lazy { lucide("arrow-down", "M12 5v14", "m19 12-7 7-7-7", stroke = 2.25f) }
     val chevronRight: ImageVector by lazy { lucide("chevron-right", "m9 18 6-6-6-6", stroke = 2.5f, mirrored = true) }
     val alert: ImageVector by lazy { lucide("circle-alert", CIRCLE, "M12 8v4", "M12 16h.01") }
 }

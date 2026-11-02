@@ -159,7 +159,8 @@ internal fun ChoiceOptions(
     val card: @Composable (Int) -> Unit = { index ->
         val option = options[index]
         val card = if (focus != null && index == target) Modifier.focusRequester(focus) else Modifier
-        ChoiceCard(option, shape, option.value.orEmpty() in selected, picture, enabled, invalid, actions, card)
+        val usable = enabled && !context.isOptionDisabled(option)
+        ChoiceCard(option, shape, option.value.orEmpty() in selected, picture, usable, invalid, actions, card, context.isReadOnly)
     }
     when (arrangement) {
         ChoiceArrangement.PICTURES -> {
