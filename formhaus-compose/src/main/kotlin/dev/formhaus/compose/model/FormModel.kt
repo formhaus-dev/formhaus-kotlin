@@ -94,6 +94,8 @@ public class FormModel private constructor(
 
     public var options: FormRendererOptions = options
         private set
+    internal var readOnly: Boolean by mutableStateOf(options.readOnly)
+        private set
     internal var submitHandler: SubmitHandler = onSubmit
         private set
     internal val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
@@ -234,7 +236,10 @@ public class FormModel private constructor(
             alerts.invalidate()
             engine.locale = engineOptions.locale
         }
-        if (options != null) this.options = options
+        if (options != null) {
+            this.options = options
+            readOnly = options.readOnly
+        }
         if (onSubmit != null) submitHandler = onSubmit
     }
 

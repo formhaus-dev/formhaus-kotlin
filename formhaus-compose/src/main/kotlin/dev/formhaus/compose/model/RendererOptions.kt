@@ -27,6 +27,26 @@ public class FormRendererOptions(
     public val formatRecall: RecallFormatFn? = null,
     public val testIds: TestIds = TestIds.Off,
 ) {
+    public var readOnly: Boolean = false
+        private set
+
+    public constructor(
+        labels: LabelSource? = null,
+        optionsProviders: Map<String, OptionsProvider> = emptyMap(),
+        onCancel: (() -> Unit)? = null,
+        onFieldChange: FieldChangeFn? = null,
+        onValuesChange: ValuesChangeFn? = null,
+        onError: ActionErrorFn? = null,
+        lang: String? = null,
+        formatRecall: RecallFormatFn? = null,
+        testIds: TestIds = TestIds.Off,
+        readOnly: Boolean,
+    ) : this(labels, optionsProviders, onCancel, onFieldChange, onValuesChange, onError, lang, formatRecall, testIds) {
+        this.readOnly = readOnly
+    }
+
+    public fun copy(readOnly: Boolean): FormRendererOptions = copy().also { it.readOnly = readOnly }
+
     public fun copy(
         labels: LabelSource? = this.labels,
         optionsProviders: Map<String, OptionsProvider> = this.optionsProviders,
@@ -38,7 +58,9 @@ public class FormRendererOptions(
         formatRecall: RecallFormatFn? = this.formatRecall,
         testIds: TestIds = this.testIds,
     ): FormRendererOptions =
-        FormRendererOptions(labels, optionsProviders, onCancel, onFieldChange, onValuesChange, onError, lang, formatRecall, testIds)
+        FormRendererOptions(labels, optionsProviders, onCancel, onFieldChange, onValuesChange, onError, lang, formatRecall, testIds).also {
+            it.readOnly = readOnly
+        }
 
     override fun equals(other: Any?): Boolean = equalParts(other, FormRendererOptions::parts)
 
@@ -57,5 +79,6 @@ public class FormRendererOptions(
             "lang" to lang,
             "formatRecall" to formatRecall,
             "testIds" to testIds,
+            "readOnly" to readOnly,
         )
 }

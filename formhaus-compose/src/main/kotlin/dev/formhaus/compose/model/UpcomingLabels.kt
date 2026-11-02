@@ -4,5 +4,4 @@ internal val upcomingLabels: Map<String, String> =
     mapOf(
         "next" to "Next",
         "select" to "Select",
-        "readOnly" to "Read only",
     )

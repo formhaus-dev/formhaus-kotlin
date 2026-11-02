@@ -49,7 +49,7 @@ public class FieldContext internal constructor(
             if (field.randomize) state.ordered(source) { model.engine.orderOptions(key, loaded) } else source
         }
     private val rules = model.rules(field, key, options)
-    public val isReadOnly: Boolean = rules.readOnly
+    public val isReadOnly: Boolean = model.readOnly || rules.readOnly
 
     public val isItem: Boolean get() = key != this.field.key
     public val isInvalid: Boolean get() = !error.isNullOrEmpty()
