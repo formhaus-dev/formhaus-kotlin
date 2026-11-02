@@ -19,7 +19,7 @@ class ScenarioActions(
     private val actions: Map<String, suspend (JsonObject) -> JsonValue?> =
         mapOf(
             "start" to { _ -> engine.start().let { null } },
-            "setValue" to { step -> engine.setValue(key(step), step["value"]).let { null } },
+            "setValue" to { step -> engine.setValue(key(step), writtenValue(step)).let { null } },
             "setItemValue" to { step ->
                 engine.setItemValue(key(step), index(step), step["field"]?.stringValue.orEmpty(), step["value"]).let { null }
             },
@@ -73,3 +73,6 @@ class ScenarioActions(
 }
 
 internal fun optionValues(options: List<FieldOption>): JsonValue = json(options.mapNotNull { it.value })
+
+private fun writtenValue(step: JsonObject): JsonValue? =
+    if (step["number"]?.stringValue == "NaN") JsonValue.Number(Double.NaN) else step["value"]
