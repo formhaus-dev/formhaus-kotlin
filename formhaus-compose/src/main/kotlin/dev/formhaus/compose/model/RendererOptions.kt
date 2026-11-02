@@ -26,10 +26,9 @@ public class FormRendererOptions(
     public val lang: String? = null,
     public val formatRecall: RecallFormatFn? = null,
     public val testIds: TestIds = TestIds.Off,
+    public val readOnly: Boolean = false,
 ) {
-    public var readOnly: Boolean = false
-        private set
-
+    @Deprecated("Kept for binary compatibility", level = DeprecationLevel.HIDDEN)
     public constructor(
         labels: LabelSource? = null,
         optionsProviders: Map<String, OptionsProvider> = emptyMap(),
@@ -40,12 +39,7 @@ public class FormRendererOptions(
         lang: String? = null,
         formatRecall: RecallFormatFn? = null,
         testIds: TestIds = TestIds.Off,
-        readOnly: Boolean,
-    ) : this(labels, optionsProviders, onCancel, onFieldChange, onValuesChange, onError, lang, formatRecall, testIds) {
-        this.readOnly = readOnly
-    }
-
-    public fun copy(readOnly: Boolean): FormRendererOptions = copy().also { it.readOnly = readOnly }
+    ) : this(labels, optionsProviders, onCancel, onFieldChange, onValuesChange, onError, lang, formatRecall, testIds, false)
 
     public fun copy(
         labels: LabelSource? = this.labels,
@@ -57,10 +51,34 @@ public class FormRendererOptions(
         lang: String? = this.lang,
         formatRecall: RecallFormatFn? = this.formatRecall,
         testIds: TestIds = this.testIds,
+        readOnly: Boolean = this.readOnly,
     ): FormRendererOptions =
-        FormRendererOptions(labels, optionsProviders, onCancel, onFieldChange, onValuesChange, onError, lang, formatRecall, testIds).also {
-            it.readOnly = readOnly
-        }
+        FormRendererOptions(
+            labels,
+            optionsProviders,
+            onCancel,
+            onFieldChange,
+            onValuesChange,
+            onError,
+            lang,
+            formatRecall,
+            testIds,
+            readOnly,
+        )
+
+    @Deprecated("Kept for binary compatibility", level = DeprecationLevel.HIDDEN)
+    public fun copy(
+        labels: LabelSource? = this.labels,
+        optionsProviders: Map<String, OptionsProvider> = this.optionsProviders,
+        onCancel: (() -> Unit)? = this.onCancel,
+        onFieldChange: FieldChangeFn? = this.onFieldChange,
+        onValuesChange: ValuesChangeFn? = this.onValuesChange,
+        onError: ActionErrorFn? = this.onError,
+        lang: String? = this.lang,
+        formatRecall: RecallFormatFn? = this.formatRecall,
+        testIds: TestIds = this.testIds,
+    ): FormRendererOptions =
+        copy(labels, optionsProviders, onCancel, onFieldChange, onValuesChange, onError, lang, formatRecall, testIds, readOnly)
 
     override fun equals(other: Any?): Boolean = equalParts(other, FormRendererOptions::parts)
 

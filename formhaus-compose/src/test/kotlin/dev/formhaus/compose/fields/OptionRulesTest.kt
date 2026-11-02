@@ -24,7 +24,6 @@ import dev.formhaus.compose.model.model
 import dev.formhaus.compose.model.setValue
 import dev.formhaus.core.json.JsonValue
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -113,7 +112,7 @@ class OptionRulesTest {
     @Test
     fun theReadOnlyOptionLocksEveryFieldAndHidesItemButtons() {
         assertEquals(FormRendererOptions(readOnly = true), FormRendererOptions().copy(readOnly = true))
-        assertTrue(FormRendererOptions(readOnly = true).copy(lang = "de").readOnly)
+        assertEquals(true, FormRendererOptions(readOnly = true).copy(lang = "de").readOnly)
         val form = render("""{"seats": 2, "tasks": [{"title": "A"}, {"title": "B"}]}""", FormRendererOptions(readOnly = true))
         compose.onNode(hasContentDescription("Seats") and readOnlyText).assert(focusable)
         compose.onNode(hasText("Starter") and hasText("Up to 5 seats")).assert(hasNoClick)
