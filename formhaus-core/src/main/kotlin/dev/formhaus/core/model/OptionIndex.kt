@@ -16,7 +16,7 @@ internal class OptionIndex(
     fun position(value: JsonValue): Int? = optionKey(value)?.let(positions::get)
 }
 
-private fun optionKey(value: JsonValue?): Any? =
+internal fun optionKey(value: JsonValue?): Any? =
     when (value) {
         is JsonValue.String -> value.value
         is JsonValue.Bool -> value.value

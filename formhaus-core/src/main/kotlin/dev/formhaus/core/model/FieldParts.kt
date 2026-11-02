@@ -6,12 +6,15 @@ import dev.formhaus.core.json.JsonValue
 @ConsistentCopyVisibility
 public data class FieldOption internal constructor(
     internal val json: JsonObject,
+    internal val rules: Boolean = true,
 ) {
     public val value: String? get() = json["value"]?.stringValue
     public val label: String? get() = json["label"]?.stringValue
     public val image: String? get() = json["image"]?.stringValue
     public val exclusive: Boolean get() = json["exclusive"]?.isTruthy == true
     public val pinned: Boolean get() = json["pinned"]?.isTruthy == true
+    public val description: String? get() = if (rules) json["description"]?.stringValue else null
+    public val disabled: ConditionRule? = if (rules) ConditionRule.of(json["disabled"]) else null
 }
 
 @ConsistentCopyVisibility

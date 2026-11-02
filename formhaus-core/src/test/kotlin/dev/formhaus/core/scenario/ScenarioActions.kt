@@ -25,6 +25,7 @@ class ScenarioActions(
             },
             "addItem" to { step -> JsonValue.Bool(engine.addItem(key(step))) },
             "removeItem" to { step -> JsonValue.Bool(engine.removeItem(key(step), index(step))) },
+            "moveItem" to { step -> JsonValue.Bool(engine.moveItem(key(step), index(step, "from"), index(step, "to"))) },
             "setErrors" to { step -> engine.setErrors(fieldErrors(step["errors"]) ?: MutableStringMap()).let { null } },
             "setFieldLoading" to { step -> engine.setFieldLoading(key(step), step["loading"]?.boolValue ?: false).let { null } },
             "cancelPendingActions" to { _ -> engine.cancelPendingActions().let { null } },
@@ -53,7 +54,10 @@ class ScenarioActions(
 
     private fun key(step: JsonObject): String = step["key"]?.stringValue.orEmpty()
 
-    private fun index(step: JsonObject): Int = step["index"]?.numberValue?.takeIf { it == Math.floor(it) }?.toInt() ?: -1
+    private fun index(
+        step: JsonObject,
+        name: String = "index",
+    ): Int = step[name]?.numberValue?.takeIf { it == Math.floor(it) }?.toInt() ?: -1
 
     private fun handler(entries: JsonValue?): SubmitHandler {
         val replies = Replies(entries?.arrayValue.orEmpty())

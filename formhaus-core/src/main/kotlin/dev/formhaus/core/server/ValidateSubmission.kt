@@ -34,13 +34,15 @@ public class SubmissionOptions(
     public val validators: Validators = stringMapOf(),
     public val messages: MessageSource? = null,
     public val hiddenValues: HiddenValues = HiddenValues.CLEAR,
+    public val previousValues: JsonObject? = null,
 ) {
     public constructor(
         skippedSteps: List<String>,
         validators: Validators = stringMapOf(),
         messages: MessageSource? = null,
         hiddenValues: HiddenValues = HiddenValues.CLEAR,
-    ) : this(JsonValue.Array(skippedSteps.map(JsonValue::String)), validators, messages, hiddenValues)
+        previousValues: JsonObject? = null,
+    ) : this(JsonValue.Array(skippedSteps.map(JsonValue::String)), validators, messages, hiddenValues, previousValues)
 }
 
 public class SubmissionResult internal constructor(
@@ -113,7 +115,7 @@ private fun prepare(
     val items = blankItems(resolved, fields, resolve)
     val validators = ignoredValidators(fields, options.validators)
     val engine = EngineCore(definition, resolved.values, validators, MessageSource.Function(messages))
-    engine.loadSubmitted(resolved.values)
+    engine.loadSubmitted(resolved.values, options.previousValues ?: MutableJsonObject())
     applySkips(engine, options.skippedSteps)
     val skipped = engine.skipped.flatMap { it.keys }
     val check = {
@@ -138,7 +140,7 @@ private fun prepare(
                 errors[item.key] = item.error
             }
         }
-        if (options.hiddenValues == HiddenValues.KEEP) keepHidden(fields, resolved, submitted, skipped, validators)
+        if (options.hiddenValues == HiddenValues.KEEP) keepHidden(fields, resolved, submitted, skipped, validators, options.previousValues)
         SubmissionResult(submitted, errors)
     }
     return Prepared(engine, skipped, check)

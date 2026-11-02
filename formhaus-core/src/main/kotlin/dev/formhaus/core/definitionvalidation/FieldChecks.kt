@@ -1,5 +1,6 @@
 package dev.formhaus.core.definitionvalidation
 
+import dev.formhaus.core.json.JsonValue
 import dev.formhaus.core.json.MutableJsonObject
 import dev.formhaus.core.json.isBlankText
 import dev.formhaus.core.json.isInteger
@@ -136,11 +137,37 @@ private fun optionIssues(entry: FieldEntry): List<DefinitionIssue> {
     }
 }
 
-internal fun fieldIssues(context: CheckContext): List<DefinitionIssue> =
-    context.entries.flatMap {
-        ruleIssues(context, it) +
-            optionIssues(it)
+private fun ruleShape(
+    value: JsonValue?,
+    path: String,
+): List<DefinitionIssue> = if (value?.boolValue != null) emptyList() else conditionList(value, path)
+
+private fun newerIssues(entry: FieldEntry): List<DefinitionIssue> {
+    val json = entry.field.json
+    val path = entry.path
+    val issues = ArrayList(ruleShape(json["readOnly"], "$path/readOnly"))
+    val reorderable = json["reorderable"]
+    if (reorderable != null && reorderable.boolValue == null) {
+        issues.add(error(IssueCode.INVALID_TYPE, "$path/reorderable", "\"reorderable\" must be true or false"))
     }
+    json["options"]?.arrayValue?.forEachIndexed { index, item ->
+        val option = item.objectValue ?: return@forEachIndexed
+        val at = "$path/options/$index"
+        issues += ruleShape(option["disabled"], "$at/disabled")
+        val description = option["description"]
+        if (description != null && description.stringValue == null) {
+            issues.add(error(IssueCode.INVALID_TYPE, "$at/description", "\"description\" must be a string"))
+        }
+    }
+    return issues
+}
+
+internal fun fieldIssues(context: CheckContext): List<DefinitionIssue> {
+    val newer = context.definition.optionRules
+    return context.entries.flatMap {
+        ruleIssues(context, it) + optionIssues(it) + if (newer) newerIssues(it) else emptyList()
+    }
+}
 
 private const val QUERY_HINT = "Use { \"query\": \"<parameter name>\" } for a URL parameter"
 

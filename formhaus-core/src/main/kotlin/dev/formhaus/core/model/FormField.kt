@@ -9,6 +9,7 @@ public class FormField private constructor(
     override val ordinal: Int,
     public val fields: List<FormNode>?,
     private val listsFiles: Boolean,
+    private val optionRules: Boolean,
 ) : FormNode() {
     internal constructor(json: JsonObject, reader: NodeReader) :
         this(
@@ -20,6 +21,7 @@ public class FormField private constructor(
                 null
             },
             reader.listsFiles,
+            reader.optionRules,
         )
 
     override val key: String = json["key"]?.stringValue ?: ""
@@ -28,8 +30,9 @@ public class FormField private constructor(
     override val showAny: List<ShowCondition>? = conditions(json["showAny"])
     public val validation: FieldValidation? = json["validation"]?.objectValue?.let(::FieldValidation)
     public val options: List<FieldOption>? =
-        json["options"]?.arrayValue?.mapNotNull { item -> item.objectValue?.let(::FieldOption) }
+        json["options"]?.arrayValue?.mapNotNull { item -> item.objectValue?.let { FieldOption(it, optionRules) } }
     internal val optionIndex: OptionIndex? = options?.let(::OptionIndex)
+    internal val ruledOptions: List<FieldOption> = options.orEmpty().filter { it.disabled != null }
     override val children: List<FormNode>? get() = fields
 
     public val label: String? get() = json["label"]?.stringValue
@@ -56,6 +59,8 @@ public class FormField private constructor(
     public val isGroup: Boolean get() = type == "group"
     public val isScale: Boolean get() = type in scaleTypes
     public val isFileList: Boolean = listsFiles && type == "file" && json["multiple"]?.boolValue == true
+    public val readOnly: ConditionRule? = if (optionRules) ConditionRule.of(json["readOnly"]) else null
+    public val reorderable: Boolean = optionRules && isGroup && json["reorderable"] == JsonValue.Bool(true)
 
     internal val hasPictures: Boolean
         get() = type in pictureTypes && options.orEmpty().any { !it.image.isNullOrEmpty() }
@@ -71,7 +76,7 @@ public class FormField private constructor(
 
     public val items: List<FormField> get() = fields.orEmpty().filterIsInstance<FormField>()
 
-    internal fun withJson(json: JsonObject): FormField = FormField(json, ordinal, fields, listsFiles)
+    internal fun withJson(json: JsonObject): FormField = FormField(json, ordinal, fields, listsFiles, optionRules)
 }
 
 private val pictureTypes = listOf("radio", "multiselect")

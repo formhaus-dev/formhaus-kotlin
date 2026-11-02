@@ -27,7 +27,12 @@ public fun validateFields(
     options: ValidateOptions = defaultOptions,
 ): FieldErrors =
     CallBudget.run {
-        validateShown(fields, values, values, ShownChecks(options.validators, options.messages, ListLimits.STANDARD))
+        validateShown(
+            fields,
+            values,
+            values,
+            ShownChecks(options.validators, options.messages, ListLimits.STANDARD, options.previousValues),
+        )
     }
 
 internal fun customRules(nodes: List<FormNode>): Boolean =
@@ -37,24 +42,29 @@ internal class ShownChecks(
     val validators: Validators,
     val messages: MessageSource?,
     val limits: ListLimits,
-) {
-    val options: ValidateOptions get() = ValidateOptions(validators, messages)
-}
+    val previous: JsonObject?,
+)
+
+internal class ShownItem(
+    val group: FormField,
+    val index: Int,
+)
 
 internal fun visitShown(
     fields: List<FormNode>,
     values: JsonObject,
     scope: JsonObject,
     limits: ListLimits,
-    visit: (String, FormField, JsonObject) -> Unit,
+    visit: (String, FormField, JsonObject, ShownItem?) -> Unit,
 ) {
     for (field in shownFields(fields, scope, limits)) {
-        visit(field.key, field, values)
+        visit(field.key, field, values, null)
         if (!field.isGroup || typeError(field, values[field.key]) != null) continue
         itemsOf(values[field.key]).forEachIndexed { index, item ->
             val own = itemScope(field, item, values)
             val shown = itemScope(field, item, scope)
-            for (rule in field.items) if (isVisible(rule, shown, limits)) visit(itemPath(field.key, index, rule.key), rule, own)
+            val at = ShownItem(field, index)
+            for (rule in field.items) if (isVisible(rule, shown, limits)) visit(itemPath(field.key, index, rule.key), rule, own, at)
         }
     }
 }
@@ -66,8 +76,19 @@ internal fun validateShown(
     checks: ShownChecks,
 ): FieldErrors {
     val errors = MutableStringMap<String>()
-    visitShown(fields, values, scope, checks.limits) { path, field, own ->
-        validateFieldValue(field, own[field.key], own, checks.options)?.let { errors[path] = it }
+    val holds = HashMap<Int, ItemHolds>()
+    visitShown(fields, values, scope, checks.limits) { path, field, own, item ->
+        val previous =
+            if (item == null) {
+                checks.previous?.get(field.key)
+            } else {
+                holds
+                    .getOrPut(item.group.ordinal) {
+                        ItemHolds(item.group, checks.previous, itemsOf(values[item.group.key]))
+                    }.previous(item.index, field)
+            }
+        fieldValueError(field, own[field.key], own, checks.validators, checks.messages, previous = previous, limits = checks.limits)
+            ?.let { errors[path] = it }
     }
     return errors
 }

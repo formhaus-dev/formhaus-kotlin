@@ -30,6 +30,23 @@ internal val Conditional.isConditioned: Boolean get() = show != null || showAny 
 internal fun conditions(value: JsonValue?): List<ShowCondition>? =
     value?.arrayValue?.mapNotNull { item -> item.objectValue?.let(::ShowCondition) }
 
+public sealed class ConditionRule {
+    public data object Always : ConditionRule()
+
+    public data class When(
+        public val conditions: List<ShowCondition>,
+    ) : ConditionRule()
+
+    internal companion object {
+        fun of(value: JsonValue?): ConditionRule? =
+            when {
+                value == JsonValue.Bool(true) -> Always
+                value is JsonValue.Array -> When(conditions(value).orEmpty())
+                else -> null
+            }
+    }
+}
+
 @ConsistentCopyVisibility
 public data class FormAction internal constructor(
     internal val json: JsonObject,

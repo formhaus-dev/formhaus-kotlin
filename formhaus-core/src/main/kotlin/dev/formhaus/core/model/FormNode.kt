@@ -38,6 +38,7 @@ public class FormSection private constructor(
 
 internal class NodeReader(
     val listsFiles: Boolean,
+    val optionRules: Boolean,
 ) {
     private var next = 0
 

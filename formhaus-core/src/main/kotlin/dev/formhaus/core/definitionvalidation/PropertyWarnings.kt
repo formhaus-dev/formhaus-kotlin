@@ -3,7 +3,9 @@ package dev.formhaus.core.definitionvalidation
 import dev.formhaus.core.json.JsonObject
 import dev.formhaus.core.json.JsonValue
 import dev.formhaus.core.json.isBlankText
+import dev.formhaus.core.json.sameValueZero
 import dev.formhaus.core.model.FieldOption
+import dev.formhaus.core.model.FormDefinition
 import dev.formhaus.core.model.FormField
 import dev.formhaus.core.model.FormSection
 import dev.formhaus.core.regex.JsRegex
@@ -74,8 +76,17 @@ private fun optionWarnings(
     field: FormField,
     option: FieldOption,
     at: String,
+    version: JsonValue?,
 ): List<DefinitionIssue> {
-    val issues = ArrayList(labeled(option.json, at) + unknown(option.json, at, Properties.option))
+    val known = Properties.known(Properties.option, version)
+    val issues =
+        ArrayList(
+            labeled(option.json, at) + unknown(option.json, at, known) { Properties.newer(Properties.option, version, it) },
+        )
+    if ("disabled" in known && "disabled" in option.json && field.type !in randomizedTypes) {
+        val problem = "\"disabled\" on an option of \"${field.key}\" applies to radio, multiselect and select fields"
+        issues.add(warning(IssueCode.DISABLED_NOT_APPLICABLE, "$at/disabled", problem, "Remove \"disabled\""))
+    }
     val image = option.image
     if (image != null && safeImage.test(image) != true) {
         val problem = "the image of option \"${option.value.orEmpty()}\" in \"${field.key}\" is not an https: or data:image/ URL"
@@ -128,6 +139,27 @@ private fun matrixWarnings(entry: FieldEntry): List<DefinitionIssue> {
     )
 }
 
+private fun disabledDefault(
+    entry: FieldEntry,
+    optionRules: Boolean,
+): List<DefinitionIssue> {
+    val field = entry.field
+    if (!optionRules) return emptyList()
+    val defaults = field.defaultValue?.let { it.arrayValue ?: listOf(it) } ?: return emptyList()
+    val option =
+        field.options.orEmpty().firstOrNull { option ->
+            val disabled = option.json["disabled"]
+            val value = option.json["value"]
+            (disabled == JsonValue.Bool(true) || disabled?.arrayValue?.isNotEmpty() == true) &&
+                value != null &&
+                defaults.any { sameValueZero(it, value) }
+        } ?: return emptyList()
+    val problem = "the defaultValue of \"${field.key}\" is the disabled option \"${option.value.orEmpty()}\""
+    return listOf(
+        warning(IssueCode.DEFAULT_DISABLED_OPTION, "${entry.path}/defaultValue", problem, "Pick an enabled option as the default"),
+    )
+}
+
 private fun multipleWarnings(
     entry: FieldEntry,
     listsFiles: Boolean,
@@ -142,8 +174,9 @@ private fun multipleWarnings(
 
 private fun fieldWarnings(
     entry: FieldEntry,
-    listsFiles: Boolean,
+    definition: FormDefinition,
 ): List<DefinitionIssue> {
+    val version = definition.json["formatVersion"]
     val field = entry.field
     val path = entry.path
     val visible = field.type != "hidden"
@@ -153,18 +186,14 @@ private fun fieldWarnings(
             warning(IssueCode.MISSING_LABEL, "$path/label", "the label of \"${field.key}\" is empty", LABEL_HINT),
         )
     }
-    val known =
-        when {
-            field.isGroup -> Properties.group
-            listsFiles -> Properties.fileListField
-            else -> Properties.field
-        }
-    issues += unknown(field.json, path, known, ::misplaced)
+    val list = if (field.isGroup) Properties.group else Properties.field
+    issues += unknown(field.json, path, Properties.known(list, version)) { misplaced(it) ?: Properties.newer(list, version, it) }
     for ((index, option) in field.options.orEmpty().withIndex()) {
         issues +=
-            optionWarnings(field, option, "$path/options/$index")
+            optionWarnings(field, option, "$path/options/$index", version)
     }
-    issues += randomizeWarnings(entry) + multipleWarnings(entry, listsFiles) + matrixWarnings(entry)
+    issues += randomizeWarnings(entry) + multipleWarnings(entry, definition.listsFiles) + matrixWarnings(entry) +
+        disabledDefault(entry, definition.optionRules)
     field.validation?.let { issues += unknown(it.json, "$path/validation", Properties.validation) }
     if ("columns" in field.json && (!field.hasPictures || inMatrix(entry))) {
         val problem = "\"columns\" of \"${field.key}\" applies to radio and multiselect options with images outside a matrix"
@@ -205,5 +234,5 @@ internal fun propertyWarnings(context: CheckContext): List<DefinitionIssue> {
                 unknown(entry.node.json, entry.path, Properties.section)
         }
     }
-    return issues + context.entries.flatMap { fieldWarnings(it, definition.listsFiles) }
+    return issues + context.entries.flatMap { fieldWarnings(it, definition) }
 }
