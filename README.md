@@ -464,7 +464,7 @@ With `HiddenValues.KEEP`, conditions, validation and recall still treat hidden f
 
 | formhaus-kotlin | @formhaus/core | Format |
 |---|---|---|
-| 0.10.0 | 1.10.0 | 1.9 |
+| 0.10.0 | 1.10.0 to 1.12.1 | 1.9 |
 | 0.9.0 | 1.9.0 | 1.8 |
 | 0.8.1 | 1.8.0 | 1.7 |
 | 0.8.0 | 1.8.0 | 1.7 |
